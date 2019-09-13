@@ -20,7 +20,7 @@ export class QueryEditor extends PureComponent<Props, State> {
 
     return (
       <div className="gf-form">
-        <FormField width={24} value={queryText} onChange={this.onQueryTextChange} label="Query"></FormField>
+        <FormField width={24} value={queryText || ''} onChange={this.onQueryTextChange} label="Query"></FormField>
       </div>
     );
   }

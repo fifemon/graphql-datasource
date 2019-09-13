@@ -2,6 +2,7 @@
   "type": "datasource",
   "name": "Simple Data Source",
   "id": "myorgid-simple-datasource",
+  "metrics": true,
 
   "info": {
     "description": "Simple Data Source",

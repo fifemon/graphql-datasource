@@ -27,7 +27,7 @@ export class ConfigEditor extends PureComponent<Props, State> {
     return (
       <div className="gf-form-group">
         <div className="gf-form">
-          <FormField label="API Key" labelWidth={6} onChange={this.onAPIKeyChange} value={jsonData.apiKey} placeholder="Your API key" />
+          <FormField label="API Key" labelWidth={6} onChange={this.onAPIKeyChange} value={jsonData.apiKey || ''} placeholder="Your API key" />
         </div>
       </div>
     );
