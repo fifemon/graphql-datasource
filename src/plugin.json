@@ -1,0 +1,29 @@
+{
+  "type": "datasource",
+  "name": "Simple Data Source",
+  "id": "myorgid-simple-datasource",
+
+  "info": {
+    "description": "Simple Data Source",
+    "author": {
+      "name": "Your Name"
+    },
+    "keywords": ["Simple"],
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "links": [
+      { "name": "Website", "url": "https://github.com/grafana/simple-datasource" },
+      { "name": "License", "url": "https://github.com/grafana/simple-datasource/blob/master/LICENSE" }
+    ],
+    "screenshots": [],
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
+  },
+
+  "dependencies": {
+    "grafanaVersion": "6.3.x",
+    "plugins": []
+  }
+}
