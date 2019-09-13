@@ -1,7 +1,7 @@
 {
   "name": "simple-datasource",
   "version": "1.0.0",
-  "description": "Grafana RSS Panel",
+  "description": "Example of a Grafana Data Source",
   "scripts": {
     "build": "grafana-toolkit plugin:build",
     "test": "grafana-toolkit plugin:test",
