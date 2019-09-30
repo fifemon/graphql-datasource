@@ -1,43 +1,33 @@
-import { DataQueryRequest, DataQueryResponse, DataSourceApi, DataSourceInstanceSettings, DataQuery, DataSourceJsonData } from '@grafana/ui';
+import defaults from 'lodash/defaults';
 
-export interface Query extends DataQuery {
-  queryText?: string;
-}
+import { DataQueryRequest, DataQueryResponse, DataSourceApi, DataSourceInstanceSettings } from '@grafana/ui';
 
-export interface Options extends DataSourceJsonData {
-  apiKey?: string;
-}
+import { MyQuery, MyDataSourceOptions, defaultQuery } from './types';
+import { MutableDataFrame, FieldType } from '@grafana/data';
 
-interface Request {
-  queries: any[];
-  from?: string;
-  to?: string;
-}
-
-export class DataSource extends DataSourceApi<Query, Options> {
-  constructor(instanceSettings: DataSourceInstanceSettings<Options>) {
+export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
+  constructor(instanceSettings: DataSourceInstanceSettings<MyDataSourceOptions>) {
     super(instanceSettings);
   }
 
-  query(options: DataQueryRequest<Query>): Promise<DataQueryResponse> {
-    const requestData: Request = {
-      queries: options.targets.map((target: any) => {
-        return {
-          datasourceId: this.id,
-          refId: target.refId,
-          queryText: target.queryText,
-        };
-      }),
-    };
+  query(options: DataQueryRequest<MyQuery>): Promise<DataQueryResponse> {
+    const { range } = options;
+    const from = range.from.valueOf();
+    const to = range.to.valueOf();
 
-    if (options.range) {
-      requestData.from = options.range.from.valueOf().toString();
-      requestData.to = options.range.to.valueOf().toString();
-    }
+    // Return a constant for each query
+    const data = options.targets.map(target => {
+      const query = defaults(target, defaultQuery);
+      return new MutableDataFrame({
+        refId: query.refId,
+        fields: [
+          { name: 'Time', values: [from, to], type: FieldType.time },
+          { name: 'Value', values: [query.constant, query.constant], type: FieldType.number },
+        ],
+      });
+    });
 
-    // This is where you will call your data source.
-
-    return Promise.resolve({ data: [] });
+    return Promise.resolve({ data });
   }
 
   testDatasource() {
