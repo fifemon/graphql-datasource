@@ -24,7 +24,7 @@
   },
 
   "dependencies": {
-    "grafanaVersion": "6.3.x",
+    "grafanaVersion": "6.4.x",
     "plugins": []
   }
 }
