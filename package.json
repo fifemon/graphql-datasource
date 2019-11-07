@@ -1,18 +1,21 @@
 {
-  "name": "simple-datasource",
+  "name": "graphql-datasource",
   "version": "1.0.0",
-  "description": "Example of a Grafana Data Source",
+  "description": "Generic GraphQL data source",
   "scripts": {
     "build": "grafana-toolkit plugin:build",
     "test": "grafana-toolkit plugin:test",
     "dev": "grafana-toolkit plugin:dev",
     "watch": "grafana-toolkit plugin:dev --watch"
   },
-  "author": "Grafana Labs",
+  "author": "Kevin Retzke",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@grafana/data": "latest",
-    "@grafana/toolkit": "latest",
-    "@grafana/ui": "latest"
+    "@grafana/data": "canary",
+    "@grafana/toolkit": "canary",
+    "@grafana/ui": "canary"
+  },
+  "dependencies": {
+    "@types/lodash": "^4.14.144"
   }
 }

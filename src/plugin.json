@@ -1,22 +1,22 @@
 {
   "type": "datasource",
-  "name": "Simple Data Source",
-  "id": "myorgid-simple-datasource",
+  "name": "GraphQL Data Source",
+  "id": "fifemon-graphql-datasource",
   "metrics": true,
 
   "info": {
-    "description": "Simple Data Source",
+    "description": "GraphQL Data Source",
     "author": {
-      "name": "Your Name"
+      "name": "Kevin Retzke"
     },
-    "keywords": ["Simple"],
+    "keywords": ["GraphQL"],
     "logos": {
       "small": "img/logo.svg",
       "large": "img/logo.svg"
     },
     "links": [
-      { "name": "Website", "url": "https://github.com/grafana/simple-datasource" },
-      { "name": "License", "url": "https://github.com/grafana/simple-datasource/blob/master/LICENSE" }
+      { "name": "Website", "url": "https://github.com/fifemon/graphql-datasource" },
+      { "name": "License", "url": "https://github.com/fifemon/graphql-datasource/blob/master/LICENSE" }
     ],
     "screenshots": [],
     "version": "%VERSION%",

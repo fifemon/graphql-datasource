@@ -1,35 +1,12 @@
-import React, { PureComponent, ChangeEvent } from 'react';
-import { DataSourcePluginOptionsEditorProps, DataSourceSettings, FormField } from '@grafana/ui';
+import React from 'react';
+import { DataSourcePluginOptionsEditorProps, DataSourceHttpSettings } from '@grafana/ui';
 import { MyDataSourceOptions } from './types';
 
-type Settings = DataSourceSettings<MyDataSourceOptions>;
+export type Props = DataSourcePluginOptionsEditorProps<MyDataSourceOptions>;
+export const ConfigEditor = (props: Props) => {
+  const { options, onOptionsChange } = props;
 
-interface Props extends DataSourcePluginOptionsEditorProps<Settings> {}
-
-interface State {}
-
-export class ConfigEditor extends PureComponent<Props, State> {
-  componentDidMount() {}
-
-  onAPIKeyChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { onOptionsChange, options } = this.props;
-    const jsonData = {
-      ...options.jsonData,
-      apiKey: event.target.value,
-    };
-    onOptionsChange({ ...options, jsonData });
-  };
-
-  render() {
-    const { options } = this.props;
-    const { jsonData } = options;
-
-    return (
-      <div className="gf-form-group">
-        <div className="gf-form">
-          <FormField label="API Key" labelWidth={6} onChange={this.onAPIKeyChange} value={jsonData.apiKey || ''} placeholder="Your API key" />
-        </div>
-      </div>
-    );
-  }
-}
+  return <>
+    <DataSourceHttpSettings defaultUrl="http://localhost:9999" dataSourceConfig={options} onChange={onOptionsChange} showAccessOptions={true} />;
+    </>
+};
