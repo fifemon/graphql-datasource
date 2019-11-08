@@ -4,6 +4,8 @@ import { DataQueryRequest, DataQueryResponse, DataSourceApi, DataSourceInstanceS
 
 import { MyQuery, MyDataSourceOptions, defaultQuery } from './types';
 import { MutableDataFrame, FieldType, DataFrame } from '@grafana/data';
+import _ from 'lodash';
+import moment from 'moment';
 
 export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
   basicAuth: string | undefined;
@@ -70,12 +72,10 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     console.log(payload);
 
     return this.postQuery(payload).then((results: any) => {
-      console.log(results);
       let data = results.data.data;
       const docs: any[] = [];
       let fields: any[] = [];
       for (let i = 0; i < data.length; i++) {
-        console.log(data[i]);
         for (let p in data[i]) {
           if (fields.indexOf(p) === -1) {
             fields.push(p);
@@ -84,26 +84,28 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
         docs.push(data[i]);
       }
 
-      console.log(docs);
-      console.log(fields);
       let df = new MutableDataFrame({
         refId: query.refId,
         fields: [],
-        //fields: [
-        //  { name: 'Time', values: [from, to], type: FieldType.time },
-        //  { name: 'Value', values: [query.constant, query.constant], type: FieldType.number },
-        //  { name: 'Value2', values: [query.constant * 2, query.constant * 2], type: FieldType.number },
-        //],
       });
       for (const f of fields) {
+        let t:FieldType = FieldType.string;
+        if (f === "Time") {
+          t = FieldType.time;
+        } else if (_.isNumber(docs[0][f])) {
+          t = FieldType.number;
+        }
         df.addField({
           name: f,
-          type: FieldType.string,
+          type: t,
         }).parse = (v: any) => {
           return v || '';
         };
       }
       for (const doc of docs) {
+        if (doc.Time) {
+          doc.Time = moment(doc.Time);
+        }
         df.add(doc);
       }
       dataFrame.push(df);

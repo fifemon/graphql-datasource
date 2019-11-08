@@ -1,15 +1,21 @@
 # GraphQL Data Source
 
-A (hopefully) generic datasource to pull data from a GraphQL API, initially
-targeted at putting data into tables primarily, instead of timeseries graphs.
+A (hopefully) generic datasource to pull data from a GraphQL API.
 
 The GraphQL query must be structured so that the data is returned as a list of 
-objects under `data.data` in the response.
+objects under `data.data` in the response. Timeseries data requires a field named `Time`.
+Grafana variables can be substituted directly in the query (instead of using GraphQL variables).
+Example query:
 
-## Current Features
-* GraphQL query editor supporting Grafana variable substitution
+    query {
+        data:submissions(user:"$user"){
+            Time:submitTime
+            idle running completed
+        }
+    }
 
 # Wishlist
 * Configurable response path handling
 * Rich schema-aware editor (graphiql-like)
 * Grafana variables are passed as GraphQL variables instead of directly substituted into the query
+* Schema-based field type handling
