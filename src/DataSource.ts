@@ -60,55 +60,56 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       throw err;
     });
   }
-
+  
   async query(options: DataQueryRequest<MyQuery>): Promise<DataQueryResponse> {
-    const dataFrame: DataFrame[] = [];
-    //const data = options.targets.map(target => {
-    const query = defaults(options.targets[0], defaultQuery);
-    let payload = query.queryText;
-    payload = payload.replace(/\$timeFrom/g, options.range.from.valueOf().toString());
-    payload = payload.replace(/\$timeTo/g, options.range.to.valueOf().toString());
-    payload = this.templateSrv.replace(payload, options.scopedVars);
-    console.log(payload);
-
-    return this.postQuery(payload).then((results: any) => {
-      let data = results.data.data;
-      const docs: any[] = [];
-      let fields: any[] = [];
-      for (let i = 0; i < data.length; i++) {
-        for (let p in data[i]) {
-          if (fields.indexOf(p) === -1) {
-            fields.push(p);
+    return Promise.all(options.targets.map((target) => {
+      let query = defaults(target, defaultQuery);
+      let payload = query.queryText;
+      payload = payload.replace(/\$timeFrom/g, options.range.from.valueOf().toString());
+      payload = payload.replace(/\$timeTo/g, options.range.to.valueOf().toString());
+      payload = this.templateSrv.replace(payload, options.scopedVars);
+      //console.log(payload);
+      return this.postQuery(payload);
+    })).then((results: any) => {
+      const dataFrame: DataFrame[] = [];
+      for (let res of results) {
+        let data = res.data.data;
+        const docs: any[] = [];
+        let fields: any[] = [];
+        for (let i = 0; i < data.length; i++) {
+          for (let p in data[i]) {
+            if (fields.indexOf(p) === -1) {
+              fields.push(p);
+            }
           }
+          docs.push(data[i]);
         }
-        docs.push(data[i]);
-      }
 
-      let df = new MutableDataFrame({
-        refId: query.refId,
-        fields: [],
-      });
-      for (const f of fields) {
-        let t:FieldType = FieldType.string;
-        if (f === "Time") {
-          t = FieldType.time;
-        } else if (_.isNumber(docs[0][f])) {
-          t = FieldType.number;
+        let df = new MutableDataFrame({
+          fields: [],
+        });
+        for (const f of fields) {
+          let t: FieldType = FieldType.string;
+          if (f === "Time") {
+            t = FieldType.time;
+          } else if (_.isNumber(docs[0][f])) {
+            t = FieldType.number;
+          }
+          df.addField({
+            name: f,
+            type: t,
+          }).parse = (v: any) => {
+            return v || '';
+          };
         }
-        df.addField({
-          name: f,
-          type: t,
-        }).parse = (v: any) => {
-          return v || '';
-        };
-      }
-      for (const doc of docs) {
-        if (doc.Time) {
-          doc.Time = moment(doc.Time);
+        for (const doc of docs) {
+          if (doc.Time) {
+            doc.Time = moment(doc.Time);
+          }
+          df.add(doc);
         }
-        df.add(doc);
+        dataFrame.push(df);
       }
-      dataFrame.push(df);
       return { data: dataFrame };
     });
   }

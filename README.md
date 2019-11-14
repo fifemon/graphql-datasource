@@ -19,3 +19,4 @@ Example query:
 * Rich schema-aware editor (graphiql-like)
 * Grafana variables are passed as GraphQL variables instead of directly substituted into the query
 * Schema-based field type handling
+* Combine queries from multiple targets?
