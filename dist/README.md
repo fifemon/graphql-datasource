@@ -8,7 +8,7 @@ Grafana variables can be substituted directly in the query (instead of using Gra
 Example query:
 
     query {
-        data:submissions(user:"$user"){
+        data:submissions(user:"$user", from:"$timeFrom", to:"$timeTo"){
             Time:submitTime
             idle running completed
         }
