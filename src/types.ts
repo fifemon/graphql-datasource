@@ -7,17 +7,12 @@ export interface MyQuery extends DataQuery {
 }
 
 export const defaultQuery: Partial<MyQuery> = {
-  queryText: `{
-    submissions(user:"novapro"){
-    id
-    pomsTaskID
-    done
-    command
-    idle running completed held
-    submitTime
-    error
-    }
-    }`,
+  queryText: `query {
+      data:submissions(user:"$user"){
+          Time:submitTime
+          idle running completed
+      }
+}`,
   dataPath: 'data.submissions',
   constant: 6.5,
 };
