@@ -2185,7 +2185,7 @@ function (_super) {
 
   DataSource.prototype.postQuery = function (query) {
     return this.request(query).then(function (results) {
-      return results.data;
+      return results;
     })["catch"](function (err) {
       if (err.data && err.data.error) {
         throw {
@@ -2221,7 +2221,7 @@ function (_super) {
           try {
             for (var results_1 = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(results), results_1_1 = results_1.next(); !results_1_1.done; results_1_1 = results_1.next()) {
               var res = results_1_1.value;
-              var data = res.data.data;
+              var data = res.data.data.data;
               var docs = [];
               var fields = [];
 
@@ -2314,12 +2314,26 @@ function (_super) {
   };
 
   DataSource.prototype.testDatasource = function () {
-    // Implement a health check for your data source.
-    return new Promise(function (resolve, reject) {
-      resolve({
+    var q = "{\n      __schema{\n        queryType{name}\n      }\n    }";
+    return this.postQuery(q).then(function (res) {
+      if (res.errors) {
+        console.log(res.errors);
+        return {
+          status: 'error',
+          message: 'GraphQL Error: ' + res.errors[0].message
+        };
+      }
+
+      return {
         status: 'success',
         message: 'Success'
-      });
+      };
+    }, function (err) {
+      console.log(err);
+      return {
+        status: 'error',
+        message: 'HTTP Response ' + err.status + ': ' + err.statusText
+      };
     });
   };
 

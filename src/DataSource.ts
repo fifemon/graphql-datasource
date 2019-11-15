@@ -47,7 +47,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
   private postQuery(query: string) {
     return this.request(query)
     .then((results: any) => {
-      return results.data;
+      return results;
     })
     .catch((err: any) => {
       if (err.data && err.data.error) {
@@ -73,7 +73,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     })).then((results: any) => {
       const dataFrame: DataFrame[] = [];
       for (let res of results) {
-        let data = res.data.data;
+        let data = res.data.data.data;
         const docs: any[] = [];
         let fields: any[] = [];
         for (let i = 0; i < data.length; i++) {
@@ -115,13 +115,30 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
   }
 
   testDatasource() {
-    // Implement a health check for your data source.
-
-    return new Promise((resolve, reject) => {
-      resolve({
+    const q = `{
+      __schema{
+        queryType{name}
+      }
+    }`
+    return this.postQuery(q).then((res: any) => {
+      if (res.errors) {
+        console.log(res.errors);
+        return {
+          status: 'error',
+          message: 'GraphQL Error: '+ res.errors[0].message,
+        };
+      }
+      return {
         status: 'success',
         message: 'Success',
-      });
+      };
+    },
+    (err: any) => {
+      console.log(err);
+      return {
+        status: 'error',
+        message: 'HTTP Response ' + err.status + ': ' + err.statusText,
+      };
     });
   }
 }
