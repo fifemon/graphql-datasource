@@ -5,6 +5,13 @@
     "rootDir": "./src",
     "baseUrl": "./src",
     "typeRoots": ["./node_modules/@types"],
+    "noImplicitAny": false,
     "jsx": "react"
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "lib",
+    "examples",
+    "build"
+  ]
 }

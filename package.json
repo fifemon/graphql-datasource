@@ -11,11 +11,17 @@
   "author": "Kevin Retzke",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@grafana/data": "canary",
-    "@grafana/toolkit": "canary",
-    "@grafana/ui": "canary"
+    "@grafana/data": "^6.5.0",
+    "@grafana/toolkit": "^6.5.0",
+    "@grafana/ui": "^6.5.0"
   },
   "dependencies": {
-    "@types/lodash": "^4.14.144"
+    "@types/lodash": "^4.14.144",
+    "@types/markdown-it": "^0.0.9",
+    "codemirror": "^5.49.2",
+    "codemirror-graphql": "^0.11.2",
+    "graphql": "0.13.0",
+    "markdown-it": "^10.0.0",
+    "marked": "^0.7.0"
   }
 }

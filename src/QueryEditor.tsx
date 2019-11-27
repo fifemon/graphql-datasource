@@ -1,10 +1,10 @@
 import defaults from 'lodash/defaults';
 
 import React, { PureComponent, ChangeEvent } from 'react';
-import { QueryEditorProps } from '@grafana/ui';
+import { QueryEditorProps } from '@grafana/data';
 import { DataSource } from './DataSource';
 import { MyQuery, MyDataSourceOptions, defaultQuery } from './types';
-
+import { GraphQLQueryEditor } from './components/GraphQLQueryEditor';
 
 type Props = QueryEditorProps<DataSource, MyQuery, MyDataSourceOptions>;
 
@@ -26,11 +26,12 @@ export class QueryEditor extends PureComponent<Props, State> {
 
   render() {
     const query = defaults(this.props.query, defaultQuery);
-    const { queryText} = query;
+    const { queryText } = query;
 
     return (
       <>
-      <textarea value={queryText || ''} onChange={this.onQueryTextChange} className="gf-form-input" rows={10} />
+        <GraphQLQueryEditor value={queryText || ''} />
+        <textarea value={queryText || ''} onChange={this.onQueryTextChange} className="gf-form-input" rows={10} />
       </>
     );
   }
