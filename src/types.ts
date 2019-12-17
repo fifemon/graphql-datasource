@@ -13,7 +13,7 @@ export const defaultQuery: Partial<MyQuery> = {
           idle running completed
       }
 }`,
-  dataPath: 'data.submissions',
+  dataPath: 'data.data',
   constant: 6.5,
 };
 

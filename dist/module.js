@@ -2183,9 +2183,12 @@ function (_super) {
     return this.backendSrv.datasourceRequest(options);
   };
 
-  DataSource.prototype.postQuery = function (query) {
-    return this.request(query).then(function (results) {
-      return results;
+  DataSource.prototype.postQuery = function (query, payload) {
+    return this.request(payload).then(function (results) {
+      return {
+        query: query,
+        results: results
+      };
     })["catch"](function (err) {
       if (err.data && err.data.error) {
         throw {
@@ -2212,7 +2215,7 @@ function (_super) {
           payload = payload.replace(/\$timeTo/g, options.range.to.valueOf().toString());
           payload = _this.templateSrv.replace(payload, options.scopedVars); //console.log(payload);
 
-          return _this.postQuery(payload);
+          return _this.postQuery(query, payload);
         })).then(function (results) {
           var e_1, _a, e_2, _b, e_3, _c;
 
@@ -2221,7 +2224,9 @@ function (_super) {
           try {
             for (var results_1 = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(results), results_1_1 = results_1.next(); !results_1_1.done; results_1_1 = results_1.next()) {
               var res = results_1_1.value;
-              var data = res.data.data.data;
+              var data = res.query.dataPath.split(".").reduce(function (d, p) {
+                return d[p];
+              }, res.results.data);
               var docs = [];
               var fields = [];
 
@@ -2315,7 +2320,7 @@ function (_super) {
 
   DataSource.prototype.testDatasource = function () {
     var q = "{\n      __schema{\n        queryType{name}\n      }\n    }";
-    return this.postQuery(q).then(function (res) {
+    return this.postQuery(_types__WEBPACK_IMPORTED_MODULE_3__["defaultQuery"], q).then(function (res) {
       if (res.errors) {
         console.log(res.errors);
         return {
@@ -2359,7 +2364,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var lodash_defaults__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(lodash_defaults__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react */ "react");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./types */ "./types.ts");
+/* harmony import */ var _grafana_ui__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @grafana/ui */ "@grafana/ui");
+/* harmony import */ var _grafana_ui__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./types */ "./types.ts");
+
 
 
 
@@ -2382,15 +2390,13 @@ function (_super) {
       }));
     };
 
-    _this.onConstantChange = function (event) {
+    _this.onDataPathTextChange = function (event) {
       var _a = _this.props,
           onChange = _a.onChange,
-          query = _a.query,
-          onRunQuery = _a.onRunQuery;
+          query = _a.query;
       onChange(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, query), {
-        constant: parseFloat(event.target.value)
+        dataPath: event.target.value
       }));
-      onRunQuery(); // executes the query
     };
 
     return _this;
@@ -2399,14 +2405,23 @@ function (_super) {
   QueryEditor.prototype.onComponentDidMount = function () {};
 
   QueryEditor.prototype.render = function () {
-    var query = lodash_defaults__WEBPACK_IMPORTED_MODULE_1___default()(this.props.query, _types__WEBPACK_IMPORTED_MODULE_3__["defaultQuery"]);
-    var queryText = query.queryText;
+    var query = lodash_defaults__WEBPACK_IMPORTED_MODULE_1___default()(this.props.query, _types__WEBPACK_IMPORTED_MODULE_4__["defaultQuery"]);
+    var queryText = query.queryText,
+        dataPath = query.dataPath;
     return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_2___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("textarea", {
       value: queryText || '',
       onChange: this.onQueryTextChange,
       className: "gf-form-input",
       rows: 10
-    }));
+    }), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
+      className: "gf-form"
+    }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["FormField"], {
+      labelWidth: 8,
+      value: dataPath || '',
+      onChange: this.onDataPathTextChange,
+      label: "Data path",
+      tooltip: "dot-delimted path to data in response"
+    })));
   };
 
   return QueryEditor;
@@ -2451,7 +2466,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "defaultQuery", function() { return defaultQuery; });
 var defaultQuery = {
   queryText: "query {\n      data:submissions(user:\"$user\"){\n          Time:submitTime\n          idle running completed\n      }\n}",
-  dataPath: 'data.submissions',
+  dataPath: 'data.data',
   constant: 6.5
 };
 

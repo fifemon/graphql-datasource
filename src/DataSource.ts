@@ -44,10 +44,10 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     return this.backendSrv.datasourceRequest(options);
   }
 
-  private postQuery(query: string) {
-    return this.request(query)
+  private postQuery(query: Partial<MyQuery>, payload: string) {
+    return this.request(payload)
     .then((results: any) => {
-      return results;
+      return {query, results};
     })
     .catch((err: any) => {
       if (err.data && err.data.error) {
@@ -69,11 +69,11 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       payload = payload.replace(/\$timeTo/g, options.range.to.valueOf().toString());
       payload = this.templateSrv.replace(payload, options.scopedVars);
       //console.log(payload);
-      return this.postQuery(payload);
+      return this.postQuery(query, payload);
     })).then((results: any) => {
       const dataFrame: DataFrame[] = [];
       for (let res of results) {
-        let data = res.data.data.data;
+        let data = res.query.dataPath.split(".").reduce((d: any, p:any) => {return d[p]}, res.results.data);
         const docs: any[] = [];
         let fields: any[] = [];
         for (let i = 0; i < data.length; i++) {
@@ -120,7 +120,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
         queryType{name}
       }
     }`
-    return this.postQuery(q).then((res: any) => {
+    return this.postQuery(defaultQuery, q).then((res: any) => {
       if (res.errors) {
         console.log(res.errors);
         return {
