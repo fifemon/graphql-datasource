@@ -2137,6 +2137,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_5__);
 /* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! moment */ "moment");
 /* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(moment__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./util */ "./util.ts");
+
 
 
 
@@ -2217,86 +2219,103 @@ function (_super) {
 
           return _this.postQuery(query, payload);
         })).then(function (results) {
-          var e_1, _a, e_2, _b, e_3, _c;
+          var e_1, _a;
 
           var dataFrame = [];
+
+          var _loop_1 = function _loop_1(res) {
+            var e_2, _a, e_3, _b;
+
+            var data = res.query.dataPath.split(".").reduce(function (d, p) {
+              return d[p];
+            }, res.results.data);
+            var docs = [];
+            var fields = [];
+
+            var pushDoc = function pushDoc(doc) {
+              var d = Object(_util__WEBPACK_IMPORTED_MODULE_7__["flatten"])(doc);
+
+              for (var p in d) {
+                if (fields.indexOf(p) === -1) {
+                  fields.push(p);
+                }
+              }
+
+              docs.push(d);
+            };
+
+            if (Array.isArray(data)) {
+              for (var i = 0; i < data.length; i++) {
+                pushDoc(data[i]);
+              }
+            } else {
+              pushDoc(data);
+            }
+
+            var df = new _grafana_data__WEBPACK_IMPORTED_MODULE_4__["MutableDataFrame"]({
+              fields: []
+            });
+
+            try {
+              for (var fields_1 = (e_2 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(fields)), fields_1_1 = fields_1.next(); !fields_1_1.done; fields_1_1 = fields_1.next()) {
+                var f = fields_1_1.value;
+                var t = _grafana_data__WEBPACK_IMPORTED_MODULE_4__["FieldType"].string;
+
+                if (f === "Time") {
+                  t = _grafana_data__WEBPACK_IMPORTED_MODULE_4__["FieldType"].time;
+                } else if (lodash__WEBPACK_IMPORTED_MODULE_5___default.a.isNumber(docs[0][f])) {
+                  t = _grafana_data__WEBPACK_IMPORTED_MODULE_4__["FieldType"].number;
+                }
+
+                df.addField({
+                  name: f,
+                  type: t
+                }).parse = function (v) {
+                  return v || '';
+                };
+              }
+            } catch (e_2_1) {
+              e_2 = {
+                error: e_2_1
+              };
+            } finally {
+              try {
+                if (fields_1_1 && !fields_1_1.done && (_a = fields_1["return"])) _a.call(fields_1);
+              } finally {
+                if (e_2) throw e_2.error;
+              }
+            }
+
+            try {
+              for (var docs_1 = (e_3 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(docs)), docs_1_1 = docs_1.next(); !docs_1_1.done; docs_1_1 = docs_1.next()) {
+                var doc = docs_1_1.value;
+
+                if (doc.Time) {
+                  doc.Time = moment__WEBPACK_IMPORTED_MODULE_6___default()(doc.Time);
+                }
+
+                df.add(doc);
+              }
+            } catch (e_3_1) {
+              e_3 = {
+                error: e_3_1
+              };
+            } finally {
+              try {
+                if (docs_1_1 && !docs_1_1.done && (_b = docs_1["return"])) _b.call(docs_1);
+              } finally {
+                if (e_3) throw e_3.error;
+              }
+            }
+
+            dataFrame.push(df);
+          };
 
           try {
             for (var results_1 = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(results), results_1_1 = results_1.next(); !results_1_1.done; results_1_1 = results_1.next()) {
               var res = results_1_1.value;
-              var data = res.query.dataPath.split(".").reduce(function (d, p) {
-                return d[p];
-              }, res.results.data);
-              var docs = [];
-              var fields = [];
 
-              for (var i = 0; i < data.length; i++) {
-                for (var p in data[i]) {
-                  if (fields.indexOf(p) === -1) {
-                    fields.push(p);
-                  }
-                }
-
-                docs.push(data[i]);
-              }
-
-              var df = new _grafana_data__WEBPACK_IMPORTED_MODULE_4__["MutableDataFrame"]({
-                fields: []
-              });
-
-              try {
-                for (var fields_1 = (e_2 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(fields)), fields_1_1 = fields_1.next(); !fields_1_1.done; fields_1_1 = fields_1.next()) {
-                  var f = fields_1_1.value;
-                  var t = _grafana_data__WEBPACK_IMPORTED_MODULE_4__["FieldType"].string;
-
-                  if (f === "Time") {
-                    t = _grafana_data__WEBPACK_IMPORTED_MODULE_4__["FieldType"].time;
-                  } else if (lodash__WEBPACK_IMPORTED_MODULE_5___default.a.isNumber(docs[0][f])) {
-                    t = _grafana_data__WEBPACK_IMPORTED_MODULE_4__["FieldType"].number;
-                  }
-
-                  df.addField({
-                    name: f,
-                    type: t
-                  }).parse = function (v) {
-                    return v || '';
-                  };
-                }
-              } catch (e_2_1) {
-                e_2 = {
-                  error: e_2_1
-                };
-              } finally {
-                try {
-                  if (fields_1_1 && !fields_1_1.done && (_b = fields_1["return"])) _b.call(fields_1);
-                } finally {
-                  if (e_2) throw e_2.error;
-                }
-              }
-
-              try {
-                for (var docs_1 = (e_3 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(docs)), docs_1_1 = docs_1.next(); !docs_1_1.done; docs_1_1 = docs_1.next()) {
-                  var doc = docs_1_1.value;
-
-                  if (doc.Time) {
-                    doc.Time = moment__WEBPACK_IMPORTED_MODULE_6___default()(doc.Time);
-                  }
-
-                  df.add(doc);
-                }
-              } catch (e_3_1) {
-                e_3 = {
-                  error: e_3_1
-                };
-              } finally {
-                try {
-                  if (docs_1_1 && !docs_1_1.done && (_c = docs_1["return"])) _c.call(docs_1);
-                } finally {
-                  if (e_3) throw e_3.error;
-                }
-              }
-
-              dataFrame.push(df);
+              _loop_1(res);
             }
           } catch (e_1_1) {
             e_1 = {
@@ -2469,6 +2488,39 @@ var defaultQuery = {
   dataPath: 'data.data',
   constant: 6.5
 };
+
+/***/ }),
+
+/***/ "./util.ts":
+/*!*****************!*\
+  !*** ./util.ts ***!
+  \*****************/
+/*! exports provided: flatten */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "flatten", function() { return flatten; });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "../node_modules/tslib/tslib.es6.js");
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+
+function flatten(object, path, separator) {
+  if (path === void 0) {
+    path = null;
+  }
+
+  if (separator === void 0) {
+    separator = '.';
+  }
+
+  return Object.keys(object).reduce(function (acc, key) {
+    var _a;
+
+    var newPath = [path, key].filter(Boolean).join(separator);
+    return _typeof(object[key]) === 'object' ? Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, acc), flatten(object[key], newPath, separator)) : Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, acc), (_a = {}, _a[newPath] = object[key], _a));
+  }, {});
+}
 
 /***/ }),
 

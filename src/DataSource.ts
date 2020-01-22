@@ -6,6 +6,7 @@ import { MyQuery, MyDataSourceOptions, defaultQuery } from './types';
 import { MutableDataFrame, FieldType, DataFrame } from '@grafana/data';
 import _ from 'lodash';
 import moment from 'moment';
+import { flatten } from './util';
 
 export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
   basicAuth: string | undefined;
@@ -75,14 +76,22 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       for (let res of results) {
         let data = res.query.dataPath.split(".").reduce((d: any, p:any) => {return d[p]}, res.results.data);
         const docs: any[] = [];
-        let fields: any[] = [];
-        for (let i = 0; i < data.length; i++) {
-          for (let p in data[i]) {
+        const fields: any[] = [];
+        let pushDoc = (doc: object) => {
+          let d = flatten(doc);
+          for (let p in d) {
             if (fields.indexOf(p) === -1) {
               fields.push(p);
             }
           }
-          docs.push(data[i]);
+          docs.push(d);
+        }
+        if (Array.isArray(data)) {
+          for (let i = 0; i < data.length; i++) {
+            pushDoc(data[i]);
+          }
+        } else {
+          pushDoc(data);
         }
 
         let df = new MutableDataFrame({
