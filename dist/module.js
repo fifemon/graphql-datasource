@@ -2110,7 +2110,7 @@ var ConfigEditor = function ConfigEditor(props) {
     dataSourceConfig: options,
     onChange: onOptionsChange,
     showAccessOptions: true
-  }), ";");
+  }));
 };
 
 /***/ }),
