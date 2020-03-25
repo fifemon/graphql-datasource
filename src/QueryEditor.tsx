@@ -1,7 +1,8 @@
 import defaults from 'lodash/defaults';
 
 import React, { PureComponent, ChangeEvent } from 'react';
-import { QueryEditorProps, FormField } from '@grafana/ui';
+import { QueryEditorProps } from '@grafana/data';
+import { FormField } from '@grafana/ui';
 import { DataSource } from './DataSource';
 import { MyQuery, MyDataSourceOptions, defaultQuery } from './types';
 

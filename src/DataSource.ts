@@ -1,6 +1,6 @@
 import defaults from 'lodash/defaults';
 
-import { DataQueryRequest, DataQueryResponse, DataSourceApi, DataSourceInstanceSettings } from '@grafana/ui';
+import { DataQueryRequest, DataQueryResponse, DataSourceApi, DataSourceInstanceSettings } from '@grafana/data';
 
 import { MyQuery, MyDataSourceOptions, defaultQuery } from './types';
 import { dateTime, MutableDataFrame, FieldType, DataFrame } from '@grafana/data';
@@ -62,8 +62,10 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       options.targets.map(target => {
         let query = defaults(target, defaultQuery);
         let payload = query.queryText;
-        payload = payload.replace(/\$timeFrom/g, options.range.from.valueOf().toString());
-        payload = payload.replace(/\$timeTo/g, options.range.to.valueOf().toString());
+        if (options.range) {
+          payload = payload.replace(/\$timeFrom/g, options.range.from.valueOf().toString());
+          payload = payload.replace(/\$timeTo/g, options.range.to.valueOf().toString());
+        }
         payload = this.templateSrv.replace(payload, options.scopedVars);
         //console.log(payload);
         return this.postQuery(query, payload);
