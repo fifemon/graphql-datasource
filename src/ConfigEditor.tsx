@@ -6,7 +6,9 @@ export type Props = DataSourcePluginOptionsEditorProps<MyDataSourceOptions>;
 export const ConfigEditor = (props: Props) => {
   const { options, onOptionsChange } = props;
 
-  return <>
-    <DataSourceHttpSettings defaultUrl="http://localhost:9999" dataSourceConfig={options} onChange={onOptionsChange} showAccessOptions={true} />
+  return (
+    <>
+      <DataSourceHttpSettings defaultUrl="http://localhost:9999" dataSourceConfig={options} onChange={onOptionsChange} showAccessOptions={true} />
     </>
+  );
 };
