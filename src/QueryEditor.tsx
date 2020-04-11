@@ -44,8 +44,8 @@ export class QueryEditor extends PureComponent<Props, State> {
             labelWidth={8}
             value={dataPath || ''}
             onChange={this.onDataPathTextChange}
-            label="Data path a"
-            tooltip="dot-delimted path to data in response"
+            label="Data path"
+            tooltip="dot-delimited path to data in response"
           />
         </div>
         <div className={'gf-form'}>
@@ -54,7 +54,7 @@ export class QueryEditor extends PureComponent<Props, State> {
             value={groupBy || ''}
             onChange={this.onGroupByTextChange}
             label="Group by"
-            tooltip="dot-delimted path for the key to use. Separate with commas to use multiple fields to group by"
+            tooltip="dot-delimited path for the key to use. Separate with commas to use multiple fields to group by"
           />
         </div>
         <div className={'gf-form'}>
@@ -63,7 +63,7 @@ export class QueryEditor extends PureComponent<Props, State> {
             value={aliasBy || ''}
             onChange={this.onAliasByTextChange}
             label="Alias by"
-            tooltip="The formattable text to alias by"
+            tooltip="The formattable text to alias by. Use $field_<field name> to replace with the value of a field, or $fieldName to replace with the name of the field"
           />
         </div>
       </>

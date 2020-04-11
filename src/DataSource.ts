@@ -71,12 +71,12 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
         return this.postQuery(query, payload);
       })
     ).then((results: any) => {
-      const dataFrame: DataFrame[] = [];
+      const dataFrameArray: DataFrame[] = [];
       for (let res of results) {
         let data = res.query.dataPath.split('.').reduce((d: any, p: any) => {
           return d[p];
         }, res.results.data);
-        const { groupBy } = res.query;
+        const { groupBy, aliasBy } = res.query;
         const split = groupBy.split(',');
         const groupByList: string[] = [];
         for (const element of split) {
@@ -85,36 +85,9 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
             groupByList.push(trimmed);
           }
         }
-        // array of each document [{"identifier": "server-1", "Time": 5000, "running": 6.6},{"identifier": "server-2", "Time": 5000, "running": 6.6}]
         const docs: any[] = [];
-        const fieldIdentifierDocumentMap = new Map();
-        const fieldIdentifierArray: string[][] = [];
         let pushDoc = (originalDoc: object) => {
-          let flatDoc: any = flatten(originalDoc);
-          console.log(flatDoc);
-          const newDoc: any = {};
-          for (const fieldName in flatDoc) {
-            const identifiers: string[] = ['' + fieldName];
-
-            if (fieldName !== 'Time') {
-              for (const groupByElement of groupByList) {
-                identifiers.push(flatDoc[groupByElement]);
-              }
-            }
-            const identifiersString = identifiers.toString();
-
-            newDoc[identifiersString] = flatDoc[fieldName];
-            console.log('For ' + fieldName + ' id is ' + identifiersString);
-            if (
-              fieldIdentifierArray.findIndex(value => {
-                return value.toString() === identifiersString;
-              }) === -1
-            ) {
-              fieldIdentifierDocumentMap.set(identifiers, flatDoc);
-              fieldIdentifierArray.push(identifiers);
-            }
-          }
-          docs.push(newDoc);
+          docs.push(flatten(originalDoc));
         };
         if (Array.isArray(data)) {
           for (const element of data) {
@@ -124,37 +97,67 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
           pushDoc(data);
         }
 
-        let df = new MutableDataFrame({
-          fields: [],
-        });
-        for (const fieldIdentifiers of fieldIdentifierArray) {
-          const fieldName = fieldIdentifiers[0];
-          const exampleDoc = fieldIdentifierDocumentMap.get(fieldIdentifiers);
-          let t: FieldType = FieldType.string;
-          if (fieldName === 'Time') {
-            t = FieldType.time;
-          } else if (_.isNumber(exampleDoc[fieldName])) {
-            t = FieldType.number;
-          }
-          df.addField({
-            name: fieldIdentifiers.toString(),
-            type: t,
-            config: { title: fieldIdentifiers.toString() }, // TODO use alias by here and use exampleDoc
-          }).parse = (v: any) => {
-            return v || '';
-          };
-        }
+        const dataFrameMap = new Map<string, MutableDataFrame>();
         for (const doc of docs) {
           if (doc.Time) {
             doc.Time = dateTime(doc.Time);
           }
-          console.log('Going to add');
-          console.log(doc);
-          df.add(doc);
+          const identifiers: string[] = [];
+          for (const groupByElement of groupByList) {
+            identifiers.push(doc[groupByElement]);
+          }
+          const identifiersString = identifiers.toString();
+          let dataFrame = dataFrameMap.get(identifiersString);
+          if (!dataFrame) {
+            // we haven't initialized the dataFrame for this specific identifier that we group by yet
+            dataFrame = new MutableDataFrame({ fields: [] });
+            const generalReplaceObject: any = {};
+            for (const fieldName in doc) {
+              generalReplaceObject['field_' + fieldName] = doc[fieldName];
+            }
+            for (const fieldName in doc) {
+              let t: FieldType = FieldType.string;
+              if (fieldName === 'Time') {
+                t = FieldType.time;
+              } else if (_.isNumber(doc[fieldName])) {
+                t = FieldType.number;
+              }
+              let title;
+              if (identifiers) {
+                // if we have any identifiers
+                title = identifiersString + fieldName;
+              } else {
+                title = fieldName;
+              }
+              if (aliasBy) {
+                title = aliasBy;
+                const replaceObject = { ...generalReplaceObject };
+                replaceObject['fieldName'] = fieldName;
+                for (const replaceKey in replaceObject) {
+                  const replaceValue = replaceObject[replaceKey];
+                  const regex = new RegExp('\\$' + replaceKey, 'g');
+                  title = title.replace(regex, replaceValue);
+                }
+                title = this.templateSrv.replace(title, options.scopedVars);
+              }
+              dataFrame.addField({
+                name: fieldName,
+                type: t,
+                config: { title: title },
+              }).parse = (v: any) => {
+                return v || '';
+              };
+            }
+            dataFrameMap.set(identifiersString, dataFrame);
+          }
+
+          dataFrame.add(doc);
         }
-        dataFrame.push(df);
+        for (const dataFrame of dataFrameMap.values()) {
+          dataFrameArray.push(dataFrame);
+        }
       }
-      return { data: dataFrame };
+      return { data: dataFrameArray };
     });
   }
 
