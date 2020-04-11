@@ -123,9 +123,9 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
                 t = FieldType.number;
               }
               let title;
-              if (identifiers) {
+              if (identifiers.length !== 0) {
                 // if we have any identifiers
-                title = identifiersString + fieldName;
+                title = identifiersString + '_' + fieldName;
               } else {
                 title = fieldName;
               }

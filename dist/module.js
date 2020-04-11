@@ -2355,9 +2355,9 @@ function (_super) {
 
                     var title = void 0;
 
-                    if (identifiers) {
+                    if (identifiers.length !== 0) {
                       // if we have any identifiers
-                      title = identifiersString + fieldName;
+                      title = identifiersString + '_' + fieldName;
                     } else {
                       title = fieldName;
                     }
