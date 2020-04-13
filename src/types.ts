@@ -3,6 +3,8 @@ import { DataQuery, DataSourceJsonData } from '@grafana/data';
 export interface MyQuery extends DataQuery {
   queryText: string;
   dataPath: string;
+  groupBy: string;
+  aliasBy: string;
   constant: number;
 }
 
@@ -14,6 +16,8 @@ export const defaultQuery: Partial<MyQuery> = {
       }
 }`,
   dataPath: 'data.data',
+  groupBy: '', // `identifier`
+  aliasBy: '', // 'Server [[tag_identifier]]`
   constant: 6.5,
 };
 

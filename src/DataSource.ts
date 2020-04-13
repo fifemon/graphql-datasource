@@ -71,56 +71,93 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
         return this.postQuery(query, payload);
       })
     ).then((results: any) => {
-      const dataFrame: DataFrame[] = [];
+      const dataFrameArray: DataFrame[] = [];
       for (let res of results) {
         let data = res.query.dataPath.split('.').reduce((d: any, p: any) => {
           return d[p];
         }, res.results.data);
-        const docs: any[] = [];
-        const fields: any[] = [];
-        let pushDoc = (doc: object) => {
-          let d = flatten(doc);
-          for (let p in d) {
-            if (fields.indexOf(p) === -1) {
-              fields.push(p);
-            }
+        const { groupBy, aliasBy } = res.query;
+        const split = groupBy.split(',');
+        const groupByList: string[] = [];
+        for (const element of split) {
+          const trimmed = element.trim();
+          if (trimmed) {
+            groupByList.push(trimmed);
           }
-          docs.push(d);
+        }
+        const docs: any[] = [];
+        let pushDoc = (originalDoc: object) => {
+          docs.push(flatten(originalDoc));
         };
         if (Array.isArray(data)) {
-          for (let i = 0; i < data.length; i++) {
-            pushDoc(data[i]);
+          for (const element of data) {
+            pushDoc(element);
           }
         } else {
           pushDoc(data);
         }
 
-        let df = new MutableDataFrame({
-          fields: [],
-        });
-        for (const f of fields) {
-          let t: FieldType = FieldType.string;
-          if (f === 'Time') {
-            t = FieldType.time;
-          } else if (_.isNumber(docs[0][f])) {
-            t = FieldType.number;
-          }
-          df.addField({
-            name: f,
-            type: t,
-          }).parse = (v: any) => {
-            return v || '';
-          };
-        }
+        const dataFrameMap = new Map<string, MutableDataFrame>();
         for (const doc of docs) {
           if (doc.Time) {
             doc.Time = dateTime(doc.Time);
           }
-          df.add(doc);
+          const identifiers: string[] = [];
+          for (const groupByElement of groupByList) {
+            identifiers.push(doc[groupByElement]);
+          }
+          const identifiersString = identifiers.toString();
+          let dataFrame = dataFrameMap.get(identifiersString);
+          if (!dataFrame) {
+            // we haven't initialized the dataFrame for this specific identifier that we group by yet
+            dataFrame = new MutableDataFrame({ fields: [] });
+            const generalReplaceObject: any = {};
+            for (const fieldName in doc) {
+              generalReplaceObject['field_' + fieldName] = doc[fieldName];
+            }
+            for (const fieldName in doc) {
+              let t: FieldType = FieldType.string;
+              if (fieldName === 'Time') {
+                t = FieldType.time;
+              } else if (_.isNumber(doc[fieldName])) {
+                t = FieldType.number;
+              }
+              let title;
+              if (identifiers.length !== 0) {
+                // if we have any identifiers
+                title = identifiersString + '_' + fieldName;
+              } else {
+                title = fieldName;
+              }
+              if (aliasBy) {
+                title = aliasBy;
+                const replaceObject = { ...generalReplaceObject };
+                replaceObject['fieldName'] = fieldName;
+                for (const replaceKey in replaceObject) {
+                  const replaceValue = replaceObject[replaceKey];
+                  const regex = new RegExp('\\$' + replaceKey, 'g');
+                  title = title.replace(regex, replaceValue);
+                }
+                title = this.templateSrv.replace(title, options.scopedVars);
+              }
+              dataFrame.addField({
+                name: fieldName,
+                type: t,
+                config: { title: title },
+              }).parse = (v: any) => {
+                return v || '';
+              };
+            }
+            dataFrameMap.set(identifiersString, dataFrame);
+          }
+
+          dataFrame.add(doc);
         }
-        dataFrame.push(df);
+        for (const dataFrame of dataFrameMap.values()) {
+          dataFrameArray.push(dataFrame);
+        }
       }
-      return { data: dataFrame };
+      return { data: dataFrameArray };
     });
   }
 
