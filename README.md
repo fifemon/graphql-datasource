@@ -13,6 +13,9 @@ format that can be parsed by `moment()` (e.g. ISO8601).
 * Grafana variables should be substituted directly in the query (instead of
 using GraphQL variables). The dashboard time ranges are available in `$timeFrom`
 and `$timeTo` variables as millisecond epoch.
+* Group by can be used to group elements into multiple data points.
+* Alias is used to alter the name of the field displayed in the legend. `$field_<field.name>` is subsistuted with the
+values of the field and `$fieldName` is subsistuted with the name of the field.
 
 Example query (data path `data.data`):
 
@@ -23,6 +26,29 @@ Example query (data path `data.data`):
         }
     }
 
+Example query (data path: `data.data.batteryVoltage`, Group by: `packet.identifier.representation`, 
+Alias by `$field_packet.identityInfo.displayName`)
+
+    query {
+        data:queryAll(from:"$timeFrom", to:"$timeTo", sourceId:"default") {
+            batteryVoltage {
+                Time:dateMillis
+                packet {
+                    batteryVoltage
+                    identifier { representation }
+                    identityInfo { displayName }
+                }
+            }
+        }
+    }
+   
+In the above example, "Group by" and "Alias by" are defined. "Group by" allows you to split up an array of data
+into multiple data points. "Alias by" is used as the name of the data point. You can make alias use text from the
+query or even the field name by using `$field_<your.field.name>` for the value of the field, or `$fieldName` 
+for the name of the field. For instance, if `$fieldName` was used, it would be replaced by "batteryVoltage" because
+that's the name of the field. If `$field_identityInfo.displayName` was used, it would be replaced with the value
+of displayName. Using `$fieldName` can be useful if you're querying multiple numeric fields that you want displayed
+in your graph.
 
 
 # Wishlist

@@ -2569,6 +2569,7 @@ function (_super) {
       className: "gf-form"
     }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["FormField"], {
       labelWidth: 8,
+      inputWidth: 24,
       value: dataPath || '',
       onChange: this.onDataPathTextChange,
       label: "Data path",
@@ -2577,6 +2578,7 @@ function (_super) {
       className: 'gf-form'
     }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["FormField"], {
       labelWidth: 8,
+      inputWidth: 24,
       value: groupBy || '',
       onChange: this.onGroupByTextChange,
       label: "Group by",
@@ -2585,6 +2587,7 @@ function (_super) {
       className: 'gf-form'
     }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["FormField"], {
       labelWidth: 8,
+      inputWidth: 24,
       value: aliasBy || '',
       onChange: this.onAliasByTextChange,
       label: "Alias by",

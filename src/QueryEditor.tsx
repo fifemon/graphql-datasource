@@ -42,6 +42,7 @@ export class QueryEditor extends PureComponent<Props, State> {
         <div className="gf-form">
           <FormField
             labelWidth={8}
+            inputWidth={24}
             value={dataPath || ''}
             onChange={this.onDataPathTextChange}
             label="Data path"
@@ -51,6 +52,7 @@ export class QueryEditor extends PureComponent<Props, State> {
         <div className={'gf-form'}>
           <FormField
             labelWidth={8}
+            inputWidth={24}
             value={groupBy || ''}
             onChange={this.onGroupByTextChange}
             label="Group by"
@@ -60,6 +62,7 @@ export class QueryEditor extends PureComponent<Props, State> {
         <div className={'gf-form'}>
           <FormField
             labelWidth={8}
+            inputWidth={24}
             value={aliasBy || ''}
             onChange={this.onAliasByTextChange}
             label="Alias by"
