@@ -72,9 +72,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       payload = payload.replace(/\$timeFrom/g, range.from.valueOf().toString());
       payload = payload.replace(/\$timeTo/g, range.to.valueOf().toString());
     }
-    if (scopedVars) {
-      payload = this.templateSrv.replace(payload, scopedVars);
-    }
+    payload = this.templateSrv.replace(payload, scopedVars);
 
     //console.log(payload);
     return this.postQuery(query, payload);

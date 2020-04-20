@@ -2229,10 +2229,7 @@ function (_super) {
       payload = payload.replace(/\$timeTo/g, range.to.valueOf().toString());
     }
 
-    if (scopedVars) {
-      payload = this.templateSrv.replace(payload, scopedVars);
-    } //console.log(payload);
-
+    payload = this.templateSrv.replace(payload, scopedVars); //console.log(payload);
 
     return this.postQuery(query, payload);
   };
