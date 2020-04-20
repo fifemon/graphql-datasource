@@ -2105,29 +2105,6 @@ module.exports = function(module) {
 
 /***/ }),
 
-/***/ "./AnnotationsQueryEditor.tsx":
-/*!************************************!*\
-  !*** ./AnnotationsQueryEditor.tsx ***!
-  \************************************/
-/*! exports provided: GraphQLAnnotationsQueryCtrl */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GraphQLAnnotationsQueryCtrl", function() { return GraphQLAnnotationsQueryCtrl; });
-var GraphQLAnnotationsQueryCtrl =
-/** @class */
-function () {
-  function GraphQLAnnotationsQueryCtrl() {}
-
-  GraphQLAnnotationsQueryCtrl.templateUrl = 'partials/annotations.editor.html';
-  return GraphQLAnnotationsQueryCtrl;
-}();
-
-
-
-/***/ }),
-
 /***/ "./ConfigEditor.tsx":
 /*!**************************!*\
   !*** ./ConfigEditor.tsx ***!
@@ -2263,9 +2240,28 @@ function (_super) {
   DataSource.prototype.getDocs = function (results, dataPath) {
     var e_1, _a;
 
+    if (!results.data) {
+      throw 'results.data does not exist!';
+    }
+
     var data = dataPath.split('.').reduce(function (d, p) {
+      if (!d) {
+        return null;
+      }
+
       return d[p];
     }, results.data);
+
+    if (!data) {
+      var errors = results.data.errors;
+
+      if (errors && errors.length !== 0) {
+        throw errors[0];
+      }
+
+      throw 'd[p] did not exist and no errors were given!';
+    }
+
     var docs = [];
 
     var pushDoc = function pushDoc(originalDoc) {
@@ -2526,8 +2522,7 @@ function (_super) {
                 title = title.replace(regex, fieldValue);
                 text = text.replace(regex, fieldValue);
                 tags = tags.replace(regex, fieldValue);
-              } // title = this.templateSrv.replace(title, options.scopedVars);
-
+              }
 
               annotation.title = title;
               annotation.text = text;
@@ -2612,6 +2607,29 @@ function (_super) {
 
   return DataSource;
 }(_grafana_data__WEBPACK_IMPORTED_MODULE_2__["DataSourceApi"]);
+
+
+
+/***/ }),
+
+/***/ "./GraphQLAnnotationsQueryCtrl.tsx":
+/*!*****************************************!*\
+  !*** ./GraphQLAnnotationsQueryCtrl.tsx ***!
+  \*****************************************/
+/*! exports provided: GraphQLAnnotationsQueryCtrl */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GraphQLAnnotationsQueryCtrl", function() { return GraphQLAnnotationsQueryCtrl; });
+var GraphQLAnnotationsQueryCtrl =
+/** @class */
+function () {
+  function GraphQLAnnotationsQueryCtrl() {}
+
+  GraphQLAnnotationsQueryCtrl.templateUrl = 'partials/annotations.editor.html';
+  return GraphQLAnnotationsQueryCtrl;
+}();
 
 
 
@@ -2753,13 +2771,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _DataSource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./DataSource */ "./DataSource.ts");
 /* harmony import */ var _ConfigEditor__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./ConfigEditor */ "./ConfigEditor.tsx");
 /* harmony import */ var _QueryEditor__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./QueryEditor */ "./QueryEditor.tsx");
-/* harmony import */ var _AnnotationsQueryEditor__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./AnnotationsQueryEditor */ "./AnnotationsQueryEditor.tsx");
+/* harmony import */ var _GraphQLAnnotationsQueryCtrl__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./GraphQLAnnotationsQueryCtrl */ "./GraphQLAnnotationsQueryCtrl.tsx");
 
 
 
 
 
-var plugin = new _grafana_data__WEBPACK_IMPORTED_MODULE_0__["DataSourcePlugin"](_DataSource__WEBPACK_IMPORTED_MODULE_1__["DataSource"]).setConfigEditor(_ConfigEditor__WEBPACK_IMPORTED_MODULE_2__["ConfigEditor"]).setAnnotationQueryCtrl(_AnnotationsQueryEditor__WEBPACK_IMPORTED_MODULE_4__["GraphQLAnnotationsQueryCtrl"]).setQueryEditor(_QueryEditor__WEBPACK_IMPORTED_MODULE_3__["QueryEditor"]);
+var plugin = new _grafana_data__WEBPACK_IMPORTED_MODULE_0__["DataSourcePlugin"](_DataSource__WEBPACK_IMPORTED_MODULE_1__["DataSource"]).setConfigEditor(_ConfigEditor__WEBPACK_IMPORTED_MODULE_2__["ConfigEditor"]).setAnnotationQueryCtrl(_GraphQLAnnotationsQueryCtrl__WEBPACK_IMPORTED_MODULE_4__["GraphQLAnnotationsQueryCtrl"]).setQueryEditor(_QueryEditor__WEBPACK_IMPORTED_MODULE_3__["QueryEditor"]);
 
 /***/ }),
 

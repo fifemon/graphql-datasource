@@ -80,9 +80,22 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     return this.postQuery(query, payload);
   }
   private getDocs(results: any, dataPath: string): any[] {
+    if (!results.data) {
+      throw 'results.data does not exist!';
+    }
     let data = dataPath.split('.').reduce((d: any, p: any) => {
+      if (!d) {
+        return null;
+      }
       return d[p];
     }, results.data);
+    if (!data) {
+      const errors: any[] = results.data.errors;
+      if (errors && errors.length !== 0) {
+        throw errors[0];
+      }
+      throw 'd[p] did not exist and no errors were given!';
+    }
     const docs: any[] = [];
     let pushDoc = (originalDoc: object) => {
       docs.push(flatten(originalDoc));
@@ -206,7 +219,6 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
             text = text.replace(regex, fieldValue);
             tags = tags.replace(regex, fieldValue);
           }
-          // title = this.templateSrv.replace(title, options.scopedVars);
 
           annotation.title = title;
           annotation.text = text;
