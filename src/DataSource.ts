@@ -199,7 +199,6 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       for (const res of results) {
         const docs: any[] = this.getDocs(res.results, options.annotation.dataPath);
         for (const doc of docs) {
-          console.log(doc);
           const annotation: AnnotationEvent = {};
           if (doc.Time) {
             annotation.time = dateTime(doc.Time).valueOf();
@@ -230,7 +229,6 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
             }
           }
           annotation.tags = tagsList;
-          console.log(annotation);
           r.push(annotation);
         }
       }

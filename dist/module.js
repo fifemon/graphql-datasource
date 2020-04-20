@@ -2499,7 +2499,6 @@ function (_super) {
           try {
             for (var docs_2 = (e_8 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(docs)), docs_2_1 = docs_2.next(); !docs_2_1.done; docs_2_1 = docs_2.next()) {
               var doc = docs_2_1.value;
-              console.log(doc);
               var annotation = {};
 
               if (doc.Time) {
@@ -2550,7 +2549,6 @@ function (_super) {
               }
 
               annotation.tags = tagsList;
-              console.log(annotation);
               r.push(annotation);
             }
           } catch (e_8_1) {
