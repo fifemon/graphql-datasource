@@ -1,0 +1,24 @@
+<div class="gf-form-group">
+  <div class="gf-form">
+    <textarea type="text" class="gf-form-input" ng-model='ctrl.annotation.queryText' placeholder="GraphQL Query">
+query {
+    data:submissions(user:"$user", from:"$timeFrom", to:"$timeTo"){
+        Time:submitTime
+        idle running completed
+    }
+}
+</textarea>
+  </div>
+  <div class="gf-form">
+    <input type="text" class="gf-form-input" ng-model='ctrl.annotation.dataPath' placeholder="Data path" value="data.data"/>
+  </div>
+  <div class="gf-form">
+    <input type="text" class="gf-form-input" ng-model='ctrl.annotation.annotationTitle' placeholder="Title" value=""/>
+  </div>
+  <div class="gf-form">
+    <input type="text" class="gf-form-input" ng-model='ctrl.annotation.annotationText' placeholder="Text" value=""/>
+  </div>
+  <div class="gf-form">
+    <input type="text" class="gf-form-input" ng-model='ctrl.annotation.annotationTags' placeholder="Tags (Comma separated)" value=""/>
+  </div>
+</div>

@@ -1,6 +1,15 @@
 import defaults from 'lodash/defaults';
 
-import { DataQueryRequest, DataQueryResponse, DataSourceApi, DataSourceInstanceSettings } from '@grafana/data';
+import {
+  AnnotationEvent,
+  AnnotationQueryRequest,
+  DataQueryRequest,
+  DataQueryResponse,
+  DataSourceApi,
+  DataSourceInstanceSettings,
+  ScopedVars,
+  TimeRange,
+} from '@grafana/data';
 
 import { MyQuery, MyDataSourceOptions, defaultQuery } from './types';
 import { dateTime, MutableDataFrame, FieldType, DataFrame } from '@grafana/data';
@@ -57,25 +66,46 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       });
   }
 
+  private createQuery(query: MyQuery, range: TimeRange | undefined, scopedVars: ScopedVars | undefined = undefined) {
+    let payload = query.queryText;
+    if (range) {
+      payload = payload.replace(/\$timeFrom/g, range.from.valueOf().toString());
+      payload = payload.replace(/\$timeTo/g, range.to.valueOf().toString());
+    }
+    if (scopedVars) {
+      payload = this.templateSrv.replace(payload, scopedVars);
+    }
+
+    //console.log(payload);
+    return this.postQuery(query, payload);
+  }
+  private getDocs(results: any, dataPath: string): any[] {
+    let data = dataPath.split('.').reduce((d: any, p: any) => {
+      return d[p];
+    }, results.data);
+    const docs: any[] = [];
+    let pushDoc = (originalDoc: object) => {
+      docs.push(flatten(originalDoc));
+    };
+    if (Array.isArray(data)) {
+      for (const element of data) {
+        pushDoc(element);
+      }
+    } else {
+      pushDoc(data);
+    }
+    return docs;
+  }
+
   async query(options: DataQueryRequest<MyQuery>): Promise<DataQueryResponse> {
     return Promise.all(
       options.targets.map(target => {
-        let query = defaults(target, defaultQuery);
-        let payload = query.queryText;
-        if (options.range) {
-          payload = payload.replace(/\$timeFrom/g, options.range.from.valueOf().toString());
-          payload = payload.replace(/\$timeTo/g, options.range.to.valueOf().toString());
-        }
-        payload = this.templateSrv.replace(payload, options.scopedVars);
-        //console.log(payload);
-        return this.postQuery(query, payload);
+        return this.createQuery(defaults(target, defaultQuery), options.range, options.scopedVars);
       })
     ).then((results: any) => {
       const dataFrameArray: DataFrame[] = [];
       for (let res of results) {
-        let data = res.query.dataPath.split('.').reduce((d: any, p: any) => {
-          return d[p];
-        }, res.results.data);
+        const docs: any[] = this.getDocs(res.results, res.query.dataPath);
         const { groupBy, aliasBy } = res.query;
         const split = groupBy.split(',');
         const groupByList: string[] = [];
@@ -84,17 +114,6 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
           if (trimmed) {
             groupByList.push(trimmed);
           }
-        }
-        const docs: any[] = [];
-        let pushDoc = (originalDoc: object) => {
-          docs.push(flatten(originalDoc));
-        };
-        if (Array.isArray(data)) {
-          for (const element of data) {
-            pushDoc(element);
-          }
-        } else {
-          pushDoc(data);
         }
 
         const dataFrameMap = new Map<string, MutableDataFrame>();
@@ -158,6 +177,52 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
         }
       }
       return { data: dataFrameArray };
+    });
+  }
+  annotationQuery(options: AnnotationQueryRequest<MyQuery>): Promise<AnnotationEvent[]> {
+    const query = defaults(options.annotation, defaultQuery);
+    return Promise.all([this.createQuery(query, options.range)]).then((results: any) => {
+      const r: AnnotationEvent[] = [];
+      for (const res of results) {
+        const docs: any[] = this.getDocs(res.results, options.annotation.dataPath);
+        for (const doc of docs) {
+          console.log(doc);
+          const annotation: AnnotationEvent = {};
+          if (doc.Time) {
+            annotation.time = dateTime(doc.Time).valueOf();
+          }
+          if (doc.TimeEnd) {
+            annotation.isRegion = true;
+            annotation.timeEnd = dateTime(doc.TimeEnd).valueOf();
+          }
+          let title = query.annotationTitle;
+          let text = query.annotationText;
+          let tags = query.annotationTags;
+          for (const fieldName in doc) {
+            const fieldValue = doc[fieldName];
+            const replaceKey = 'field_' + fieldName;
+            const regex = new RegExp('\\$' + replaceKey, 'g');
+            title = title.replace(regex, fieldValue);
+            text = text.replace(regex, fieldValue);
+            tags = tags.replace(regex, fieldValue);
+          }
+          // title = this.templateSrv.replace(title, options.scopedVars);
+
+          annotation.title = title;
+          annotation.text = text;
+          const tagsList: string[] = [];
+          for (const element of tags.split(',')) {
+            const trimmed = element.trim();
+            if (trimmed) {
+              tagsList.push(trimmed);
+            }
+          }
+          annotation.tags = tagsList;
+          console.log(annotation);
+          r.push(annotation);
+        }
+      }
+      return r;
     });
   }
 

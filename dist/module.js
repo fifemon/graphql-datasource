@@ -2105,6 +2105,29 @@ module.exports = function(module) {
 
 /***/ }),
 
+/***/ "./AnnotationsQueryEditor.tsx":
+/*!************************************!*\
+  !*** ./AnnotationsQueryEditor.tsx ***!
+  \************************************/
+/*! exports provided: GraphQLAnnotationsQueryCtrl */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GraphQLAnnotationsQueryCtrl", function() { return GraphQLAnnotationsQueryCtrl; });
+var GraphQLAnnotationsQueryCtrl =
+/** @class */
+function () {
+  function GraphQLAnnotationsQueryCtrl() {}
+
+  GraphQLAnnotationsQueryCtrl.templateUrl = 'partials/annotations.editor.html';
+  return GraphQLAnnotationsQueryCtrl;
+}();
+
+
+
+/***/ }),
+
 /***/ "./ConfigEditor.tsx":
 /*!**************************!*\
   !*** ./ConfigEditor.tsx ***!
@@ -2217,6 +2240,62 @@ function (_super) {
     });
   };
 
+  DataSource.prototype.createQuery = function (query, range, scopedVars) {
+    if (scopedVars === void 0) {
+      scopedVars = undefined;
+    }
+
+    var payload = query.queryText;
+
+    if (range) {
+      payload = payload.replace(/\$timeFrom/g, range.from.valueOf().toString());
+      payload = payload.replace(/\$timeTo/g, range.to.valueOf().toString());
+    }
+
+    if (scopedVars) {
+      payload = this.templateSrv.replace(payload, scopedVars);
+    } //console.log(payload);
+
+
+    return this.postQuery(query, payload);
+  };
+
+  DataSource.prototype.getDocs = function (results, dataPath) {
+    var e_1, _a;
+
+    var data = dataPath.split('.').reduce(function (d, p) {
+      return d[p];
+    }, results.data);
+    var docs = [];
+
+    var pushDoc = function pushDoc(originalDoc) {
+      docs.push(Object(_util__WEBPACK_IMPORTED_MODULE_5__["flatten"])(originalDoc));
+    };
+
+    if (Array.isArray(data)) {
+      try {
+        for (var data_1 = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(data), data_1_1 = data_1.next(); !data_1_1.done; data_1_1 = data_1.next()) {
+          var element = data_1_1.value;
+          pushDoc(element);
+        }
+      } catch (e_1_1) {
+        e_1 = {
+          error: e_1_1
+        };
+      } finally {
+        try {
+          if (data_1_1 && !data_1_1.done && (_a = data_1["return"])) _a.call(data_1);
+        } finally {
+          if (e_1) throw e_1.error;
+        }
+      }
+    } else {
+      pushDoc(data);
+    }
+
+    return docs;
+  };
+
   DataSource.prototype.query = function (options) {
     return Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__awaiter"])(this, void 0, void 0, function () {
       var _this = this;
@@ -2225,66 +2304,32 @@ function (_super) {
         return [2
         /*return*/
         , Promise.all(options.targets.map(function (target) {
-          var query = lodash_defaults__WEBPACK_IMPORTED_MODULE_1___default()(target, _types__WEBPACK_IMPORTED_MODULE_3__["defaultQuery"]);
-          var payload = query.queryText;
-
-          if (options.range) {
-            payload = payload.replace(/\$timeFrom/g, options.range.from.valueOf().toString());
-            payload = payload.replace(/\$timeTo/g, options.range.to.valueOf().toString());
-          }
-
-          payload = _this.templateSrv.replace(payload, options.scopedVars); //console.log(payload);
-
-          return _this.postQuery(query, payload);
+          return _this.createQuery(lodash_defaults__WEBPACK_IMPORTED_MODULE_1___default()(target, _types__WEBPACK_IMPORTED_MODULE_3__["defaultQuery"]), options.range, options.scopedVars);
         })).then(function (results) {
-          var e_1, _a;
+          var e_2, _a, e_3, _b, e_4, _c, e_5, _d, e_6, _e;
 
           var dataFrameArray = [];
 
-          var _loop_1 = function _loop_1(res) {
-            var e_2, _a, e_3, _b, e_4, _c, e_5, _d, e_6, _e;
+          try {
+            for (var results_1 = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(results), results_1_1 = results_1.next(); !results_1_1.done; results_1_1 = results_1.next()) {
+              var res = results_1_1.value;
 
-            var data = res.query.dataPath.split('.').reduce(function (d, p) {
-              return d[p];
-            }, res.results.data);
-            var _f = res.query,
-                groupBy = _f.groupBy,
-                aliasBy = _f.aliasBy;
-            var split = groupBy.split(',');
-            var groupByList = [];
+              var docs = _this.getDocs(res.results, res.query.dataPath);
 
-            try {
-              for (var split_1 = (e_2 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(split)), split_1_1 = split_1.next(); !split_1_1.done; split_1_1 = split_1.next()) {
-                var element = split_1_1.value;
-                var trimmed = element.trim();
+              var _f = res.query,
+                  groupBy = _f.groupBy,
+                  aliasBy = _f.aliasBy;
+              var split = groupBy.split(',');
+              var groupByList = [];
 
-                if (trimmed) {
-                  groupByList.push(trimmed);
-                }
-              }
-            } catch (e_2_1) {
-              e_2 = {
-                error: e_2_1
-              };
-            } finally {
               try {
-                if (split_1_1 && !split_1_1.done && (_a = split_1["return"])) _a.call(split_1);
-              } finally {
-                if (e_2) throw e_2.error;
-              }
-            }
+                for (var split_1 = (e_3 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(split)), split_1_1 = split_1.next(); !split_1_1.done; split_1_1 = split_1.next()) {
+                  var element = split_1_1.value;
+                  var trimmed = element.trim();
 
-            var docs = [];
-
-            var pushDoc = function pushDoc(originalDoc) {
-              docs.push(Object(_util__WEBPACK_IMPORTED_MODULE_5__["flatten"])(originalDoc));
-            };
-
-            if (Array.isArray(data)) {
-              try {
-                for (var data_1 = (e_3 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(data)), data_1_1 = data_1.next(); !data_1_1.done; data_1_1 = data_1.next()) {
-                  var element = data_1_1.value;
-                  pushDoc(element);
+                  if (trimmed) {
+                    groupByList.push(trimmed);
+                  }
                 }
               } catch (e_3_1) {
                 e_3 = {
@@ -2292,153 +2337,143 @@ function (_super) {
                 };
               } finally {
                 try {
-                  if (data_1_1 && !data_1_1.done && (_b = data_1["return"])) _b.call(data_1);
+                  if (split_1_1 && !split_1_1.done && (_b = split_1["return"])) _b.call(split_1);
                 } finally {
                   if (e_3) throw e_3.error;
                 }
               }
-            } else {
-              pushDoc(data);
-            }
 
-            var dataFrameMap = new Map();
+              var dataFrameMap = new Map();
 
-            try {
-              for (var docs_1 = (e_4 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(docs)), docs_1_1 = docs_1.next(); !docs_1_1.done; docs_1_1 = docs_1.next()) {
-                var doc = docs_1_1.value;
+              try {
+                for (var docs_1 = (e_4 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(docs)), docs_1_1 = docs_1.next(); !docs_1_1.done; docs_1_1 = docs_1.next()) {
+                  var doc = docs_1_1.value;
 
-                if (doc.Time) {
-                  doc.Time = Object(_grafana_data__WEBPACK_IMPORTED_MODULE_2__["dateTime"])(doc.Time);
-                }
-
-                var identifiers = [];
-
-                try {
-                  for (var groupByList_1 = (e_5 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(groupByList)), groupByList_1_1 = groupByList_1.next(); !groupByList_1_1.done; groupByList_1_1 = groupByList_1.next()) {
-                    var groupByElement = groupByList_1_1.value;
-                    identifiers.push(doc[groupByElement]);
+                  if (doc.Time) {
+                    doc.Time = Object(_grafana_data__WEBPACK_IMPORTED_MODULE_2__["dateTime"])(doc.Time);
                   }
-                } catch (e_5_1) {
-                  e_5 = {
-                    error: e_5_1
-                  };
-                } finally {
+
+                  var identifiers = [];
+
                   try {
-                    if (groupByList_1_1 && !groupByList_1_1.done && (_d = groupByList_1["return"])) _d.call(groupByList_1);
-                  } finally {
-                    if (e_5) throw e_5.error;
-                  }
-                }
-
-                var identifiersString = identifiers.toString();
-                var dataFrame = dataFrameMap.get(identifiersString);
-
-                if (!dataFrame) {
-                  // we haven't initialized the dataFrame for this specific identifier that we group by yet
-                  dataFrame = new _grafana_data__WEBPACK_IMPORTED_MODULE_2__["MutableDataFrame"]({
-                    fields: []
-                  });
-                  var generalReplaceObject = {};
-
-                  for (var fieldName in doc) {
-                    generalReplaceObject['field_' + fieldName] = doc[fieldName];
-                  }
-
-                  for (var fieldName in doc) {
-                    var t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].string;
-
-                    if (fieldName === 'Time') {
-                      t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].time;
-                    } else if (lodash__WEBPACK_IMPORTED_MODULE_4___default.a.isNumber(doc[fieldName])) {
-                      t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].number;
+                    for (var groupByList_1 = (e_5 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(groupByList)), groupByList_1_1 = groupByList_1.next(); !groupByList_1_1.done; groupByList_1_1 = groupByList_1.next()) {
+                      var groupByElement = groupByList_1_1.value;
+                      identifiers.push(doc[groupByElement]);
                     }
-
-                    var title = void 0;
-
-                    if (identifiers.length !== 0) {
-                      // if we have any identifiers
-                      title = identifiersString + '_' + fieldName;
-                    } else {
-                      title = fieldName;
-                    }
-
-                    if (aliasBy) {
-                      title = aliasBy;
-
-                      var replaceObject = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, generalReplaceObject);
-
-                      replaceObject['fieldName'] = fieldName;
-
-                      for (var replaceKey in replaceObject) {
-                        var replaceValue = replaceObject[replaceKey];
-                        var regex = new RegExp('\\$' + replaceKey, 'g');
-                        title = title.replace(regex, replaceValue);
-                      }
-
-                      title = _this.templateSrv.replace(title, options.scopedVars);
-                    }
-
-                    dataFrame.addField({
-                      name: fieldName,
-                      type: t,
-                      config: {
-                        title: title
-                      }
-                    }).parse = function (v) {
-                      return v || '';
+                  } catch (e_5_1) {
+                    e_5 = {
+                      error: e_5_1
                     };
+                  } finally {
+                    try {
+                      if (groupByList_1_1 && !groupByList_1_1.done && (_d = groupByList_1["return"])) _d.call(groupByList_1);
+                    } finally {
+                      if (e_5) throw e_5.error;
+                    }
                   }
 
-                  dataFrameMap.set(identifiersString, dataFrame);
+                  var identifiersString = identifiers.toString();
+                  var dataFrame = dataFrameMap.get(identifiersString);
+
+                  if (!dataFrame) {
+                    // we haven't initialized the dataFrame for this specific identifier that we group by yet
+                    dataFrame = new _grafana_data__WEBPACK_IMPORTED_MODULE_2__["MutableDataFrame"]({
+                      fields: []
+                    });
+                    var generalReplaceObject = {};
+
+                    for (var fieldName in doc) {
+                      generalReplaceObject['field_' + fieldName] = doc[fieldName];
+                    }
+
+                    for (var fieldName in doc) {
+                      var t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].string;
+
+                      if (fieldName === 'Time') {
+                        t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].time;
+                      } else if (lodash__WEBPACK_IMPORTED_MODULE_4___default.a.isNumber(doc[fieldName])) {
+                        t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].number;
+                      }
+
+                      var title = void 0;
+
+                      if (identifiers.length !== 0) {
+                        // if we have any identifiers
+                        title = identifiersString + '_' + fieldName;
+                      } else {
+                        title = fieldName;
+                      }
+
+                      if (aliasBy) {
+                        title = aliasBy;
+
+                        var replaceObject = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, generalReplaceObject);
+
+                        replaceObject['fieldName'] = fieldName;
+
+                        for (var replaceKey in replaceObject) {
+                          var replaceValue = replaceObject[replaceKey];
+                          var regex = new RegExp('\\$' + replaceKey, 'g');
+                          title = title.replace(regex, replaceValue);
+                        }
+
+                        title = _this.templateSrv.replace(title, options.scopedVars);
+                      }
+
+                      dataFrame.addField({
+                        name: fieldName,
+                        type: t,
+                        config: {
+                          title: title
+                        }
+                      }).parse = function (v) {
+                        return v || '';
+                      };
+                    }
+
+                    dataFrameMap.set(identifiersString, dataFrame);
+                  }
+
+                  dataFrame.add(doc);
                 }
-
-                dataFrame.add(doc);
-              }
-            } catch (e_4_1) {
-              e_4 = {
-                error: e_4_1
-              };
-            } finally {
-              try {
-                if (docs_1_1 && !docs_1_1.done && (_c = docs_1["return"])) _c.call(docs_1);
+              } catch (e_4_1) {
+                e_4 = {
+                  error: e_4_1
+                };
               } finally {
-                if (e_4) throw e_4.error;
+                try {
+                  if (docs_1_1 && !docs_1_1.done && (_c = docs_1["return"])) _c.call(docs_1);
+                } finally {
+                  if (e_4) throw e_4.error;
+                }
               }
-            }
 
-            try {
-              for (var _g = (e_6 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(dataFrameMap.values())), _h = _g.next(); !_h.done; _h = _g.next()) {
-                var dataFrame = _h.value;
-                dataFrameArray.push(dataFrame);
-              }
-            } catch (e_6_1) {
-              e_6 = {
-                error: e_6_1
-              };
-            } finally {
               try {
-                if (_h && !_h.done && (_e = _g["return"])) _e.call(_g);
+                for (var _g = (e_6 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(dataFrameMap.values())), _h = _g.next(); !_h.done; _h = _g.next()) {
+                  var dataFrame = _h.value;
+                  dataFrameArray.push(dataFrame);
+                }
+              } catch (e_6_1) {
+                e_6 = {
+                  error: e_6_1
+                };
               } finally {
-                if (e_6) throw e_6.error;
+                try {
+                  if (_h && !_h.done && (_e = _g["return"])) _e.call(_g);
+                } finally {
+                  if (e_6) throw e_6.error;
+                }
               }
             }
-          };
-
-          try {
-            for (var results_1 = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(results), results_1_1 = results_1.next(); !results_1_1.done; results_1_1 = results_1.next()) {
-              var res = results_1_1.value;
-
-              _loop_1(res);
-            }
-          } catch (e_1_1) {
-            e_1 = {
-              error: e_1_1
+          } catch (e_2_1) {
+            e_2 = {
+              error: e_2_1
             };
           } finally {
             try {
               if (results_1_1 && !results_1_1.done && (_a = results_1["return"])) _a.call(results_1);
             } finally {
-              if (e_1) throw e_1.error;
+              if (e_2) throw e_2.error;
             }
           }
 
@@ -2447,6 +2482,107 @@ function (_super) {
           };
         })];
       });
+    });
+  };
+
+  DataSource.prototype.annotationQuery = function (options) {
+    var _this = this;
+
+    var query = lodash_defaults__WEBPACK_IMPORTED_MODULE_1___default()(options.annotation, _types__WEBPACK_IMPORTED_MODULE_3__["defaultQuery"]);
+    return Promise.all([this.createQuery(query, options.range)]).then(function (results) {
+      var e_7, _a, e_8, _b, e_9, _c;
+
+      var r = [];
+
+      try {
+        for (var results_2 = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(results), results_2_1 = results_2.next(); !results_2_1.done; results_2_1 = results_2.next()) {
+          var res = results_2_1.value;
+
+          var docs = _this.getDocs(res.results, options.annotation.dataPath);
+
+          try {
+            for (var docs_2 = (e_8 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(docs)), docs_2_1 = docs_2.next(); !docs_2_1.done; docs_2_1 = docs_2.next()) {
+              var doc = docs_2_1.value;
+              console.log(doc);
+              var annotation = {};
+
+              if (doc.Time) {
+                annotation.time = Object(_grafana_data__WEBPACK_IMPORTED_MODULE_2__["dateTime"])(doc.Time).valueOf();
+              }
+
+              if (doc.TimeEnd) {
+                annotation.isRegion = true;
+                annotation.timeEnd = Object(_grafana_data__WEBPACK_IMPORTED_MODULE_2__["dateTime"])(doc.TimeEnd).valueOf();
+              }
+
+              var title = query.annotationTitle;
+              var text = query.annotationText;
+              var tags = query.annotationTags;
+
+              for (var fieldName in doc) {
+                var fieldValue = doc[fieldName];
+                var replaceKey = 'field_' + fieldName;
+                var regex = new RegExp('\\$' + replaceKey, 'g');
+                title = title.replace(regex, fieldValue);
+                text = text.replace(regex, fieldValue);
+                tags = tags.replace(regex, fieldValue);
+              } // title = this.templateSrv.replace(title, options.scopedVars);
+
+
+              annotation.title = title;
+              annotation.text = text;
+              var tagsList = [];
+
+              try {
+                for (var _d = (e_9 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(tags.split(','))), _e = _d.next(); !_e.done; _e = _d.next()) {
+                  var element = _e.value;
+                  var trimmed = element.trim();
+
+                  if (trimmed) {
+                    tagsList.push(trimmed);
+                  }
+                }
+              } catch (e_9_1) {
+                e_9 = {
+                  error: e_9_1
+                };
+              } finally {
+                try {
+                  if (_e && !_e.done && (_c = _d["return"])) _c.call(_d);
+                } finally {
+                  if (e_9) throw e_9.error;
+                }
+              }
+
+              annotation.tags = tagsList;
+              console.log(annotation);
+              r.push(annotation);
+            }
+          } catch (e_8_1) {
+            e_8 = {
+              error: e_8_1
+            };
+          } finally {
+            try {
+              if (docs_2_1 && !docs_2_1.done && (_b = docs_2["return"])) _b.call(docs_2);
+            } finally {
+              if (e_8) throw e_8.error;
+            }
+          }
+        }
+      } catch (e_7_1) {
+        e_7 = {
+          error: e_7_1
+        };
+      } finally {
+        try {
+          if (results_2_1 && !results_2_1.done && (_a = results_2["return"])) _a.call(results_2);
+        } finally {
+          if (e_7) throw e_7.error;
+        }
+      }
+
+      return r;
     });
   };
 
@@ -2617,11 +2753,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _DataSource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./DataSource */ "./DataSource.ts");
 /* harmony import */ var _ConfigEditor__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./ConfigEditor */ "./ConfigEditor.tsx");
 /* harmony import */ var _QueryEditor__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./QueryEditor */ "./QueryEditor.tsx");
+/* harmony import */ var _AnnotationsQueryEditor__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./AnnotationsQueryEditor */ "./AnnotationsQueryEditor.tsx");
 
 
 
 
-var plugin = new _grafana_data__WEBPACK_IMPORTED_MODULE_0__["DataSourcePlugin"](_DataSource__WEBPACK_IMPORTED_MODULE_1__["DataSource"]).setConfigEditor(_ConfigEditor__WEBPACK_IMPORTED_MODULE_2__["ConfigEditor"]).setQueryEditor(_QueryEditor__WEBPACK_IMPORTED_MODULE_3__["QueryEditor"]);
+
+var plugin = new _grafana_data__WEBPACK_IMPORTED_MODULE_0__["DataSourcePlugin"](_DataSource__WEBPACK_IMPORTED_MODULE_1__["DataSource"]).setConfigEditor(_ConfigEditor__WEBPACK_IMPORTED_MODULE_2__["ConfigEditor"]).setAnnotationQueryCtrl(_AnnotationsQueryEditor__WEBPACK_IMPORTED_MODULE_4__["GraphQLAnnotationsQueryCtrl"]).setQueryEditor(_QueryEditor__WEBPACK_IMPORTED_MODULE_3__["QueryEditor"]);
 
 /***/ }),
 
@@ -2640,6 +2778,9 @@ var defaultQuery = {
   dataPath: 'data.data',
   groupBy: '',
   aliasBy: '',
+  annotationTitle: '',
+  annotationText: '',
+  annotationTags: '',
   constant: 6.5
 };
 
