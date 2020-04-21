@@ -5,6 +5,9 @@ export interface MyQuery extends DataQuery {
   dataPath: string;
   groupBy: string;
   aliasBy: string;
+  annotationTitle: string;
+  annotationText: string;
+  annotationTags: string;
   constant: number;
 }
 
@@ -18,6 +21,9 @@ export const defaultQuery: Partial<MyQuery> = {
   dataPath: 'data.data',
   groupBy: '', // `identifier`
   aliasBy: '', // 'Server [[tag_identifier]]`
+  annotationTitle: '',
+  annotationText: '',
+  annotationTags: '',
   constant: 6.5,
 };
 

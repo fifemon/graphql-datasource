@@ -14,8 +14,8 @@ format that can be parsed by `moment()` (e.g. ISO8601).
 using GraphQL variables). The dashboard time ranges are available in `$timeFrom`
 and `$timeTo` variables as millisecond epoch.
 * Group by can be used to group elements into multiple data points.
-* Alias is used to alter the name of the field displayed in the legend. `$field_<field.name>` is subsistuted with the
-values of the field and `$fieldName` is subsistuted with the name of the field.
+* Alias by is used to alter the name of the field displayed in the legend. `$field_<field.name>` is substituted with the
+values of the field and `$fieldName` is substituted with the name of the field.
 
 Example query (data path `data.data`):
 
@@ -27,7 +27,7 @@ Example query (data path `data.data`):
     }
 
 Example query (data path: `data.data.batteryVoltage`, Group by: `packet.identifier.representation`, 
-Alias by `$field_packet.identityInfo.displayName`)
+Alias by `$field_packet.identityInfo.displayName`):
 
     query {
         data:queryAll(from:"$timeFrom", to:"$timeTo", sourceId:"default") {
@@ -50,6 +50,25 @@ that's the name of the field. If `$field_identityInfo.displayName` was used, it 
 of displayName. Using `$fieldName` can be useful if you're querying multiple numeric fields that you want displayed
 in your graph.
 
+Example annotation query (data path: `data.data.birthdayEvent`, title: `Birthday yay!`, 
+text: `$field_person.fullName` tags: `tag1, tag2`):
+
+    query {
+        data:queryEvents(from: "$timeFrom", to:"$timeTo") {
+            birthdayEvent {
+                Time:dateMillis
+                person {
+                    fullName
+                }
+            }
+        }
+    }
+
+The above annotation example is similar to regular queries. You must have a `Time` field and are able to define
+a data path. Similar to the last example, you can also substitute values into the title, text, and tags by using `$field_<field name>`.
+By using `$field_person.fullName` as the text, the text in this annotation will be the person's full name. Tags are
+separated by commas. The above example has two tags: "tag1" and "tag2". If a `TimeEnd` field is present, the annotation will
+be shown over a period of time.
 
 # Wishlist
 * Rich schema-aware editor (graphiql-like)
