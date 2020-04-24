@@ -116,7 +116,16 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     ).then((results: any) => {
       const dataFrameArray: DataFrame[] = [];
       for (let res of results) {
-        const docs: any[] = this.getDocs(res.results, res.query.dataPath);
+        const dataPathArray: string[] = [];
+        for (const dataPath of res.query.dataPath.split(',')) {
+          const trimmed = dataPath.trim();
+          if (trimmed) {
+            dataPathArray.push(trimmed);
+          }
+        }
+        if (!dataPathArray) {
+          throw 'data path is empty!';
+        }
         const { groupBy, aliasBy } = res.query;
         const split = groupBy.split(',');
         const groupByList: string[] = [];
@@ -126,65 +135,68 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
             groupByList.push(trimmed);
           }
         }
+        for (const dataPath of dataPathArray) {
+          const docs: any[] = this.getDocs(res.results, dataPath);
 
-        const dataFrameMap = new Map<string, MutableDataFrame>();
-        for (const doc of docs) {
-          if (doc.Time) {
-            doc.Time = dateTime(doc.Time);
-          }
-          const identifiers: string[] = [];
-          for (const groupByElement of groupByList) {
-            identifiers.push(doc[groupByElement]);
-          }
-          const identifiersString = identifiers.toString();
-          let dataFrame = dataFrameMap.get(identifiersString);
-          if (!dataFrame) {
-            // we haven't initialized the dataFrame for this specific identifier that we group by yet
-            dataFrame = new MutableDataFrame({ fields: [] });
-            const generalReplaceObject: any = {};
-            for (const fieldName in doc) {
-              generalReplaceObject['field_' + fieldName] = doc[fieldName];
+          const dataFrameMap = new Map<string, MutableDataFrame>();
+          for (const doc of docs) {
+            if (doc.Time) {
+              doc.Time = dateTime(doc.Time);
             }
-            for (const fieldName in doc) {
-              let t: FieldType = FieldType.string;
-              if (fieldName === 'Time') {
-                t = FieldType.time;
-              } else if (_.isNumber(doc[fieldName])) {
-                t = FieldType.number;
+            const identifiers: string[] = [];
+            for (const groupByElement of groupByList) {
+              identifiers.push(doc[groupByElement]);
+            }
+            const identifiersString = identifiers.toString();
+            let dataFrame = dataFrameMap.get(identifiersString);
+            if (!dataFrame) {
+              // we haven't initialized the dataFrame for this specific identifier that we group by yet
+              dataFrame = new MutableDataFrame({ fields: [] });
+              const generalReplaceObject: any = {};
+              for (const fieldName in doc) {
+                generalReplaceObject['field_' + fieldName] = doc[fieldName];
               }
-              let title;
-              if (identifiers.length !== 0) {
-                // if we have any identifiers
-                title = identifiersString + '_' + fieldName;
-              } else {
-                title = fieldName;
-              }
-              if (aliasBy) {
-                title = aliasBy;
-                const replaceObject = { ...generalReplaceObject };
-                replaceObject['fieldName'] = fieldName;
-                for (const replaceKey in replaceObject) {
-                  const replaceValue = replaceObject[replaceKey];
-                  const regex = new RegExp('\\$' + replaceKey, 'g');
-                  title = title.replace(regex, replaceValue);
+              for (const fieldName in doc) {
+                let t: FieldType = FieldType.string;
+                if (fieldName === 'Time') {
+                  t = FieldType.time;
+                } else if (_.isNumber(doc[fieldName])) {
+                  t = FieldType.number;
                 }
-                title = this.templateSrv.replace(title, options.scopedVars);
+                let title;
+                if (identifiers.length !== 0) {
+                  // if we have any identifiers
+                  title = identifiersString + '_' + fieldName;
+                } else {
+                  title = fieldName;
+                }
+                if (aliasBy) {
+                  title = aliasBy;
+                  const replaceObject = { ...generalReplaceObject };
+                  replaceObject['fieldName'] = fieldName;
+                  for (const replaceKey in replaceObject) {
+                    const replaceValue = replaceObject[replaceKey];
+                    const regex = new RegExp('\\$' + replaceKey, 'g');
+                    title = title.replace(regex, replaceValue);
+                  }
+                  title = this.templateSrv.replace(title, options.scopedVars);
+                }
+                dataFrame.addField({
+                  name: fieldName,
+                  type: t,
+                  config: { title: title },
+                }).parse = (v: any) => {
+                  return v || '';
+                };
               }
-              dataFrame.addField({
-                name: fieldName,
-                type: t,
-                config: { title: title },
-              }).parse = (v: any) => {
-                return v || '';
-              };
+              dataFrameMap.set(identifiersString, dataFrame);
             }
-            dataFrameMap.set(identifiersString, dataFrame);
-          }
 
-          dataFrame.add(doc);
-        }
-        for (const dataFrame of dataFrameMap.values()) {
-          dataFrameArray.push(dataFrame);
+            dataFrame.add(doc);
+          }
+          for (const dataFrame of dataFrameMap.values()) {
+            dataFrameArray.push(dataFrame);
+          }
         }
       }
       return { data: dataFrameArray };

@@ -2299,29 +2299,22 @@ function (_super) {
         , Promise.all(options.targets.map(function (target) {
           return _this.createQuery(lodash_defaults__WEBPACK_IMPORTED_MODULE_1___default()(target, _types__WEBPACK_IMPORTED_MODULE_3__["defaultQuery"]), options.range, options.scopedVars);
         })).then(function (results) {
-          var e_2, _a, e_3, _b, e_4, _c, e_5, _d, e_6, _e;
+          var e_2, _a, e_3, _b, e_4, _c, e_5, _d, e_6, _e, e_7, _f, e_8, _g;
 
           var dataFrameArray = [];
 
           try {
             for (var results_1 = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(results), results_1_1 = results_1.next(); !results_1_1.done; results_1_1 = results_1.next()) {
               var res = results_1_1.value;
-
-              var docs = _this.getDocs(res.results, res.query.dataPath);
-
-              var _f = res.query,
-                  groupBy = _f.groupBy,
-                  aliasBy = _f.aliasBy;
-              var split = groupBy.split(',');
-              var groupByList = [];
+              var dataPathArray = [];
 
               try {
-                for (var split_1 = (e_3 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(split)), split_1_1 = split_1.next(); !split_1_1.done; split_1_1 = split_1.next()) {
-                  var element = split_1_1.value;
-                  var trimmed = element.trim();
+                for (var _h = (e_3 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(res.query.dataPath.split(','))), _j = _h.next(); !_j.done; _j = _h.next()) {
+                  var dataPath = _j.value;
+                  var trimmed = dataPath.trim();
 
                   if (trimmed) {
-                    groupByList.push(trimmed);
+                    dataPathArray.push(trimmed);
                   }
                 }
               } catch (e_3_1) {
@@ -2330,104 +2323,30 @@ function (_super) {
                 };
               } finally {
                 try {
-                  if (split_1_1 && !split_1_1.done && (_b = split_1["return"])) _b.call(split_1);
+                  if (_j && !_j.done && (_b = _h["return"])) _b.call(_h);
                 } finally {
                   if (e_3) throw e_3.error;
                 }
               }
 
-              var dataFrameMap = new Map();
+              if (!dataPathArray) {
+                throw 'data path is empty!';
+              }
+
+              var _k = res.query,
+                  groupBy = _k.groupBy,
+                  aliasBy = _k.aliasBy;
+              var split = groupBy.split(',');
+              var groupByList = [];
 
               try {
-                for (var docs_1 = (e_4 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(docs)), docs_1_1 = docs_1.next(); !docs_1_1.done; docs_1_1 = docs_1.next()) {
-                  var doc = docs_1_1.value;
+                for (var split_1 = (e_4 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(split)), split_1_1 = split_1.next(); !split_1_1.done; split_1_1 = split_1.next()) {
+                  var element = split_1_1.value;
+                  var trimmed = element.trim();
 
-                  if (doc.Time) {
-                    doc.Time = Object(_grafana_data__WEBPACK_IMPORTED_MODULE_2__["dateTime"])(doc.Time);
+                  if (trimmed) {
+                    groupByList.push(trimmed);
                   }
-
-                  var identifiers = [];
-
-                  try {
-                    for (var groupByList_1 = (e_5 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(groupByList)), groupByList_1_1 = groupByList_1.next(); !groupByList_1_1.done; groupByList_1_1 = groupByList_1.next()) {
-                      var groupByElement = groupByList_1_1.value;
-                      identifiers.push(doc[groupByElement]);
-                    }
-                  } catch (e_5_1) {
-                    e_5 = {
-                      error: e_5_1
-                    };
-                  } finally {
-                    try {
-                      if (groupByList_1_1 && !groupByList_1_1.done && (_d = groupByList_1["return"])) _d.call(groupByList_1);
-                    } finally {
-                      if (e_5) throw e_5.error;
-                    }
-                  }
-
-                  var identifiersString = identifiers.toString();
-                  var dataFrame = dataFrameMap.get(identifiersString);
-
-                  if (!dataFrame) {
-                    // we haven't initialized the dataFrame for this specific identifier that we group by yet
-                    dataFrame = new _grafana_data__WEBPACK_IMPORTED_MODULE_2__["MutableDataFrame"]({
-                      fields: []
-                    });
-                    var generalReplaceObject = {};
-
-                    for (var fieldName in doc) {
-                      generalReplaceObject['field_' + fieldName] = doc[fieldName];
-                    }
-
-                    for (var fieldName in doc) {
-                      var t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].string;
-
-                      if (fieldName === 'Time') {
-                        t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].time;
-                      } else if (lodash__WEBPACK_IMPORTED_MODULE_4___default.a.isNumber(doc[fieldName])) {
-                        t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].number;
-                      }
-
-                      var title = void 0;
-
-                      if (identifiers.length !== 0) {
-                        // if we have any identifiers
-                        title = identifiersString + '_' + fieldName;
-                      } else {
-                        title = fieldName;
-                      }
-
-                      if (aliasBy) {
-                        title = aliasBy;
-
-                        var replaceObject = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, generalReplaceObject);
-
-                        replaceObject['fieldName'] = fieldName;
-
-                        for (var replaceKey in replaceObject) {
-                          var replaceValue = replaceObject[replaceKey];
-                          var regex = new RegExp('\\$' + replaceKey, 'g');
-                          title = title.replace(regex, replaceValue);
-                        }
-
-                        title = _this.templateSrv.replace(title, options.scopedVars);
-                      }
-
-                      dataFrame.addField({
-                        name: fieldName,
-                        type: t,
-                        config: {
-                          title: title
-                        }
-                      }).parse = function (v) {
-                        return v || '';
-                      };
-                    }
-
-                    dataFrameMap.set(identifiersString, dataFrame);
-                  }
-
-                  dataFrame.add(doc);
                 }
               } catch (e_4_1) {
                 e_4 = {
@@ -2435,26 +2354,149 @@ function (_super) {
                 };
               } finally {
                 try {
-                  if (docs_1_1 && !docs_1_1.done && (_c = docs_1["return"])) _c.call(docs_1);
+                  if (split_1_1 && !split_1_1.done && (_c = split_1["return"])) _c.call(split_1);
                 } finally {
                   if (e_4) throw e_4.error;
                 }
               }
 
               try {
-                for (var _g = (e_6 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(dataFrameMap.values())), _h = _g.next(); !_h.done; _h = _g.next()) {
-                  var dataFrame = _h.value;
-                  dataFrameArray.push(dataFrame);
+                for (var dataPathArray_1 = (e_5 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(dataPathArray)), dataPathArray_1_1 = dataPathArray_1.next(); !dataPathArray_1_1.done; dataPathArray_1_1 = dataPathArray_1.next()) {
+                  var dataPath = dataPathArray_1_1.value;
+
+                  var docs = _this.getDocs(res.results, dataPath);
+
+                  var dataFrameMap = new Map();
+
+                  try {
+                    for (var docs_1 = (e_6 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(docs)), docs_1_1 = docs_1.next(); !docs_1_1.done; docs_1_1 = docs_1.next()) {
+                      var doc = docs_1_1.value;
+
+                      if (doc.Time) {
+                        doc.Time = Object(_grafana_data__WEBPACK_IMPORTED_MODULE_2__["dateTime"])(doc.Time);
+                      }
+
+                      var identifiers = [];
+
+                      try {
+                        for (var groupByList_1 = (e_7 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(groupByList)), groupByList_1_1 = groupByList_1.next(); !groupByList_1_1.done; groupByList_1_1 = groupByList_1.next()) {
+                          var groupByElement = groupByList_1_1.value;
+                          identifiers.push(doc[groupByElement]);
+                        }
+                      } catch (e_7_1) {
+                        e_7 = {
+                          error: e_7_1
+                        };
+                      } finally {
+                        try {
+                          if (groupByList_1_1 && !groupByList_1_1.done && (_f = groupByList_1["return"])) _f.call(groupByList_1);
+                        } finally {
+                          if (e_7) throw e_7.error;
+                        }
+                      }
+
+                      var identifiersString = identifiers.toString();
+                      var dataFrame = dataFrameMap.get(identifiersString);
+
+                      if (!dataFrame) {
+                        // we haven't initialized the dataFrame for this specific identifier that we group by yet
+                        dataFrame = new _grafana_data__WEBPACK_IMPORTED_MODULE_2__["MutableDataFrame"]({
+                          fields: []
+                        });
+                        var generalReplaceObject = {};
+
+                        for (var fieldName in doc) {
+                          generalReplaceObject['field_' + fieldName] = doc[fieldName];
+                        }
+
+                        for (var fieldName in doc) {
+                          var t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].string;
+
+                          if (fieldName === 'Time') {
+                            t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].time;
+                          } else if (lodash__WEBPACK_IMPORTED_MODULE_4___default.a.isNumber(doc[fieldName])) {
+                            t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].number;
+                          }
+
+                          var title = void 0;
+
+                          if (identifiers.length !== 0) {
+                            // if we have any identifiers
+                            title = identifiersString + '_' + fieldName;
+                          } else {
+                            title = fieldName;
+                          }
+
+                          if (aliasBy) {
+                            title = aliasBy;
+
+                            var replaceObject = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, generalReplaceObject);
+
+                            replaceObject['fieldName'] = fieldName;
+
+                            for (var replaceKey in replaceObject) {
+                              var replaceValue = replaceObject[replaceKey];
+                              var regex = new RegExp('\\$' + replaceKey, 'g');
+                              title = title.replace(regex, replaceValue);
+                            }
+
+                            title = _this.templateSrv.replace(title, options.scopedVars);
+                          }
+
+                          dataFrame.addField({
+                            name: fieldName,
+                            type: t,
+                            config: {
+                              title: title
+                            }
+                          }).parse = function (v) {
+                            return v || '';
+                          };
+                        }
+
+                        dataFrameMap.set(identifiersString, dataFrame);
+                      }
+
+                      dataFrame.add(doc);
+                    }
+                  } catch (e_6_1) {
+                    e_6 = {
+                      error: e_6_1
+                    };
+                  } finally {
+                    try {
+                      if (docs_1_1 && !docs_1_1.done && (_e = docs_1["return"])) _e.call(docs_1);
+                    } finally {
+                      if (e_6) throw e_6.error;
+                    }
+                  }
+
+                  try {
+                    for (var _l = (e_8 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(dataFrameMap.values())), _m = _l.next(); !_m.done; _m = _l.next()) {
+                      var dataFrame = _m.value;
+                      dataFrameArray.push(dataFrame);
+                    }
+                  } catch (e_8_1) {
+                    e_8 = {
+                      error: e_8_1
+                    };
+                  } finally {
+                    try {
+                      if (_m && !_m.done && (_g = _l["return"])) _g.call(_l);
+                    } finally {
+                      if (e_8) throw e_8.error;
+                    }
+                  }
                 }
-              } catch (e_6_1) {
-                e_6 = {
-                  error: e_6_1
+              } catch (e_5_1) {
+                e_5 = {
+                  error: e_5_1
                 };
               } finally {
                 try {
-                  if (_h && !_h.done && (_e = _g["return"])) _e.call(_g);
+                  if (dataPathArray_1_1 && !dataPathArray_1_1.done && (_d = dataPathArray_1["return"])) _d.call(dataPathArray_1);
                 } finally {
-                  if (e_6) throw e_6.error;
+                  if (e_5) throw e_5.error;
                 }
               }
             }
@@ -2483,7 +2525,7 @@ function (_super) {
 
     var query = lodash_defaults__WEBPACK_IMPORTED_MODULE_1___default()(options.annotation, _types__WEBPACK_IMPORTED_MODULE_3__["defaultQuery"]);
     return Promise.all([this.createQuery(query, options.range)]).then(function (results) {
-      var e_7, _a, e_8, _b, e_9, _c;
+      var e_9, _a, e_10, _b, e_11, _c;
 
       var r = [];
 
@@ -2494,7 +2536,7 @@ function (_super) {
           var docs = _this.getDocs(res.results, options.annotation.dataPath);
 
           try {
-            for (var docs_2 = (e_8 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(docs)), docs_2_1 = docs_2.next(); !docs_2_1.done; docs_2_1 = docs_2.next()) {
+            for (var docs_2 = (e_10 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(docs)), docs_2_1 = docs_2.next(); !docs_2_1.done; docs_2_1 = docs_2.next()) {
               var doc = docs_2_1.value;
               var annotation = {};
 
@@ -2525,7 +2567,7 @@ function (_super) {
               var tagsList = [];
 
               try {
-                for (var _d = (e_9 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(tags.split(','))), _e = _d.next(); !_e.done; _e = _d.next()) {
+                for (var _d = (e_11 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(tags.split(','))), _e = _d.next(); !_e.done; _e = _d.next()) {
                   var element = _e.value;
                   var trimmed = element.trim();
 
@@ -2533,42 +2575,42 @@ function (_super) {
                     tagsList.push(trimmed);
                   }
                 }
-              } catch (e_9_1) {
-                e_9 = {
-                  error: e_9_1
+              } catch (e_11_1) {
+                e_11 = {
+                  error: e_11_1
                 };
               } finally {
                 try {
                   if (_e && !_e.done && (_c = _d["return"])) _c.call(_d);
                 } finally {
-                  if (e_9) throw e_9.error;
+                  if (e_11) throw e_11.error;
                 }
               }
 
               annotation.tags = tagsList;
               r.push(annotation);
             }
-          } catch (e_8_1) {
-            e_8 = {
-              error: e_8_1
+          } catch (e_10_1) {
+            e_10 = {
+              error: e_10_1
             };
           } finally {
             try {
               if (docs_2_1 && !docs_2_1.done && (_b = docs_2["return"])) _b.call(docs_2);
             } finally {
-              if (e_8) throw e_8.error;
+              if (e_10) throw e_10.error;
             }
           }
         }
-      } catch (e_7_1) {
-        e_7 = {
-          error: e_7_1
+      } catch (e_9_1) {
+        e_9 = {
+          error: e_9_1
         };
       } finally {
         try {
           if (results_2_1 && !results_2_1.done && (_a = results_2["return"])) _a.call(results_2);
         } finally {
-          if (e_7) throw e_7.error;
+          if (e_9) throw e_9.error;
         }
       }
 
