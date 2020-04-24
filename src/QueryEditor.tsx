@@ -46,7 +46,7 @@ export class QueryEditor extends PureComponent<Props, State> {
             value={dataPath || ''}
             onChange={this.onDataPathTextChange}
             label="Data path"
-            tooltip="dot-delimited path to data in response"
+            tooltip="dot-delimited path to data in response. Separate with commas to use multiple data paths"
           />
         </div>
         <div className={'gf-form'}>

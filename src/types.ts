@@ -18,7 +18,7 @@ export const defaultQuery: Partial<MyQuery> = {
           idle running completed
       }
 }`,
-  dataPath: 'data.data',
+  dataPath: 'data',
   groupBy: '', // `identifier`
   aliasBy: '', // 'Server [[tag_identifier]]`
   annotationTitle: '',

@@ -4,9 +4,10 @@ A generic datasource to pull data from a GraphQL API. This is in early
 development, and while it should mostly work it still has a lot of rough edges.
 
 * The GraphQL query must be structured so that the data of interest is returned
-under the configurable data path (default `data.data`) in the response. If the
+under the configurable data path (default `data`) in the response. If the
 objest at that path is an array it will be iterated over, with each object added
 as a row in the data frame, otherwise the result object will be the only row.
+  * Can be separated by commas to use multiple data paths
 * Timeseries data requires a field named `Time` containing the timestamp in a
 format that can be parsed by `moment()` (e.g. ISO8601). 
 * Nested types will be flattened into dot-delimited fields. 
@@ -17,7 +18,7 @@ and `$timeTo` variables as millisecond epoch.
 * Alias by is used to alter the name of the field displayed in the legend. `$field_<field.name>` is substituted with the
 values of the field and `$fieldName` is substituted with the name of the field.
 
-Example query (data path `data.data`):
+Example query (data path `data`):
 
     query {
         data:submissions(user:"$user", from:"$timeFrom", to:"$timeTo"){
@@ -26,7 +27,7 @@ Example query (data path `data.data`):
         }
     }
 
-Example query (data path: `data.data.batteryVoltage`, Group by: `packet.identifier.representation`, 
+Example query (data path: `data.batteryVoltage`, Group by: `packet.identifier.representation`, 
 Alias by `$field_packet.identityInfo.displayName`):
 
     query {
@@ -50,11 +51,19 @@ that's the name of the field. If `$field_identityInfo.displayName` was used, it 
 of displayName. Using `$fieldName` can be useful if you're querying multiple numeric fields that you want displayed
 in your graph.
 
-Example annotation query (data path: `data.data.birthdayEvent`, title: `Birthday yay!`, 
+Example annotation query (data path: `server1.birthdayEvent, server2.birthdayEvent`, title: `Birthday yay!`, 
 text: `$field_person.fullName` tags: `tag1, tag2`):
 
     query {
-        data:queryEvents(from: "$timeFrom", to:"$timeTo") {
+        server1:queryEvents(from: "$timeFrom", to:"$timeTo", server:"server1") {
+            birthdayEvent {
+                Time:dateMillis
+                person {
+                    fullName
+                }
+            }
+        }
+        server2:queryEvents(from: "$timeFrom", to:"$timeTo", server:"server2") {
             birthdayEvent {
                 Time:dateMillis
                 person {
@@ -69,6 +78,7 @@ a data path. Similar to the last example, you can also substitute values into th
 By using `$field_person.fullName` as the text, the text in this annotation will be the person's full name. Tags are
 separated by commas. The above example has two tags: "tag1" and "tag2". If a `TimeEnd` field is present, the annotation will
 be shown over a period of time.
+You can also separate the data path with commas to provide multiple data paths as shown with both server1 and server2.
 
 # Wishlist
 * Rich schema-aware editor (graphiql-like)

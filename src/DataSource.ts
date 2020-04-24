@@ -77,22 +77,27 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     //console.log(payload);
     return this.postQuery(query, payload);
   }
-  private getDocs(results: any, dataPath: string): any[] {
-    if (!results.data) {
-      throw 'results.data does not exist!';
+  private static getDocs(resultsData: any, dataPath: string): any[] {
+    if (!resultsData) {
+      throw 'resultsData was null or undefined';
     }
     let data = dataPath.split('.').reduce((d: any, p: any) => {
       if (!d) {
         return null;
       }
       return d[p];
-    }, results.data);
+    }, resultsData.data);
     if (!data) {
-      const errors: any[] = results.data.errors;
+      const errors: any[] = resultsData.errors;
       if (errors && errors.length !== 0) {
         throw errors[0];
       }
-      throw 'd[p] did not exist and no errors were given!';
+      throw 'Your data path did not exist! dataPath: ' + dataPath;
+    }
+    if (resultsData.errors) {
+      // There can still be errors even if there is data
+      console.log('Got GraphQL errors:');
+      console.log(resultsData.errors);
     }
     const docs: any[] = [];
     let pushDoc = (originalDoc: object) => {
@@ -107,6 +112,19 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     }
     return docs;
   }
+  private static getDataPathArray(dataPathString: string): string[] {
+    const dataPathArray: string[] = [];
+    for (const dataPath of dataPathString.split(',')) {
+      const trimmed = dataPath.trim();
+      if (trimmed) {
+        dataPathArray.push(trimmed);
+      }
+    }
+    if (!dataPathArray) {
+      throw 'data path is empty!';
+    }
+    return dataPathArray;
+  }
 
   async query(options: DataQueryRequest<MyQuery>): Promise<DataQueryResponse> {
     return Promise.all(
@@ -116,16 +134,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     ).then((results: any) => {
       const dataFrameArray: DataFrame[] = [];
       for (let res of results) {
-        const dataPathArray: string[] = [];
-        for (const dataPath of res.query.dataPath.split(',')) {
-          const trimmed = dataPath.trim();
-          if (trimmed) {
-            dataPathArray.push(trimmed);
-          }
-        }
-        if (!dataPathArray) {
-          throw 'data path is empty!';
-        }
+        const dataPathArray: string[] = DataSource.getDataPathArray(res.query.dataPath);
         const { groupBy, aliasBy } = res.query;
         const split = groupBy.split(',');
         const groupByList: string[] = [];
@@ -136,7 +145,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
           }
         }
         for (const dataPath of dataPathArray) {
-          const docs: any[] = this.getDocs(res.results, dataPath);
+          const docs: any[] = DataSource.getDocs(res.results.data, dataPath);
 
           const dataFrameMap = new Map<string, MutableDataFrame>();
           for (const doc of docs) {
@@ -207,39 +216,42 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     return Promise.all([this.createQuery(query, options.range)]).then((results: any) => {
       const r: AnnotationEvent[] = [];
       for (const res of results) {
-        const docs: any[] = this.getDocs(res.results, options.annotation.dataPath);
-        for (const doc of docs) {
-          const annotation: AnnotationEvent = {};
-          if (doc.Time) {
-            annotation.time = dateTime(doc.Time).valueOf();
-          }
-          if (doc.TimeEnd) {
-            annotation.isRegion = true;
-            annotation.timeEnd = dateTime(doc.TimeEnd).valueOf();
-          }
-          let title = query.annotationTitle;
-          let text = query.annotationText;
-          let tags = query.annotationTags;
-          for (const fieldName in doc) {
-            const fieldValue = doc[fieldName];
-            const replaceKey = 'field_' + fieldName;
-            const regex = new RegExp('\\$' + replaceKey, 'g');
-            title = title.replace(regex, fieldValue);
-            text = text.replace(regex, fieldValue);
-            tags = tags.replace(regex, fieldValue);
-          }
-
-          annotation.title = title;
-          annotation.text = text;
-          const tagsList: string[] = [];
-          for (const element of tags.split(',')) {
-            const trimmed = element.trim();
-            if (trimmed) {
-              tagsList.push(trimmed);
+        const dataPathArray: string[] = DataSource.getDataPathArray(res.query.dataPath);
+        for (const dataPath of dataPathArray) {
+          const docs: any[] = DataSource.getDocs(res.results.data, dataPath);
+          for (const doc of docs) {
+            const annotation: AnnotationEvent = {};
+            if (doc.Time) {
+              annotation.time = dateTime(doc.Time).valueOf();
             }
+            if (doc.TimeEnd) {
+              annotation.isRegion = true;
+              annotation.timeEnd = dateTime(doc.TimeEnd).valueOf();
+            }
+            let title = query.annotationTitle;
+            let text = query.annotationText;
+            let tags = query.annotationTags;
+            for (const fieldName in doc) {
+              const fieldValue = doc[fieldName];
+              const replaceKey = 'field_' + fieldName;
+              const regex = new RegExp('\\$' + replaceKey, 'g');
+              title = title.replace(regex, fieldValue);
+              text = text.replace(regex, fieldValue);
+              tags = tags.replace(regex, fieldValue);
+            }
+
+            annotation.title = title;
+            annotation.text = text;
+            const tagsList: string[] = [];
+            for (const element of tags.split(',')) {
+              const trimmed = element.trim();
+              if (trimmed) {
+                tagsList.push(trimmed);
+              }
+            }
+            annotation.tags = tagsList;
+            r.push(annotation);
           }
-          annotation.tags = tagsList;
-          r.push(annotation);
         }
       }
       return r;
