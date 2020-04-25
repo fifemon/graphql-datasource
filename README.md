@@ -27,40 +27,38 @@ examples and tutorials.
 
 ## Basic timeseries
 
-* Data path: `submissions`
-* Query:
 ```graphql
-    query {
-        submissions(user:"$user", from:"$timeFrom", to:"$timeTo"){
-            Time:submitTime
-            idle running completed
-        }
+query {
+    submissions(user:"$user", from:"$timeFrom", to:"$timeTo"){
+        Time:submitTime
+        idle running completed
     }
+}
 ```
+* Data path: `submissions`
 
 Note the use of the special `$timeFrom` and `$timeTo` variables to insert the
 dashboard time range into the query, alongside a dashboard variable `$user`.
 
 ## Alias and group by
 
-* Data path: `data.batteryVoltage`
-* Group by: `packet.identifier.representation`
-* Alias by: `$field_packet.identityInfo.displayName`
-* Query:
 ```graphql
 query {
-        data:queryAll(from:"$timeFrom", to:"$timeTo", sourceId:"default") {
-            batteryVoltage {
-                Time:dateMillis
-                packet {
-                    batteryVoltage
-                    identifier { representation }
-                    identityInfo { displayName }
-                }
+    data:queryAll(from:"$timeFrom", to:"$timeTo", sourceId:"default") {
+        batteryVoltage {
+            Time:dateMillis
+            packet {
+                batteryVoltage
+                identifier { representation }
+                identityInfo { displayName }
             }
         }
     }
+}
 ```
+* Data path: `data.batteryVoltage`
+* Group by: `packet.identifier.representation`
+* Alias by: `$field_packet.identityInfo.displayName`
 
 In the above example, "Group by" and "Alias by" are defined. "Group by" allows
 you to split up an array of data into multiple data points. "Alias by" is used
@@ -74,31 +72,30 @@ querying multiple numeric fields that you want displayed in your graph.
 
 ## Annotations
 
+```graphql
+query {
+    server1:queryEvents(from: "$timeFrom", to:"$timeTo", server:"server1") {
+        birthdayEvent {
+            Time:dateMillis
+            person {
+                fullName
+            }
+        }
+    }
+    server2:queryEvents(from: "$timeFrom", to:"$timeTo", server:"server2") {
+        birthdayEvent {
+            Time:dateMillis
+            person {
+                fullName
+            }
+        }
+    }
+}
+```
 * Data path: `server1.birthdayEvent, server2.birthdayEvent`
 * Title: `Birthday yay!`
 * Text: `$field_person.fullName`
 * Tags: `tag1, tag2`
-* Query:
-```graphql
-    query {
-        server1:queryEvents(from: "$timeFrom", to:"$timeTo", server:"server1") {
-            birthdayEvent {
-                Time:dateMillis
-                person {
-                    fullName
-                }
-            }
-        }
-        server2:queryEvents(from: "$timeFrom", to:"$timeTo", server:"server2") {
-            birthdayEvent {
-                Time:dateMillis
-                person {
-                    fullName
-                }
-            }
-        }
-    }
-```
 
 The above annotation example is similar to regular queries. You must have a
 `Time` field and are able to define a data path. Similar to the last example,
