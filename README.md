@@ -29,14 +29,15 @@ examples and tutorials.
 
 * Data path: `submissions`
 * Query:
-
+```graphql
     query {
         submissions(user:"$user", from:"$timeFrom", to:"$timeTo"){
             Time:submitTime
             idle running completed
         }
     }
-    
+```
+
 Note the use of the special `$timeFrom` and `$timeTo` variables to insert the
 dashboard time range into the query, alongside a dashboard variable `$user`.
 
@@ -46,8 +47,8 @@ dashboard time range into the query, alongside a dashboard variable `$user`.
 * Group by: `packet.identifier.representation`
 * Alias by: `$field_packet.identityInfo.displayName`
 * Query:
-
-    query {
+```graphql
+query {
         data:queryAll(from:"$timeFrom", to:"$timeTo", sourceId:"default") {
             batteryVoltage {
                 Time:dateMillis
@@ -59,7 +60,8 @@ dashboard time range into the query, alongside a dashboard variable `$user`.
             }
         }
     }
-   
+```
+
 In the above example, "Group by" and "Alias by" are defined. "Group by" allows
 you to split up an array of data into multiple data points. "Alias by" is used
 as the name of the data point. You can make alias use text from the query or
@@ -77,7 +79,7 @@ querying multiple numeric fields that you want displayed in your graph.
 * Text: `$field_person.fullName`
 * Tags: `tag1, tag2`
 * Query:
-
+```graphql
     query {
         server1:queryEvents(from: "$timeFrom", to:"$timeTo", server:"server1") {
             birthdayEvent {
@@ -96,6 +98,7 @@ querying multiple numeric fields that you want displayed in your graph.
             }
         }
     }
+```
 
 The above annotation example is similar to regular queries. You must have a
 `Time` field and are able to define a data path. Similar to the last example,
