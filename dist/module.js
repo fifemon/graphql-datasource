@@ -1,4 +1,4 @@
-define(["@grafana/data","@grafana/ui","lodash","react"], function(__WEBPACK_EXTERNAL_MODULE__grafana_data__, __WEBPACK_EXTERNAL_MODULE__grafana_ui__, __WEBPACK_EXTERNAL_MODULE_lodash__, __WEBPACK_EXTERNAL_MODULE_react__) { return /******/ (function(modules) { // webpackBootstrap
+define(["@grafana/data","@grafana/runtime","@grafana/ui","lodash","react"], function(__WEBPACK_EXTERNAL_MODULE__grafana_data__, __WEBPACK_EXTERNAL_MODULE__grafana_runtime__, __WEBPACK_EXTERNAL_MODULE__grafana_ui__, __WEBPACK_EXTERNAL_MODULE_lodash__, __WEBPACK_EXTERNAL_MODULE_react__) { return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -2150,9 +2150,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _grafana_data__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @grafana/data */ "@grafana/data");
 /* harmony import */ var _grafana_data__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_grafana_data__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./types */ "./types.ts");
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! lodash */ "lodash");
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./util */ "./util.ts");
+/* harmony import */ var _grafana_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @grafana/runtime */ "@grafana/runtime");
+/* harmony import */ var _grafana_runtime__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_grafana_runtime__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! lodash */ "lodash");
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./util */ "./util.ts");
+
 
 
 
@@ -2166,11 +2169,10 @@ var DataSource =
 function (_super) {
   Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__extends"])(DataSource, _super);
 
-  function DataSource(instanceSettings, backendSrv, templateSrv) {
+  function DataSource(instanceSettings, backendSrv) {
     var _this = _super.call(this, instanceSettings) || this;
 
     _this.backendSrv = backendSrv;
-    _this.templateSrv = templateSrv;
     _this.basicAuth = instanceSettings.basicAuth;
     _this.withCredentials = instanceSettings.withCredentials;
     _this.url = instanceSettings.url;
@@ -2229,7 +2231,7 @@ function (_super) {
       payload = payload.replace(/\$timeTo/g, range.to.valueOf().toString());
     }
 
-    payload = this.templateSrv.replace(payload, scopedVars); //console.log(payload);
+    payload = Object(_grafana_runtime__WEBPACK_IMPORTED_MODULE_4__["getTemplateSrv"])().replace(payload, scopedVars); //console.log(payload);
 
     return this.postQuery(query, payload);
   };
@@ -2268,7 +2270,7 @@ function (_super) {
     var docs = [];
 
     var pushDoc = function pushDoc(originalDoc) {
-      docs.push(Object(_util__WEBPACK_IMPORTED_MODULE_5__["flatten"])(originalDoc));
+      docs.push(Object(_util__WEBPACK_IMPORTED_MODULE_6__["flatten"])(originalDoc));
     };
 
     if (Array.isArray(data)) {
@@ -2329,7 +2331,7 @@ function (_super) {
   };
 
   DataSource.prototype.query = function (options) {
-    return Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__awaiter"])(this, void 0, void 0, function () {
+    return Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__awaiter"])(this, void 0, Promise, function () {
       var _this = this;
 
       return Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__generator"])(this, function (_a) {
@@ -2425,7 +2427,7 @@ function (_super) {
 
                           if (fieldName === 'Time') {
                             t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].time;
-                          } else if (lodash__WEBPACK_IMPORTED_MODULE_4___default.a.isNumber(doc[fieldName])) {
+                          } else if (lodash__WEBPACK_IMPORTED_MODULE_5___default.a.isNumber(doc[fieldName])) {
                             t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].number;
                           }
 
@@ -2451,7 +2453,7 @@ function (_super) {
                               title = title.replace(regex, replaceValue);
                             }
 
-                            title = _this.templateSrv.replace(title, options.scopedVars);
+                            title = Object(_grafana_runtime__WEBPACK_IMPORTED_MODULE_4__["getTemplateSrv"])().replace(title, options.scopedVars);
                           }
 
                           dataFrame.addField({
@@ -2783,7 +2785,7 @@ function (_super) {
       rows: 10
     }), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
       className: "gf-form"
-    }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["FormField"], {
+    }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["LegacyForms"].FormField, {
       labelWidth: 8,
       inputWidth: 24,
       value: dataPath || '',
@@ -2792,7 +2794,7 @@ function (_super) {
       tooltip: "dot-delimited path to data in response. Separate with commas to use multiple data paths"
     })), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
       className: 'gf-form'
-    }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["FormField"], {
+    }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["LegacyForms"].FormField, {
       labelWidth: 8,
       inputWidth: 24,
       value: groupBy || '',
@@ -2801,7 +2803,7 @@ function (_super) {
       tooltip: "dot-delimited path for the key to use. Separate with commas to use multiple fields to group by"
     })), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
       className: 'gf-form'
-    }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["FormField"], {
+    }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["LegacyForms"].FormField, {
       labelWidth: 8,
       inputWidth: 24,
       value: aliasBy || '',
@@ -2907,6 +2909,17 @@ function flatten(object, path, separator) {
 /***/ (function(module, exports) {
 
 module.exports = __WEBPACK_EXTERNAL_MODULE__grafana_data__;
+
+/***/ }),
+
+/***/ "@grafana/runtime":
+/*!***********************************!*\
+  !*** external "@grafana/runtime" ***!
+  \***********************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE__grafana_runtime__;
 
 /***/ }),
 

@@ -9,7 +9,12 @@ export const ConfigEditor = (props: Props) => {
 
   return (
     <>
-      <DataSourceHttpSettings defaultUrl="http://localhost:9999" dataSourceConfig={options} onChange={onOptionsChange} showAccessOptions={true} />
+      <DataSourceHttpSettings
+        defaultUrl="http://localhost:9999"
+        dataSourceConfig={options}
+        onChange={onOptionsChange}
+        showAccessOptions={true}
+      />
     </>
   );
 };

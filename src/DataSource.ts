@@ -13,6 +13,7 @@ import {
 
 import { MyQuery, MyDataSourceOptions, defaultQuery } from './types';
 import { dateTime, MutableDataFrame, FieldType, DataFrame } from '@grafana/data';
+import { getTemplateSrv } from '@grafana/runtime';
 import _ from 'lodash';
 import { flatten } from './util';
 
@@ -21,7 +22,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
   withCredentials: boolean | undefined;
   url: string | undefined;
 
-  constructor(instanceSettings: DataSourceInstanceSettings<MyDataSourceOptions>, private backendSrv: any, private templateSrv: any) {
+  constructor(instanceSettings: DataSourceInstanceSettings<MyDataSourceOptions>, private backendSrv: any) {
     super(instanceSettings);
     this.basicAuth = instanceSettings.basicAuth;
     this.withCredentials = instanceSettings.withCredentials;
@@ -72,7 +73,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       payload = payload.replace(/\$timeFrom/g, range.from.valueOf().toString());
       payload = payload.replace(/\$timeTo/g, range.to.valueOf().toString());
     }
-    payload = this.templateSrv.replace(payload, scopedVars);
+    payload = getTemplateSrv().replace(payload, scopedVars);
 
     //console.log(payload);
     return this.postQuery(query, payload);
@@ -188,7 +189,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
                     const regex = new RegExp('\\$' + replaceKey, 'g');
                     title = title.replace(regex, replaceValue);
                   }
-                  title = this.templateSrv.replace(title, options.scopedVars);
+                  title = getTemplateSrv().replace(title, options.scopedVars);
                 }
                 dataFrame.addField({
                   name: fieldName,

@@ -2,7 +2,7 @@ import defaults from 'lodash/defaults';
 
 import React, { PureComponent, ChangeEvent } from 'react';
 import { QueryEditorProps } from '@grafana/data';
-import { FormField } from '@grafana/ui';
+import { LegacyForms } from '@grafana/ui';
 import { DataSource } from './DataSource';
 import { MyQuery, MyDataSourceOptions, defaultQuery } from './types';
 
@@ -40,7 +40,7 @@ export class QueryEditor extends PureComponent<Props, State> {
       <>
         <textarea value={queryText || ''} onChange={this.onQueryTextChange} className="gf-form-input" rows={10} />
         <div className="gf-form">
-          <FormField
+          <LegacyForms.FormField
             labelWidth={8}
             inputWidth={24}
             value={dataPath || ''}
@@ -50,7 +50,7 @@ export class QueryEditor extends PureComponent<Props, State> {
           />
         </div>
         <div className={'gf-form'}>
-          <FormField
+          <LegacyForms.FormField
             labelWidth={8}
             inputWidth={24}
             value={groupBy || ''}
@@ -60,7 +60,7 @@ export class QueryEditor extends PureComponent<Props, State> {
           />
         </div>
         <div className={'gf-form'}>
-          <FormField
+          <LegacyForms.FormField
             labelWidth={8}
             inputWidth={24}
             value={aliasBy || ''}
