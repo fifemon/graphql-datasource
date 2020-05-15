@@ -24,7 +24,9 @@ test('flatten function test', () => {
 		"float":123.4,
 		"null":null,
 		"undefined":undefined,
-		"array":[1,2,3],
+		"array.0":1,
+		"array.1":2,
+		"array.2":3,
 		"nested.string":"hello",
 		"nested.number":123,
 		"nested.float":123.4,
@@ -32,6 +34,5 @@ test('flatten function test', () => {
 		"nested.undefined":undefined,
 	}
 
-
-	expect(flatten(obj)).toMatchObject(flattenObj);
+	expect(flatten(obj)).toEqual(flattenObj);
 });
