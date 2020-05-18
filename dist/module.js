@@ -2892,8 +2892,9 @@ function flatten(object, path, separator) {
   return Object.keys(object).reduce(function (acc, key) {
     var _a;
 
+    var isObject = _typeof(object[key]) === 'object' && object[key] != null;
     var newPath = [path, key].filter(Boolean).join(separator);
-    return _typeof(object[key]) === 'object' ? Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, acc), flatten(object[key], newPath, separator)) : Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, acc), (_a = {}, _a[newPath] = object[key], _a));
+    return isObject ? Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, acc), flatten(object[key], newPath, separator)) : Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, acc), (_a = {}, _a[newPath] = object[key], _a));
   }, {});
 }
 
