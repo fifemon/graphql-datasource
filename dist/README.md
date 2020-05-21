@@ -13,8 +13,9 @@ as a row in the data frame, otherwise the result object will be the only row.
 format that can be parsed by `moment()` (e.g. ISO8601). 
 * Nested types will be flattened into dot-delimited fields. 
 * Grafana variables should be substituted directly in the query (instead of
-using GraphQL variables). The dashboard time ranges are available in `$timeFrom`
-and `$timeTo` variables as millisecond epoch.
+using GraphQL variables). The dashboard time ranges are available in the 
+[global variables](https://grafana.com/docs/grafana/latest/variables/global-variables/) 
+`$__from` and `$__to` as millisecond epoch.
 * Group by can be used to group elements into multiple data points.
 * Alias by is used to alter the name of the field displayed in the legend. `$field_<field.name>` is substituted with the
 values of the field and `$fieldName` is substituted with the name of the field.
@@ -29,7 +30,7 @@ examples and tutorials.
 
 ```graphql
 query {
-    submissions(user:"$user", from:"$timeFrom", to:"$timeTo"){
+    submissions(user:"$user", from:"$__from", to:"$__to"){
         Time:submitTime
         idle running completed
     }
@@ -37,14 +38,14 @@ query {
 ```
 * Data path: `submissions`
 
-Note the use of the special `$timeFrom` and `$timeTo` variables to insert the
+Note the use of the global `$__from` and `$__to` variables to insert the
 dashboard time range into the query, alongside a dashboard variable `$user`.
 
 ## Alias and group by
 
 ```graphql
 query {
-    data:queryAll(from:"$timeFrom", to:"$timeTo", sourceId:"default") {
+    data:queryAll(from:"$__from", to:"$__to", sourceId:"default") {
         batteryVoltage {
             Time:dateMillis
             packet {
@@ -74,7 +75,7 @@ querying multiple numeric fields that you want displayed in your graph.
 
 ```graphql
 query {
-    server1:queryEvents(from: "$timeFrom", to:"$timeTo", server:"server1") {
+    server1:queryEvents(from: "$__from", to:"$__to", server:"server1") {
         birthdayEvent {
             Time:dateMillis
             person {
@@ -82,7 +83,7 @@ query {
             }
         }
     }
-    server2:queryEvents(from: "$timeFrom", to:"$timeTo", server:"server2") {
+    server2:queryEvents(from: "$__from", to:"$__to", server:"server2") {
         birthdayEvent {
             Time:dateMillis
             person {
