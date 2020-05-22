@@ -20,12 +20,12 @@
       { "name": "License", "url": "https://github.com/fifemon/graphql-datasource/blob/master/LICENSE" }
     ],
     "screenshots": [],
-    "version": "1.1.0",
-    "updated": "2020-05-21"
+    "version": "1.1.1",
+    "updated": "2020-05-22"
   },
 
   "dependencies": {
-    "grafanaVersion": "6.4.x",
+    "grafanaVersion": "7.x.x",
     "plugins": []
   }
 }
