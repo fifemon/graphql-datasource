@@ -2460,7 +2460,7 @@ function (_super) {
                             name: fieldName,
                             type: t,
                             config: {
-                              title: title
+                              displayName: title
                             }
                           }).parse = function (v) {
                             return v || '';

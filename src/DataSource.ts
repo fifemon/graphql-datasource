@@ -194,7 +194,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
                 dataFrame.addField({
                   name: fieldName,
                   type: t,
-                  config: { title: title },
+                  config: { displayName: title },
                 }).parse = (v: any) => {
                   return v || '';
                 };
