@@ -38,7 +38,13 @@ export class QueryEditor extends PureComponent<Props, State> {
 
     return (
       <>
-        <textarea value={queryText || ''} onChange={this.onQueryTextChange} className="gf-form-input" rows={10} />
+        <textarea
+          value={queryText || ''}
+          onChange={this.onQueryTextChange}
+          className="gf-form-input"
+          rows={10}
+          style={{ fontFamily: 'monospace' }}
+        />
         <div className="gf-form">
           <LegacyForms.FormField
             labelWidth={8}

@@ -2782,7 +2782,10 @@ function (_super) {
       value: queryText || '',
       onChange: this.onQueryTextChange,
       className: "gf-form-input",
-      rows: 10
+      rows: 10,
+      style: {
+        fontFamily: 'monospace'
+      }
     }), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
       className: "gf-form"
     }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["LegacyForms"].FormField, {
