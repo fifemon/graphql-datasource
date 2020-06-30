@@ -2731,13 +2731,16 @@ function (_super) {
   function QueryEditor() {
     var _this = _super !== null && _super.apply(this, arguments) || this;
 
-    _this.onQueryTextChange = function (event) {
+    _this.onChangeQuery = function (value, override) {
       var _a = _this.props,
           onChange = _a.onChange,
           query = _a.query;
-      onChange(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, query), {
-        queryText: event.target.value
-      }));
+
+      if (onChange) {
+        onChange(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, query), {
+          queryText: value
+        }));
+      }
     };
 
     _this.onDataPathTextChange = function (event) {
@@ -2778,14 +2781,10 @@ function (_super) {
         dataPath = query.dataPath,
         groupBy = query.groupBy,
         aliasBy = query.aliasBy;
-    return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_2___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("textarea", {
-      value: queryText || '',
-      onChange: this.onQueryTextChange,
-      className: "gf-form-input",
-      rows: 10,
-      style: {
-        fontFamily: 'monospace'
-      }
+    return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_2___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["QueryField"], {
+      query: queryText || '',
+      onChange: this.onChangeQuery,
+      portalOrigin: "graphQL"
     }), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
       className: "gf-form"
     }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["LegacyForms"].FormField, {
