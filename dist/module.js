@@ -2425,7 +2425,7 @@ function (_super) {
                         for (var fieldName in doc) {
                           var t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].string;
 
-                          if (fieldName === 'Time') {
+                          if (fieldName === 'Time' || Object(_util__WEBPACK_IMPORTED_MODULE_6__["isRFC3339_ISO6801"])(doc[fieldName])) {
                             t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].time;
                           } else if (lodash__WEBPACK_IMPORTED_MODULE_5___default.a.isNumber(doc[fieldName])) {
                             t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].number;
@@ -2874,12 +2874,13 @@ var defaultQuery = {
 /*!*****************!*\
   !*** ./util.ts ***!
   \*****************/
-/*! exports provided: flatten */
+/*! exports provided: flatten, isRFC3339_ISO6801 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "flatten", function() { return flatten; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isRFC3339_ISO6801", function() { return isRFC3339_ISO6801; });
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "../node_modules/tslib/tslib.es6.js");
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -2900,6 +2901,23 @@ function flatten(object, path, separator) {
     var newPath = [path, key].filter(Boolean).join(separator);
     return isObject ? Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, acc), flatten(object[key], newPath, separator)) : Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, acc), (_a = {}, _a[newPath] = object[key], _a));
   }, {});
+}
+function isRFC3339_ISO6801(str) {
+  if (typeof str !== 'string') {
+    return false;
+  }
+
+  if (!str.endsWith('Z')) {
+    return false;
+  }
+
+  var d = new Date(str);
+
+  if (d.toISOString() === str) {
+    return true;
+  } else {
+    return /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z/.test(str);
+  }
 }
 
 /***/ }),

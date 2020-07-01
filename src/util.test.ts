@@ -1,4 +1,4 @@
-import { flatten } from './util';
+import { flatten, isRFC3339_ISO6801 } from './util';
 
 test('flatten function test', () => {
   let obj = {
@@ -34,4 +34,13 @@ test('flatten function test', () => {
   };
 
   expect(flatten(obj)).toEqual(flattenObj);
+});
+
+test('RFC3339 and ISO8601 valid string test', () => {
+  expect(isRFC3339_ISO6801('I am not a date but a string')).toBe(false);
+  expect(isRFC3339_ISO6801('1234')).toBe(false);
+  expect(isRFC3339_ISO6801(8)).toBe(false);
+  expect(isRFC3339_ISO6801(null)).toBe(false);
+  expect(isRFC3339_ISO6801('2011-10-05T14:48:00.000Z')).toBe(true);
+  expect(isRFC3339_ISO6801('2020-06-01T00:00:00Z')).toBe(true);
 });

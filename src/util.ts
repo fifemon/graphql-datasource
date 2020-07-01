@@ -5,3 +5,18 @@ export function flatten<T extends Record<string, any>>(object: T, path: string |
     return isObject ? { ...acc, ...flatten(object[key], newPath, separator) } : { ...acc, [newPath]: object[key] };
   }, {} as T);
 }
+
+export function isRFC3339_ISO6801(str: any): boolean {
+  if (typeof str !== 'string') {
+    return false;
+  }
+  if (!str.endsWith('Z')) {
+    return false;
+  }
+  var d = new Date(str);
+  if (d.toISOString() === str) {
+    return true;
+  } else {
+    return /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z/.test(str);
+  }
+}
