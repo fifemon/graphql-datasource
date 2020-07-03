@@ -41,6 +41,10 @@ test('RFC3339 and ISO8601 valid string test', () => {
   expect(isRFC3339_ISO6801('1234')).toBe(false);
   expect(isRFC3339_ISO6801(8)).toBe(false);
   expect(isRFC3339_ISO6801(null)).toBe(false);
-  expect(isRFC3339_ISO6801('2011-10-05T14:48:00.000Z')).toBe(true);
+  expect(isRFC3339_ISO6801('2020-06-01T00:00:00.000Z')).toBe(true);
   expect(isRFC3339_ISO6801('2020-06-01T00:00:00Z')).toBe(true);
+  expect(isRFC3339_ISO6801(true)).toBe(false);
+  expect(isRFC3339_ISO6801(0)).toBe(false);
+  expect(isRFC3339_ISO6801(0.111111)).toBe(false);
+
 });
