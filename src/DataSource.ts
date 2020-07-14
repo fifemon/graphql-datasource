@@ -15,7 +15,7 @@ import { MyQuery, MyDataSourceOptions, defaultQuery } from './types';
 import { dateTime, MutableDataFrame, FieldType, DataFrame } from '@grafana/data';
 import { getTemplateSrv } from '@grafana/runtime';
 import _ from 'lodash';
-import { flatten } from './util';
+import { flatten, isRFC3339_ISO6801 } from './util';
 
 export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
   basicAuth: string | undefined;
@@ -168,7 +168,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
               }
               for (const fieldName in doc) {
                 let t: FieldType = FieldType.string;
-                if (fieldName === 'Time') {
+                if (fieldName === 'Time' || isRFC3339_ISO6801(doc[fieldName])) {
                   t = FieldType.time;
                 } else if (_.isNumber(doc[fieldName])) {
                   t = FieldType.number;
