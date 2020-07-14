@@ -1,3 +1,4 @@
+/*eslint no-restricted-exports: []*/
 import moment from 'moment';
 
 export function flatten<T extends Record<string, any>>(object: T, path: string | null = null, separator = '.'): T {
@@ -8,7 +9,7 @@ export function flatten<T extends Record<string, any>>(object: T, path: string |
   }, {} as T);
 }
 
-export function isRFC3339_ISO6801(str: any): boolean {  
+export function isRFC3339_ISO6801(str: any): boolean {
   let date =  moment(str, moment.ISO_8601, true);
   if (date.isValid()) {
     let iso = date.toISOString();
@@ -16,7 +17,7 @@ export function isRFC3339_ISO6801(str: any): boolean {
       return true;
     } else {
       // some RFC3339 dates don't include fractions of a second to same resolution, but still valid.
-      return iso.substring(0, 19) == str.substring(0, 19);
+      return iso.substring(0, 19) === str.substring(0, 19);
     }
   }
   return false;

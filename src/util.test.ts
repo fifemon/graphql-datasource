@@ -46,5 +46,4 @@ test('RFC3339 and ISO8601 valid string test', () => {
   expect(isRFC3339_ISO6801(true)).toBe(false);
   expect(isRFC3339_ISO6801(0)).toBe(false);
   expect(isRFC3339_ISO6801(0.111111)).toBe(false);
-
 });
