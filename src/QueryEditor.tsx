@@ -2,7 +2,7 @@ import defaults from 'lodash/defaults';
 
 import React, { PureComponent, ChangeEvent } from 'react';
 import { QueryEditorProps } from '@grafana/data';
-import { LegacyForms } from '@grafana/ui';
+import { LegacyForms, QueryField } from '@grafana/ui';
 import { DataSource } from './DataSource';
 import { MyQuery, MyDataSourceOptions, defaultQuery } from './types';
 
@@ -13,9 +13,11 @@ interface State {}
 export class QueryEditor extends PureComponent<Props, State> {
   onComponentDidMount() {}
 
-  onQueryTextChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+  onChangeQuery = (value: string, override?: boolean) => {
     const { onChange, query } = this.props;
-    onChange({ ...query, queryText: event.target.value });
+    if (onChange) {
+      onChange({ ...query, queryText: value });
+    }
   };
 
   onDataPathTextChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -38,7 +40,7 @@ export class QueryEditor extends PureComponent<Props, State> {
 
     return (
       <>
-        <textarea value={queryText || ''} onChange={this.onQueryTextChange} className="gf-form-input" rows={10} />
+        <QueryField query={queryText || ''} onChange={this.onChangeQuery} portalOrigin="graphQL" />
         <div className="gf-form">
           <LegacyForms.FormField
             labelWidth={8}
