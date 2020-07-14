@@ -1,5 +1,4 @@
-/*eslint no-restricted-exports: []*/
-import moment from 'moment';
+import { dateTime, ISO_8601 } from '@grafana/data';
 
 export function flatten<T extends Record<string, any>>(object: T, path: string | null = null, separator = '.'): T {
   return Object.keys(object).reduce((acc: T, key: string): T => {
@@ -10,7 +9,7 @@ export function flatten<T extends Record<string, any>>(object: T, path: string |
 }
 
 export function isRFC3339_ISO6801(str: any): boolean {
-  let date =  moment(str, moment.ISO_8601, true);
+  let date = dateTime(str, ISO_8601);
   if (date.isValid()) {
     let iso = date.toISOString();
     if (iso === str) {
