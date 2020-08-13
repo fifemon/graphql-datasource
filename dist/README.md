@@ -14,8 +14,9 @@ format that can be parsed by `moment()` (e.g. ISO8601).
 * Nested types will be flattened into dot-delimited fields. 
 * Grafana variables should be substituted directly in the query (instead of
 using GraphQL variables). The dashboard time ranges are available in the 
-[global variables](https://grafana.com/docs/grafana/latest/variables/global-variables/) 
-`$__from` and `$__to` as millisecond epoch.
+[global variables](https://grafana.com/docs/grafana/latest/variables/variable-types/global-variables/)
+`$__from` and `$__to` as millisecond epoch (or in whatever format is needed by the API
+in Grafana 7.1.2 or later).
 * Group by can be used to group elements into multiple data points.
 * Alias by is used to alter the name of the field displayed in the legend. `$field_<field.name>` is substituted with the
 values of the field and `$fieldName` is substituted with the name of the field.
