@@ -21,6 +21,12 @@ in Grafana 7.1.2 or later).
 * Alias by is used to alter the name of the field displayed in the legend. `$field_<field.name>` is substituted with the
 values of the field and `$fieldName` is substituted with the name of the field.
 
+# Screenshots
+
+![DeutscheBahn Arrivals Table](https://user-images.githubusercontent.com/1627510/90258294-f1bf2b00-de0d-11ea-8768-34b4ef37c125.png)
+![DeutscheBahn Arrivals Annotations](https://user-images.githubusercontent.com/1627510/90258316-f8e63900-de0d-11ea-91eb-d40532d5b768.png)
+![GitHub Security Advisories](https://user-images.githubusercontent.com/1627510/90258319-fbe12980-de0d-11ea-8ea2-c97bbc398aa4.png)
+
 # Examples
 
 Below are some example queries demonstrating how to use the plugin. See the

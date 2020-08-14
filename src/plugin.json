@@ -19,7 +19,11 @@
       { "name": "Website", "url": "https://github.com/fifemon/graphql-datasource" },
       { "name": "License", "url": "https://github.com/fifemon/graphql-datasource/blob/master/LICENSE" }
     ],
-    "screenshots": [],
+    "screenshots": [
+      "https://user-images.githubusercontent.com/1627510/90258294-f1bf2b00-de0d-11ea-8768-34b4ef37c125.png",
+      "https://user-images.githubusercontent.com/1627510/90258316-f8e63900-de0d-11ea-91eb-d40532d5b768.png",
+      "https://user-images.githubusercontent.com/1627510/90258319-fbe12980-de0d-11ea-8ea2-c97bbc398aa4.png"
+    ],
     "version": "%VERSION%",
     "updated": "%TODAY%"
   },
