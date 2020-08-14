@@ -19,13 +19,18 @@
       { "name": "Website", "url": "https://github.com/fifemon/graphql-datasource" },
       { "name": "License", "url": "https://github.com/fifemon/graphql-datasource/blob/master/LICENSE" }
     ],
-    "screenshots": [],
+    "screenshots": [
+      { "name": "DeutscheBahn Arrivals", "path": "img/db_arrivals.png"},
+      { "name": "DeutscheBahn Arrivals Annotations", "path": "img/db_arrivals_annotations.png"},
+      { "name": "GitHub Security Advisories", "path": "img/github_security_advisories.png"}
+    ],
     "version": "1.1.2",
-    "updated": "2020-07-01"
+    "updated": "2020-08-14"
   },
 
   "dependencies": {
     "grafanaVersion": "7.x.x",
+    "grafanaDependency": ">=7.0.0",
     "plugins": []
   }
 }
