@@ -2233,8 +2233,16 @@ function (_super) {
     var payload = query.queryText;
 
     if (range) {
-      payload = payload.replace(/\$timeFrom/g, range.from.valueOf().toString());
-      payload = payload.replace(/\$timeTo/g, range.to.valueOf().toString());
+      payload = Object(_grafana_runtime__WEBPACK_IMPORTED_MODULE_4__["getTemplateSrv"])().replace(payload, {
+        timeFrom: {
+          text: 'from',
+          value: range.from.valueOf()
+        },
+        timeTo: {
+          text: 'to',
+          value: range.to.valueOf()
+        }
+      });
     }
 
     payload = Object(_grafana_runtime__WEBPACK_IMPORTED_MODULE_4__["getTemplateSrv"])().replace(payload, scopedVars); //console.log(payload);
