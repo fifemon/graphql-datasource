@@ -2659,6 +2659,28 @@ function (_super) {
     });
   };
 
+  DataSource.prototype.metricFindQuery = function (query, options) {
+    return this.request(query).then(function (results) {
+      var values = results.data.data.data.map(function (object) {
+        return object[Object.keys(object)[0]];
+      });
+      return values.map(function (value) {
+        return {
+          text: value
+        };
+      });
+    })["catch"](function (err) {
+      if (err.data && err.data.error) {
+        throw {
+          message: 'GraphQL error: ' + err.data.error.reason,
+          error: err.data.error
+        };
+      }
+
+      throw err;
+    });
+  };
+
   DataSource.prototype.testDatasource = function () {
     var q = "{\n      __schema{\n        queryType{name}\n      }\n    }";
     return this.postQuery(_types__WEBPACK_IMPORTED_MODULE_3__["defaultQuery"], q).then(function (res) {

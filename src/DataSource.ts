@@ -7,6 +7,7 @@ import {
   DataQueryResponse,
   DataSourceApi,
   DataSourceInstanceSettings,
+  MetricFindValue,
   ScopedVars,
   TimeRange,
 } from '@grafana/data';
@@ -259,6 +260,23 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       }
       return r;
     });
+  }
+  metricFindQuery(query: string, options?: any): Promise<MetricFindValue[]> {
+    return this.request(query)
+      .then((results: any) => {
+        const values = results.data.data.data.map((object: any) => object[Object.keys(object)[0]]);
+        return values.map((value: any) => ({ text: value }));
+      })
+      .catch((err: any) => {
+        if (err.data && err.data.error) {
+          throw {
+            message: 'GraphQL error: ' + err.data.error.reason,
+            error: err.data.error,
+          };
+        }
+
+        throw err;
+      });
   }
 
   testDatasource() {
