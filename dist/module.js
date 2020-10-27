@@ -2439,7 +2439,7 @@ function (_super) {
                         for (var fieldName in doc) {
                           var t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].string;
 
-                          if (fieldName === 'Time' || Object(_util__WEBPACK_IMPORTED_MODULE_6__["isRFC3339_ISO6801"])(doc[fieldName])) {
+                          if (fieldName === 'Time' || Object(_util__WEBPACK_IMPORTED_MODULE_6__["isRFC3339_ISO6801"])(String(doc[fieldName]))) {
                             t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].time;
                           } else if (lodash__WEBPACK_IMPORTED_MODULE_5___default.a.isNumber(doc[fieldName])) {
                             t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].number;

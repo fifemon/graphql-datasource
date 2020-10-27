@@ -170,7 +170,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
               }
               for (const fieldName in doc) {
                 let t: FieldType = FieldType.string;
-                if (fieldName === 'Time' || isRFC3339_ISO6801(doc[fieldName])) {
+                if (fieldName === 'Time' || isRFC3339_ISO6801(String(doc[fieldName]))) {
                   t = FieldType.time;
                 } else if (_.isNumber(doc[fieldName])) {
                   t = FieldType.number;
