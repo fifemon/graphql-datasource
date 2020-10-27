@@ -9,6 +9,9 @@ export function flatten<T extends Record<string, any>>(object: T, path: string |
 }
 
 export function isRFC3339_ISO6801(str: any): boolean {
+  if (typeof str !== 'string') {
+    return false;
+  }
   let date = dateTime(str, ISO_8601);
   if (date.isValid()) {
     let iso = date.toISOString();
