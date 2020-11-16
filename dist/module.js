@@ -1,4 +1,4 @@
-define(["@grafana/data","@grafana/runtime","@grafana/ui","lodash","react"], function(__WEBPACK_EXTERNAL_MODULE__grafana_data__, __WEBPACK_EXTERNAL_MODULE__grafana_runtime__, __WEBPACK_EXTERNAL_MODULE__grafana_ui__, __WEBPACK_EXTERNAL_MODULE_lodash__, __WEBPACK_EXTERNAL_MODULE_react__) { return /******/ (function(modules) { // webpackBootstrap
+define(["@grafana/data","@grafana/runtime","@grafana/ui","react"], function(__WEBPACK_EXTERNAL_MODULE__grafana_data__, __WEBPACK_EXTERNAL_MODULE__grafana_runtime__, __WEBPACK_EXTERNAL_MODULE__grafana_ui__, __WEBPACK_EXTERNAL_MODULE_react__) { return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -2158,10 +2158,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./types */ "./types.ts");
 /* harmony import */ var _grafana_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @grafana/runtime */ "@grafana/runtime");
 /* harmony import */ var _grafana_runtime__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_grafana_runtime__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! lodash */ "lodash");
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./util */ "./util.ts");
-
+/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./util */ "./util.ts");
 
 
 
@@ -2284,7 +2281,7 @@ function (_super) {
     var docs = [];
 
     var pushDoc = function pushDoc(originalDoc) {
-      docs.push(Object(_util__WEBPACK_IMPORTED_MODULE_6__["flatten"])(originalDoc));
+      docs.push(Object(_util__WEBPACK_IMPORTED_MODULE_5__["flatten"])(originalDoc));
     };
 
     if (Array.isArray(data)) {
@@ -2439,9 +2436,9 @@ function (_super) {
                         for (var fieldName in doc) {
                           var t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].string;
 
-                          if (fieldName === 'Time' || Object(_util__WEBPACK_IMPORTED_MODULE_6__["isRFC3339_ISO6801"])(String(doc[fieldName]))) {
+                          if (fieldName === 'Time' || Object(_util__WEBPACK_IMPORTED_MODULE_5__["isRFC3339_ISO6801"])(String(doc[fieldName]))) {
                             t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].time;
-                          } else if (lodash__WEBPACK_IMPORTED_MODULE_5___default.a.isNumber(doc[fieldName])) {
+                          } else if (!isNaN(doc[fieldName])) {
                             t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].number;
                           }
 
@@ -2968,17 +2965,6 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__grafana_runtime__;
 /***/ (function(module, exports) {
 
 module.exports = __WEBPACK_EXTERNAL_MODULE__grafana_ui__;
-
-/***/ }),
-
-/***/ "lodash":
-/*!*************************!*\
-  !*** external "lodash" ***!
-  \*************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_lodash__;
 
 /***/ }),
 
