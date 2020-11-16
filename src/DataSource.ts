@@ -172,7 +172,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
                 let t: FieldType = FieldType.string;
                 if (fieldName === 'Time' || isRFC3339_ISO6801(String(doc[fieldName]))) {
                   t = FieldType.time;
-                } else if (_.isNumber(doc[fieldName])) {
+                } else if (!isNaN(doc[fieldName])) {
                   t = FieldType.number;
                 }
                 let title;
