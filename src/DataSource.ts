@@ -6,16 +6,27 @@ import {
   DataQueryRequest,
   DataQueryResponse,
   DataSourceApi,
+  MetricFindValue,
   DataSourceInstanceSettings,
   ScopedVars,
   TimeRange,
 } from '@grafana/data';
 
-import { MyQuery, MyDataSourceOptions, defaultQuery } from './types';
+import {
+  MyQuery,
+  MyDataSourceOptions,
+  defaultQuery,
+  MyVariableQuery,
+  MultiValueVariable,
+  TextValuePair,
+} from './types';
 import { dateTime, MutableDataFrame, FieldType, DataFrame } from '@grafana/data';
 import { getTemplateSrv } from '@grafana/runtime';
 import _ from 'lodash';
+import { isEqual } from 'lodash';
 import { flatten, isRFC3339_ISO6801 } from './util';
+
+const supportedVariableTypes = ['constant', 'custom', 'query', 'textbox'];
 
 export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
   basicAuth: string | undefined;
@@ -289,5 +300,55 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
         };
       }
     );
+  }
+
+  async metricFindQuery(query: MyVariableQuery, options?: any) {
+    const metricFindValues: MetricFindValue[] = [];
+
+    query = defaults(query, defaultQuery);
+
+    let payload = query.queryText;
+    payload = getTemplateSrv().replace(payload, { ...this.getVariables });
+
+    const response = await this.postQuery(query, payload);
+
+    const docs: any[] = DataSource.getDocs(response.results.data, query.dataPath);
+
+    for (const doc of docs) {
+      for (const fieldName in doc) {
+        metricFindValues.push({ text: doc[fieldName] });
+      }
+    }
+
+    return metricFindValues;
+  }
+
+  getVariables() {
+    const variables: { [id: string]: TextValuePair } = {};
+    Object.values(getTemplateSrv().getVariables()).forEach(variable => {
+      if (!supportedVariableTypes.includes(variable.type)) {
+        console.warn(`Variable of type "${variable.type}" is not supported`);
+
+        return;
+      }
+
+      const supportedVariable = variable as MultiValueVariable;
+
+      let variableValue = supportedVariable.current.value;
+      if (variableValue === '$__all' || isEqual(variableValue, ['$__all'])) {
+        if (supportedVariable.allValue === null || supportedVariable.allValue === '') {
+          variableValue = supportedVariable.options.slice(1).map(textValuePair => textValuePair.value);
+        } else {
+          variableValue = supportedVariable.allValue;
+        }
+      }
+
+      variables[supportedVariable.id] = {
+        text: supportedVariable.current.text,
+        value: variableValue,
+      };
+    });
+
+    return variables;
   }
 }

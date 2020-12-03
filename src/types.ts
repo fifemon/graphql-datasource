@@ -1,4 +1,4 @@
-import { DataQuery, DataSourceJsonData } from '@grafana/data';
+import { DataQuery, DataSourceJsonData, VariableModel } from '@grafana/data';
 
 export interface MyQuery extends DataQuery {
   queryText: string;
@@ -32,4 +32,21 @@ export const defaultQuery: Partial<MyQuery> = {
  */
 export interface MyDataSourceOptions extends DataSourceJsonData {
   apiKey?: string;
+}
+
+export interface MyVariableQuery extends DataQuery {
+  dataPath: string;
+  queryText: string;
+}
+
+export interface TextValuePair {
+  text: string;
+  value: any;
+}
+
+export interface MultiValueVariable extends VariableModel {
+  allValue: string | null;
+  id: string;
+  current: TextValuePair;
+  options: TextValuePair[];
 }

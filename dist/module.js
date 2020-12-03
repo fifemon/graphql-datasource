@@ -2170,6 +2170,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+var supportedVariableTypes = ['constant', 'custom', 'query', 'textbox'];
+
 var DataSource =
 /** @class */
 function (_super) {
@@ -2683,6 +2685,86 @@ function (_super) {
     });
   };
 
+  DataSource.prototype.metricFindQuery = function (query, options) {
+    return Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__awaiter"])(this, void 0, void 0, function () {
+      var metricFindValues, payload, response, docs, docs_3, docs_3_1, doc, fieldName;
+
+      var e_13, _a;
+
+      return Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__generator"])(this, function (_b) {
+        switch (_b.label) {
+          case 0:
+            metricFindValues = [];
+            query = lodash_defaults__WEBPACK_IMPORTED_MODULE_1___default()(query, _types__WEBPACK_IMPORTED_MODULE_3__["defaultQuery"]);
+            payload = query.queryText;
+            payload = Object(_grafana_runtime__WEBPACK_IMPORTED_MODULE_4__["getTemplateSrv"])().replace(payload, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, this.getVariables));
+            return [4
+            /*yield*/
+            , this.postQuery(query, payload)];
+
+          case 1:
+            response = _b.sent();
+            docs = DataSource.getDocs(response.results.data, query.dataPath);
+
+            try {
+              for (docs_3 = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(docs), docs_3_1 = docs_3.next(); !docs_3_1.done; docs_3_1 = docs_3.next()) {
+                doc = docs_3_1.value;
+
+                for (fieldName in doc) {
+                  metricFindValues.push({
+                    text: doc[fieldName]
+                  });
+                }
+              }
+            } catch (e_13_1) {
+              e_13 = {
+                error: e_13_1
+              };
+            } finally {
+              try {
+                if (docs_3_1 && !docs_3_1.done && (_a = docs_3["return"])) _a.call(docs_3);
+              } finally {
+                if (e_13) throw e_13.error;
+              }
+            }
+
+            return [2
+            /*return*/
+            , metricFindValues];
+        }
+      });
+    });
+  };
+
+  DataSource.prototype.getVariables = function () {
+    var variables = {};
+    Object.values(Object(_grafana_runtime__WEBPACK_IMPORTED_MODULE_4__["getTemplateSrv"])().getVariables()).forEach(function (variable) {
+      if (!supportedVariableTypes.includes(variable.type)) {
+        console.warn("Variable of type \"" + variable.type + "\" is not supported");
+        return;
+      }
+
+      var supportedVariable = variable;
+      var variableValue = supportedVariable.current.value;
+
+      if (variableValue === '$__all' || Object(lodash__WEBPACK_IMPORTED_MODULE_5__["isEqual"])(variableValue, ['$__all'])) {
+        if (supportedVariable.allValue === null || supportedVariable.allValue === '') {
+          variableValue = supportedVariable.options.slice(1).map(function (textValuePair) {
+            return textValuePair.value;
+          });
+        } else {
+          variableValue = supportedVariable.allValue;
+        }
+      }
+
+      variables[supportedVariable.id] = {
+        text: supportedVariable.current.text,
+        value: variableValue
+      };
+    });
+    return variables;
+  };
+
   return DataSource;
 }(_grafana_data__WEBPACK_IMPORTED_MODULE_2__["DataSourceApi"]);
 
@@ -2836,6 +2918,64 @@ function (_super) {
 
 /***/ }),
 
+/***/ "./VariableQueryEditor.tsx":
+/*!*********************************!*\
+  !*** ./VariableQueryEditor.tsx ***!
+  \*********************************/
+/*! exports provided: VariableQueryEditor */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "VariableQueryEditor", function() { return VariableQueryEditor; });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "../node_modules/tslib/tslib.es6.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
+
+
+var VariableQueryEditor = function VariableQueryEditor(_a) {
+  var onChange = _a.onChange,
+      query = _a.query;
+
+  var _b = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__read"])(Object(react__WEBPACK_IMPORTED_MODULE_1__["useState"])(query), 2),
+      state = _b[0],
+      setState = _b[1];
+
+  var saveQuery = function saveQuery() {
+    onChange(state, state.queryText + " (" + state.dataPath + ")");
+  };
+
+  var handleChange = function handleChange(event) {
+    var _a;
+
+    return setState(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, state), (_a = {}, _a[event.currentTarget.name] = event.currentTarget.value, _a)));
+  };
+
+  return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_1___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
+    className: "gf-form"
+  }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("span", {
+    className: "gf-form-label width-10"
+  }, "Data Path"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("input", {
+    name: "dataPath",
+    className: "gf-form-input",
+    onBlur: saveQuery,
+    onChange: handleChange,
+    value: state.dataPath
+  })), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
+    className: "gf-form"
+  }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("span", {
+    className: "gf-form-label width-10"
+  }, "Query"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("input", {
+    name: "queryText",
+    className: "gf-form-input",
+    onBlur: saveQuery,
+    onChange: handleChange,
+    value: state.queryText
+  })));
+};
+
+/***/ }),
+
 /***/ "./module.ts":
 /*!*******************!*\
   !*** ./module.ts ***!
@@ -2852,12 +2992,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ConfigEditor__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./ConfigEditor */ "./ConfigEditor.tsx");
 /* harmony import */ var _QueryEditor__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./QueryEditor */ "./QueryEditor.tsx");
 /* harmony import */ var _GraphQLAnnotationsQueryCtrl__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./GraphQLAnnotationsQueryCtrl */ "./GraphQLAnnotationsQueryCtrl.tsx");
+/* harmony import */ var _VariableQueryEditor__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./VariableQueryEditor */ "./VariableQueryEditor.tsx");
 
 
 
 
 
-var plugin = new _grafana_data__WEBPACK_IMPORTED_MODULE_0__["DataSourcePlugin"](_DataSource__WEBPACK_IMPORTED_MODULE_1__["DataSource"]).setConfigEditor(_ConfigEditor__WEBPACK_IMPORTED_MODULE_2__["ConfigEditor"]).setAnnotationQueryCtrl(_GraphQLAnnotationsQueryCtrl__WEBPACK_IMPORTED_MODULE_4__["GraphQLAnnotationsQueryCtrl"]).setQueryEditor(_QueryEditor__WEBPACK_IMPORTED_MODULE_3__["QueryEditor"]);
+
+var plugin = new _grafana_data__WEBPACK_IMPORTED_MODULE_0__["DataSourcePlugin"](_DataSource__WEBPACK_IMPORTED_MODULE_1__["DataSource"]).setConfigEditor(_ConfigEditor__WEBPACK_IMPORTED_MODULE_2__["ConfigEditor"]).setAnnotationQueryCtrl(_GraphQLAnnotationsQueryCtrl__WEBPACK_IMPORTED_MODULE_4__["GraphQLAnnotationsQueryCtrl"]).setQueryEditor(_QueryEditor__WEBPACK_IMPORTED_MODULE_3__["QueryEditor"]).setVariableQueryEditor(_VariableQueryEditor__WEBPACK_IMPORTED_MODULE_5__["VariableQueryEditor"]);
 
 /***/ }),
 
@@ -2880,7 +3022,15 @@ var defaultQuery = {
   annotationText: '',
   annotationTags: '',
   constant: 6.5
-};
+}; // export const defaultVariableQuery: Partial<MyVariableQuery> = {
+//   queryText: `query {
+//       data:submissions(user:"$user"){
+//           Time:submitTime
+//           idle running completed
+//       }
+// }`,
+//   dataPath: 'data',
+// };
 
 /***/ }),
 
