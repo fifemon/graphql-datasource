@@ -19,6 +19,12 @@ export const VariableQueryEditor: React.FC<VariableQueryProps> = ({ onChange, qu
       [event.currentTarget.name]: event.currentTarget.value,
     });
 
+  const handleChangeta = (event: React.FormEvent<HTMLTextAreaElement>) =>
+    setState({
+      ...state,
+      [event.currentTarget.name]: event.currentTarget.value,
+    });
+
   return (
     <>
       <div className="gf-form">
@@ -33,11 +39,11 @@ export const VariableQueryEditor: React.FC<VariableQueryProps> = ({ onChange, qu
       </div>
       <div className="gf-form">
         <span className="gf-form-label width-10">Query</span>
-        <input
+        <textarea
           name="queryText"
           className="gf-form-input"
           onBlur={saveQuery}
-          onChange={handleChange}
+          onChange={handleChangeta}
           value={state.queryText}
         />
       </div>
