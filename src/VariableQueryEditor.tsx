@@ -1,3 +1,4 @@
+import { QueryField } from '@grafana/ui';
 import React, { useState } from 'react';
 import { MyQuery } from './types';
 
@@ -13,13 +14,13 @@ export const VariableQueryEditor: React.FC<VariableQueryProps> = ({ onChange, qu
     onChange(state, `${state.queryText} (${state.dataPath})`);
   };
 
-  const handleChange = (event: React.FormEvent<HTMLInputElement>) =>
+  const onChangeQuery = (value: string, override?: boolean) =>
     setState({
       ...state,
-      [event.currentTarget.name]: event.currentTarget.value,
+      queryText: value,
     });
 
-  const handleChangeta = (event: React.FormEvent<HTMLTextAreaElement>) =>
+  const handleChange = (event: React.FormEvent<HTMLInputElement>) =>
     setState({
       ...state,
       [event.currentTarget.name]: event.currentTarget.value,
@@ -39,13 +40,7 @@ export const VariableQueryEditor: React.FC<VariableQueryProps> = ({ onChange, qu
       </div>
       <div className="gf-form">
         <span className="gf-form-label width-10">Query</span>
-        <textarea
-          name="queryText"
-          className="gf-form-input"
-          onBlur={saveQuery}
-          onChange={handleChangeta}
-          value={state.queryText}
-        />
+        <QueryField query={state.queryText || ''} onBlur={saveQuery} onChange={onChangeQuery} portalOrigin="graphQL" />
       </div>
     </>
   );

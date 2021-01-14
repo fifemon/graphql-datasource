@@ -2929,20 +2929,29 @@ function (_super) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "VariableQueryEditor", function() { return VariableQueryEditor; });
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "../node_modules/tslib/tslib.es6.js");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "react");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _grafana_ui__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @grafana/ui */ "@grafana/ui");
+/* harmony import */ var _grafana_ui__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_grafana_ui__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_2__);
+
 
 
 var VariableQueryEditor = function VariableQueryEditor(_a) {
   var onChange = _a.onChange,
       query = _a.query;
 
-  var _b = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__read"])(Object(react__WEBPACK_IMPORTED_MODULE_1__["useState"])(query), 2),
+  var _b = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__read"])(Object(react__WEBPACK_IMPORTED_MODULE_2__["useState"])(query), 2),
       state = _b[0],
       setState = _b[1];
 
   var saveQuery = function saveQuery() {
     onChange(state, state.queryText + " (" + state.dataPath + ")");
+  };
+
+  var onChangeQuery = function onChangeQuery(value, override) {
+    return setState(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, state), {
+      queryText: value
+    }));
   };
 
   var handleChange = function handleChange(event) {
@@ -2951,26 +2960,25 @@ var VariableQueryEditor = function VariableQueryEditor(_a) {
     return setState(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, state), (_a = {}, _a[event.currentTarget.name] = event.currentTarget.value, _a)));
   };
 
-  return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_1___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
+  return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_2___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
     className: "gf-form"
-  }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("span", {
+  }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("span", {
     className: "gf-form-label width-10"
-  }, "Data Path"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("input", {
+  }, "Data Path"), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("input", {
     name: "dataPath",
     className: "gf-form-input",
     onBlur: saveQuery,
     onChange: handleChange,
     value: state.dataPath
-  })), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
+  })), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
     className: "gf-form"
-  }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("span", {
+  }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("span", {
     className: "gf-form-label width-10"
-  }, "Query"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("input", {
-    name: "queryText",
-    className: "gf-form-input",
+  }, "Query"), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_1__["QueryField"], {
+    query: state.queryText || '',
     onBlur: saveQuery,
-    onChange: handleChange,
-    value: state.queryText
+    onChange: onChangeQuery,
+    portalOrigin: "graphQL"
   })));
 };
 
@@ -3022,15 +3030,7 @@ var defaultQuery = {
   annotationText: '',
   annotationTags: '',
   constant: 6.5
-}; // export const defaultVariableQuery: Partial<MyVariableQuery> = {
-//   queryText: `query {
-//       data:submissions(user:"$user"){
-//           Time:submitTime
-//           idle running completed
-//       }
-// }`,
-//   dataPath: 'data',
-// };
+};
 
 /***/ }),
 
