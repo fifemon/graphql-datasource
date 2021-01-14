@@ -80,15 +80,11 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
 
   private createQuery(query: MyQuery, range: TimeRange | undefined, scopedVars: ScopedVars | undefined = undefined) {
     let payload = query.queryText;
-    // add legacy variables
-    if (range) {
-      scopedVars = {
-        ...scopedVars,
-        timeFrom: { text: 'from', value: range.from.valueOf() },
-        timeTo: { text: 'to', value: range.to.valueOf() },
-      };
-    }
-    payload = getTemplateSrv().replace(payload, scopedVars);
+    payload = getTemplateSrv().replace(payload, {
+      ...scopedVars,
+      timeFrom: { text: 'from', value: range?.from.valueOf() },
+      timeTo: { text: 'to', value: range?.to.valueOf() },
+    });
 
     //console.log(payload);
     return this.postQuery(query, payload);
