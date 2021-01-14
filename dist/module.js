@@ -2232,8 +2232,7 @@ function (_super) {
       scopedVars = undefined;
     }
 
-    var payload = query.queryText;
-    payload = Object(_grafana_runtime__WEBPACK_IMPORTED_MODULE_4__["getTemplateSrv"])().replace(payload, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, scopedVars), {
+    var payload = Object(_grafana_runtime__WEBPACK_IMPORTED_MODULE_4__["getTemplateSrv"])().replace(query.queryText, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, scopedVars), {
       timeFrom: {
         text: 'from',
         value: range === null || range === void 0 ? void 0 : range.from.valueOf()
