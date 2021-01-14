@@ -2232,22 +2232,16 @@ function (_super) {
       scopedVars = undefined;
     }
 
-    var payload = query.queryText;
-
-    if (range) {
-      payload = Object(_grafana_runtime__WEBPACK_IMPORTED_MODULE_4__["getTemplateSrv"])().replace(payload, {
-        timeFrom: {
-          text: 'from',
-          value: range.from.valueOf()
-        },
-        timeTo: {
-          text: 'to',
-          value: range.to.valueOf()
-        }
-      });
-    }
-
-    payload = Object(_grafana_runtime__WEBPACK_IMPORTED_MODULE_4__["getTemplateSrv"])().replace(payload, scopedVars); //console.log(payload);
+    var payload = Object(_grafana_runtime__WEBPACK_IMPORTED_MODULE_4__["getTemplateSrv"])().replace(query.queryText, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, scopedVars), {
+      timeFrom: {
+        text: 'from',
+        value: range === null || range === void 0 ? void 0 : range.from.valueOf()
+      },
+      timeTo: {
+        text: 'to',
+        value: range === null || range === void 0 ? void 0 : range.to.valueOf()
+      }
+    })); //console.log(payload);
 
     return this.postQuery(query, payload);
   };
