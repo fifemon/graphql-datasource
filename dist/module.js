@@ -2232,10 +2232,10 @@ function (_super) {
       scopedVars = undefined;
     }
 
-    var payload = query.queryText;
+    var payload = query.queryText; // add legacy variables
 
     if (range) {
-      payload = Object(_grafana_runtime__WEBPACK_IMPORTED_MODULE_4__["getTemplateSrv"])().replace(payload, {
+      scopedVars = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, scopedVars), {
         timeFrom: {
           text: 'from',
           value: range.from.valueOf()
