@@ -25,7 +25,7 @@
       { "name": "GitHub Security Advisories", "path": "img/github_security_advisories.png"}
     ],
     "version": "1.2.0",
-    "updated": "2021-01-14"
+    "updated": "2021-03-09"
   },
 
   "dependencies": {

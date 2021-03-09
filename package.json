@@ -11,10 +11,10 @@
   "author": "Kevin Retzke",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@grafana/data": "7.3.7",
-    "@grafana/runtime": "7.3.7",
-    "@grafana/toolkit": "7.3.7",
-    "@grafana/ui": "7.3.7",
+    "@grafana/data": "7.4.3",
+    "@grafana/runtime": "7.4.3",
+    "@grafana/toolkit": "7.4.3",
+    "@grafana/ui": "7.4.3",
     "moment": "*"
   },
   "dependencies": {
