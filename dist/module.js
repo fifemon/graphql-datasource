@@ -2704,10 +2704,17 @@ function (_super) {
               for (docs_3 = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(docs), docs_3_1 = docs_3.next(); !docs_3_1.done; docs_3_1 = docs_3.next()) {
                 doc = docs_3_1.value;
 
-                for (fieldName in doc) {
+                if ('__text' in doc && '__value' in doc) {
                   metricFindValues.push({
-                    text: doc[fieldName]
+                    text: doc['__text'],
+                    value: doc['__value']
                   });
+                } else {
+                  for (fieldName in doc) {
+                    metricFindValues.push({
+                      text: doc[fieldName]
+                    });
+                  }
                 }
               }
             } catch (e_13_1) {

@@ -312,8 +312,12 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     const docs: any[] = DataSource.getDocs(response.results.data, query.dataPath);
 
     for (const doc of docs) {
-      for (const fieldName in doc) {
-        metricFindValues.push({ text: doc[fieldName] });
+      if ('__text' in doc && '__value' in doc) {
+        metricFindValues.push({ text: doc['__text'], value: doc['__value'] });
+      } else {
+        for (const fieldName in doc) {
+          metricFindValues.push({ text: doc[fieldName] });
+        }
       }
     }
 
