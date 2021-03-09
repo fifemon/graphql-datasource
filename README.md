@@ -29,6 +29,7 @@ annotations, and dashboard variables.
 ![DeutscheBahn Arrivals Table](https://user-images.githubusercontent.com/1627510/90258294-f1bf2b00-de0d-11ea-8768-34b4ef37c125.png)
 ![DeutscheBahn Arrivals Annotations](https://user-images.githubusercontent.com/1627510/90258316-f8e63900-de0d-11ea-91eb-d40532d5b768.png)
 ![GitHub Security Advisories](https://user-images.githubusercontent.com/1627510/90258319-fbe12980-de0d-11ea-8ea2-c97bbc398aa4.png)
+![DeutscheBahn Station Variable](https://user-images.githubusercontent.com/1627510/110505565-e1c9aa00-80c3-11eb-85bb-10e5471fb151.png)
 
 # Examples
 
@@ -83,7 +84,7 @@ In the above example, "Group by" and "Alias by" are defined. "Group by" allows
 you to split up an array of data into multiple data points. "Alias by" is used
 as the name of the data point. You can make alias use text from the query or
 even the field name by using `$field_<your.field.name>` for the value of the
-field, or `$fieldName` for the name of the field. For instance, if `$fieldName`
+field,
 was used, it would be replaced by "batteryVoltage" because that's the name of
 the field. If `$field_identityInfo.displayName` was used, it would be replaced
 with the value of displayName. Using `$fieldName` can be useful if you're
@@ -126,3 +127,24 @@ The above example has two tags: "tag1" and "tag2". If a `TimeEnd` field is
 present, the annotation will be shown over a period of time. You can also
 separate the data path with commas to provide multiple data paths as shown with
 both server1 and server2.
+
+## Dashboard Variable Queries
+
+Dashboard variables can be populated by a GraphQL query that returns an array of
+objects. If the objects contain both `__text` and `__value` fields then they
+will be used (the `__text` field will be displayed, the `__value` field will be
+used in substitutions). Otherwise the values of all fields will be appended to
+the variable value list.
+
+```graphql
+query {
+  search(searchTerm: "$query") {
+    stations {
+      __value: primaryEvaId
+      __text: name
+    }
+  }
+}
+```
+
+- Data path: `search.stations`
