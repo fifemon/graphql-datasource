@@ -139,7 +139,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
 
   async query(options: DataQueryRequest<MyQuery>): Promise<DataQueryResponse> {
     return Promise.all(
-      options.targets.map(target => {
+      options.targets.map((target) => {
         return this.createQuery(defaults(target, defaultQuery), options.range, options.scopedVars);
       })
     ).then((results: any) => {
@@ -312,8 +312,12 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     const docs: any[] = DataSource.getDocs(response.results.data, query.dataPath);
 
     for (const doc of docs) {
-      for (const fieldName in doc) {
-        metricFindValues.push({ text: doc[fieldName] });
+      if ('__text' in doc && '__value' in doc) {
+        metricFindValues.push({ text: doc['__text'], value: doc['__value'] });
+      } else {
+        for (const fieldName in doc) {
+          metricFindValues.push({ text: doc[fieldName] });
+        }
       }
     }
 
@@ -322,7 +326,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
 
   getVariables() {
     const variables: { [id: string]: TextValuePair } = {};
-    Object.values(getTemplateSrv().getVariables()).forEach(variable => {
+    Object.values(getTemplateSrv().getVariables()).forEach((variable) => {
       if (!supportedVariableTypes.includes(variable.type)) {
         console.warn(`Variable of type "${variable.type}" is not supported`);
 
@@ -334,7 +338,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       let variableValue = supportedVariable.current.value;
       if (variableValue === '$__all' || isEqual(variableValue, ['$__all'])) {
         if (supportedVariable.allValue === null || supportedVariable.allValue === '') {
-          variableValue = supportedVariable.options.slice(1).map(textValuePair => textValuePair.value);
+          variableValue = supportedVariable.options.slice(1).map((textValuePair) => textValuePair.value);
         } else {
           variableValue = supportedVariable.allValue;
         }
