@@ -2359,6 +2359,8 @@ function (_super) {
               var res = results_1_1.value;
               var dataPathArray = DataSource.getDataPathArray(res.query.dataPath);
               var _g = res.query,
+                  timePath = _g.timePath,
+                  timeFormat = _g.timeFormat,
                   groupBy = _g.groupBy,
                   aliasBy = _g.aliasBy;
               var split = groupBy.split(',');
@@ -2395,8 +2397,8 @@ function (_super) {
                     for (var docs_1 = (e_6 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(docs)), docs_1_1 = docs_1.next(); !docs_1_1.done; docs_1_1 = docs_1.next()) {
                       var doc = docs_1_1.value;
 
-                      if (doc.Time) {
-                        doc.Time = Object(_grafana_data__WEBPACK_IMPORTED_MODULE_2__["dateTime"])(doc.Time);
+                      if (timePath in doc) {
+                        doc[timePath] = Object(_grafana_data__WEBPACK_IMPORTED_MODULE_2__["dateTime"])(doc[timePath], timeFormat);
                       }
 
                       var identifiers = [];
@@ -2435,7 +2437,7 @@ function (_super) {
                         for (var fieldName in doc) {
                           var t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].string;
 
-                          if (fieldName === 'Time' || Object(_util__WEBPACK_IMPORTED_MODULE_6__["isRFC3339_ISO6801"])(String(doc[fieldName]))) {
+                          if (fieldName === timePath || Object(_util__WEBPACK_IMPORTED_MODULE_6__["isRFC3339_ISO6801"])(String(doc[fieldName]))) {
                             t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].time;
                           } else if (lodash__WEBPACK_IMPORTED_MODULE_5___default.a.isNumber(doc[fieldName])) {
                             t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].number;
@@ -2849,6 +2851,24 @@ function (_super) {
       }));
     };
 
+    _this.onTimePathTextChange = function (event) {
+      var _a = _this.props,
+          onChange = _a.onChange,
+          query = _a.query;
+      onChange(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, query), {
+        timePath: event.target.value
+      }));
+    };
+
+    _this.onTimeFormatTextChange = function (event) {
+      var _a = _this.props,
+          onChange = _a.onChange,
+          query = _a.query;
+      onChange(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, query), {
+        timeFormat: event.target.value
+      }));
+    };
+
     _this.onGroupByTextChange = function (event) {
       var _a = _this.props,
           onChange = _a.onChange,
@@ -2876,6 +2896,8 @@ function (_super) {
     var query = lodash_defaults__WEBPACK_IMPORTED_MODULE_1___default()(this.props.query, _types__WEBPACK_IMPORTED_MODULE_4__["defaultQuery"]);
     var queryText = query.queryText,
         dataPath = query.dataPath,
+        timePath = query.timePath,
+        timeFormat = query.timeFormat,
         groupBy = query.groupBy,
         aliasBy = query.aliasBy;
     return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_2___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["QueryField"], {
@@ -2891,6 +2913,29 @@ function (_super) {
       onChange: this.onDataPathTextChange,
       label: "Data path",
       tooltip: "dot-delimited path to data in response. Separate with commas to use multiple data paths"
+    })), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
+      className: "gf-form"
+    }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["LegacyForms"].FormField, {
+      labelWidth: 8,
+      inputWidth: 24,
+      value: timePath || '',
+      onChange: this.onTimePathTextChange,
+      label: "Time path",
+      tooltip: "dot-delimited path to time under data path"
+    })), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
+      className: 'gf-form'
+    }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["LegacyForms"].FormField, {
+      labelWidth: 8,
+      inputWidth: 24,
+      value: timeFormat || '',
+      onChange: this.onTimeFormatTextChange,
+      label: "Time format",
+      tooltip: react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("a", {
+        href: "https://momentjs.com/docs/#/parsing/string-format/",
+        title: "Formatting help"
+      }, "Optional time format in moment.js format.\xA0", react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["Icon"], {
+        name: "external-link-alt"
+      }))
     })), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
       className: 'gf-form'
     }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["LegacyForms"].FormField, {
@@ -3025,6 +3070,8 @@ __webpack_require__.r(__webpack_exports__);
 var defaultQuery = {
   queryText: "query {\n      data:submissions(user:\"$user\"){\n          Time:submitTime\n          idle running completed\n      }\n}",
   dataPath: 'data',
+  timePath: 'Time',
+  timeFormat: null,
   groupBy: '',
   aliasBy: '',
   annotationTitle: '',

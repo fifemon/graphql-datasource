@@ -146,7 +146,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       const dataFrameArray: DataFrame[] = [];
       for (let res of results) {
         const dataPathArray: string[] = DataSource.getDataPathArray(res.query.dataPath);
-        const { groupBy, aliasBy } = res.query;
+        const { timePath, timeFormat, groupBy, aliasBy } = res.query;
         const split = groupBy.split(',');
         const groupByList: string[] = [];
         for (const element of split) {
@@ -160,8 +160,8 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
 
           const dataFrameMap = new Map<string, MutableDataFrame>();
           for (const doc of docs) {
-            if (doc.Time) {
-              doc.Time = dateTime(doc.Time);
+            if (timePath in doc) {
+              doc[timePath] = dateTime(doc[timePath], timeFormat);
             }
             const identifiers: string[] = [];
             for (const groupByElement of groupByList) {
@@ -178,7 +178,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
               }
               for (const fieldName in doc) {
                 let t: FieldType = FieldType.string;
-                if (fieldName === 'Time' || isRFC3339_ISO6801(String(doc[fieldName]))) {
+                if (fieldName === timePath || isRFC3339_ISO6801(String(doc[fieldName]))) {
                   t = FieldType.time;
                 } else if (_.isNumber(doc[fieldName])) {
                   t = FieldType.number;
