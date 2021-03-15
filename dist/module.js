@@ -2555,6 +2555,10 @@ function (_super) {
       try {
         for (var results_2 = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(results), results_2_1 = results_2.next(); !results_2_1.done; results_2_1 = results_2.next()) {
           var res = results_2_1.value;
+          var _e = res.query,
+              timePath = _e.timePath,
+              endTimePath = _e.endTimePath,
+              timeFormat = _e.timeFormat;
           var dataPathArray = DataSource.getDataPathArray(res.query.dataPath);
 
           try {
@@ -2567,13 +2571,13 @@ function (_super) {
                   var doc = docs_2_1.value;
                   var annotation = {};
 
-                  if (doc.Time) {
-                    annotation.time = Object(_grafana_data__WEBPACK_IMPORTED_MODULE_2__["dateTime"])(doc.Time).valueOf();
+                  if (timePath in doc) {
+                    annotation.time = Object(_grafana_data__WEBPACK_IMPORTED_MODULE_2__["dateTime"])(doc[timePath], timeFormat).valueOf();
                   }
 
-                  if (doc.TimeEnd) {
+                  if (endTimePath in doc) {
                     annotation.isRegion = true;
-                    annotation.timeEnd = Object(_grafana_data__WEBPACK_IMPORTED_MODULE_2__["dateTime"])(doc.TimeEnd).valueOf();
+                    annotation.timeEnd = Object(_grafana_data__WEBPACK_IMPORTED_MODULE_2__["dateTime"])(doc[endTimePath], timeFormat).valueOf();
                   }
 
                   var title = query.annotationTitle;
@@ -2594,8 +2598,8 @@ function (_super) {
                   var tagsList = [];
 
                   try {
-                    for (var _e = (e_12 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(tags.split(','))), _f = _e.next(); !_f.done; _f = _e.next()) {
-                      var element = _f.value;
+                    for (var _f = (e_12 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(tags.split(','))), _g = _f.next(); !_g.done; _g = _f.next()) {
+                      var element = _g.value;
                       var trimmed = element.trim();
 
                       if (trimmed) {
@@ -2608,7 +2612,7 @@ function (_super) {
                     };
                   } finally {
                     try {
-                      if (_f && !_f.done && (_d = _e["return"])) _d.call(_e);
+                      if (_g && !_g.done && (_d = _f["return"])) _d.call(_f);
                     } finally {
                       if (e_12) throw e_12.error;
                     }
@@ -3071,6 +3075,7 @@ var defaultQuery = {
   queryText: "query {\n      data:submissions(user:\"$user\"){\n          Time:submitTime\n          idle running completed\n      }\n}",
   dataPath: 'data',
   timePath: 'Time',
+  endTimePath: 'endTime',
   timeFormat: null,
   groupBy: '',
   aliasBy: '',

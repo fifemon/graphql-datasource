@@ -227,17 +227,18 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     return Promise.all([this.createQuery(query, options.range)]).then((results: any) => {
       const r: AnnotationEvent[] = [];
       for (const res of results) {
+        const { timePath, endTimePath, timeFormat } = res.query;
         const dataPathArray: string[] = DataSource.getDataPathArray(res.query.dataPath);
         for (const dataPath of dataPathArray) {
           const docs: any[] = DataSource.getDocs(res.results.data, dataPath);
           for (const doc of docs) {
             const annotation: AnnotationEvent = {};
-            if (doc.Time) {
-              annotation.time = dateTime(doc.Time).valueOf();
+            if (timePath in doc) {
+              annotation.time = dateTime(doc[timePath], timeFormat).valueOf();
             }
-            if (doc.TimeEnd) {
+            if (endTimePath in doc) {
               annotation.isRegion = true;
-              annotation.timeEnd = dateTime(doc.TimeEnd).valueOf();
+              annotation.timeEnd = dateTime(doc[endTimePath], timeFormat).valueOf();
             }
             let title = query.annotationTitle;
             let text = query.annotationText;
