@@ -11,8 +11,10 @@ annotations, and dashboard variables.
   object at that path is an array it will be iterated over, with each object added
   as a row in the data frame, otherwise the result object will be the only row.
   - Can be separated by commas to use multiple data paths
-- Timeseries data requires a field named `Time` containing the timestamp in a
-  format that can be parsed by `moment()` (e.g. ISO8601).
+- Timeseries data must include a timestamp field under the data path, default
+  `Time`, in [ISO8601](https://momentjs.com/docs/#/parsing/string/) or a
+  configurable [custom
+  format](https://momentjs.com/docs/#/parsing/string-format/).
 - Nested types will be flattened into dot-delimited fields.
 - Grafana variables should be substituted directly in the query (instead of
   using GraphQL variables). The dashboard time ranges are available in the
@@ -33,100 +35,108 @@ annotations, and dashboard variables.
 
 # Examples
 
-Below are some example queries demonstrating how to use the plugin. See the
-[project wiki](https://github.com/fifemon/graphql-datasource/wiki) for further
-examples and tutorials.
+Below are some example queries demonstrating how to use the plugin, using the
+[FIFEMon GraphQL test source
+server](https://github.com/fifemon/graphql-test-source/), which also includes a
+[dashboard](https://raw.githubusercontent.com/fifemon/graphql-test-source/master/doc/graphql-test-dashboard.json)
+demonstrating these queries.
 
 ## Basic timeseries
 
 ```graphql
 query {
-  submissions(user: "$user", from: "$__from", to: "$__to") {
-    Time: submitTime
-    idle
-    running
-    completed
+  data: simple_series(from: "${__from:date:iso}", to: "${__to:date:iso}", interval_ms: $__interval_ms) {
+    Time: timestamp
+    value
   }
 }
 ```
 
-- Data path: `submissions`
-
 Note the use of the global `$__from` and `$__to` variables to insert the
-dashboard time range into the query, alongside a dashboard variable `$user`.
+dashboard time range into the query and the use of `$__interval_ms` to specify
+the appropriate time interval for the graph.
+
+## Custom time format
+
+```graphql
+query {
+  simple_series(
+    from: "${__from:date:iso}"
+    to: "${__to:date:iso}"
+    interval_ms: $__interval_ms
+    format: "MM.dd.uuuu HHmmss"
+  ) {
+    timestamp
+    value
+  }
+}
+```
+
+- Data path: `simple_series`
+- Time path: `timestamp`
+- Time format: `MM.DD.YYYY HHmmss`
 
 ## Alias and group by
 
 ```graphql
 query {
-  data: queryAll(from: "$__from", to: "$__to", sourceId: "default") {
-    batteryVoltage {
-      Time: dateMillis
-      packet {
-        batteryVoltage
-        identifier {
-          representation
-        }
-        identityInfo {
-          displayName
-        }
-      }
+  complex_series(from: "${__from:date:iso}", to: "${__to:date:iso}", interval_ms: $__interval_ms) {
+    time {
+      timestamp
+    }
+    value
+    group {
+      id
+      name
     }
   }
 }
 ```
 
-- Data path: `data.batteryVoltage`
-- Group by: `packet.identifier.representation`
-- Alias by: `$field_packet.identityInfo.displayName`
+- Data path: `complex_series`
+- Time path: `time.timestamp`
+- Group by: `group.id`
+- Alias by: `$field_group.name`
 
 In the above example, "Group by" and "Alias by" are defined. "Group by" allows
 you to split up an array of data into multiple data points. "Alias by" is used
 as the name of the data point. You can make alias use text from the query or
 even the field name by using `$field_<your.field.name>` for the value of the
-field,
-was used, it would be replaced by "batteryVoltage" because that's the name of
-the field. If `$field_identityInfo.displayName` was used, it would be replaced
-with the value of displayName. Using `$fieldName` can be useful if you're
-querying multiple numeric fields that you want displayed in your graph.
+field, or `$fieldName` for the name of the field. If `$fieldName` was used, it
+would be replaced by "value" because that's the name of the field. If
+`$field_group.name` was used, it would be replaced with the value
+of `name`. Using `$fieldName` can be useful if you're querying multiple
+numeric fields that you want displayed in your graph.
 
 ## Annotations
 
 ```graphql
 query {
-  server1: queryEvents(from: "$__from", to: "$__to", server: "server1") {
-    birthdayEvent {
-      Time: dateMillis
-      person {
-        fullName
-      }
-    }
-  }
-  server2: queryEvents(from: "$__from", to: "$__to", server: "server2") {
-    birthdayEvent {
-      Time: dateMillis
-      person {
-        fullName
-      }
-    }
+  events(from: "${__from:date:iso}", to: "${__to:date:iso}", end: true) {
+    timestamp
+    end_timestamp
+    name
+    description
+    tags
   }
 }
 ```
 
-- Data path: `server1.birthdayEvent, server2.birthdayEvent`
-- Title: `Birthday yay!`
-- Text: `$field_person.fullName`
+- Data path: `events`
+- Time path: `timestamp`
+- End time path: `end_timestamp`
+- Title: `$field_name`
+- Text: `$field_description`
 - Tags: `tag1, tag2`
 
-The above annotation example is similar to regular queries. You must have a
-`Time` field and are able to define a data path. Similar to the last example,
-you can also substitute values into the title, text, and tags by using
-`$field_<field name>`. By using `$field_person.fullName` as the text, the text
-in this annotation will be the person's full name. Tags are separated by commas.
-The above example has two tags: "tag1" and "tag2". If a `TimeEnd` field is
-present, the annotation will be shown over a period of time. You can also
-separate the data path with commas to provide multiple data paths as shown with
-both server1 and server2.
+The above annotation example is similar to regular queries. You are able to
+define a data path, time path, and time format. Similar to the last example, you
+can also substitute values into the title, text, and tags by using
+`$field_<field name>`. Tags are separated by commas. The above example has two
+tags: "tag1" and "tag2".
+
+If the optional end time field is defined and present, the annotation will be
+shown over a period of time.
 
 ## Dashboard Variable Queries
 
@@ -138,13 +148,11 @@ the variable value list.
 
 ```graphql
 query {
-  search(searchTerm: "$query") {
-    stations {
-      __value: primaryEvaId
-      __text: name
-    }
+  groups {
+    __value: id
+    __text: name
   }
 }
 ```
 
-- Data path: `search.stations`
+- Data path: `groups`
