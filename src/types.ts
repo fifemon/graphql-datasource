@@ -3,6 +3,9 @@ import { DataQuery, DataSourceJsonData, VariableModel } from '@grafana/data';
 export interface MyQuery extends DataQuery {
   queryText: string;
   dataPath: string;
+  timePath: string;
+  endTimePath: string | null;
+  timeFormat: string | null;
   groupBy: string;
   aliasBy: string;
   annotationTitle: string;
@@ -19,6 +22,9 @@ export const defaultQuery: Partial<MyQuery> = {
       }
 }`,
   dataPath: 'data',
+  timePath: 'Time',
+  endTimePath: 'endTime',
+  timeFormat: null,
   groupBy: '', // `identifier`
   aliasBy: '', // 'Server [[tag_identifier]]`
   annotationTitle: '',

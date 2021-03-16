@@ -146,7 +146,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       const dataFrameArray: DataFrame[] = [];
       for (let res of results) {
         const dataPathArray: string[] = DataSource.getDataPathArray(res.query.dataPath);
-        const { groupBy, aliasBy } = res.query;
+        const { timePath, timeFormat, groupBy, aliasBy } = res.query;
         const split = groupBy.split(',');
         const groupByList: string[] = [];
         for (const element of split) {
@@ -160,8 +160,8 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
 
           const dataFrameMap = new Map<string, MutableDataFrame>();
           for (const doc of docs) {
-            if (doc.Time) {
-              doc.Time = dateTime(doc.Time);
+            if (timePath in doc) {
+              doc[timePath] = dateTime(doc[timePath], timeFormat);
             }
             const identifiers: string[] = [];
             for (const groupByElement of groupByList) {
@@ -178,7 +178,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
               }
               for (const fieldName in doc) {
                 let t: FieldType = FieldType.string;
-                if (fieldName === 'Time' || isRFC3339_ISO6801(String(doc[fieldName]))) {
+                if (fieldName === timePath || isRFC3339_ISO6801(String(doc[fieldName]))) {
                   t = FieldType.time;
                 } else if (_.isNumber(doc[fieldName])) {
                   t = FieldType.number;
@@ -227,17 +227,18 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     return Promise.all([this.createQuery(query, options.range)]).then((results: any) => {
       const r: AnnotationEvent[] = [];
       for (const res of results) {
+        const { timePath, endTimePath, timeFormat } = res.query;
         const dataPathArray: string[] = DataSource.getDataPathArray(res.query.dataPath);
         for (const dataPath of dataPathArray) {
           const docs: any[] = DataSource.getDocs(res.results.data, dataPath);
           for (const doc of docs) {
             const annotation: AnnotationEvent = {};
-            if (doc.Time) {
-              annotation.time = dateTime(doc.Time).valueOf();
+            if (timePath in doc) {
+              annotation.time = dateTime(doc[timePath], timeFormat).valueOf();
             }
-            if (doc.TimeEnd) {
+            if (endTimePath in doc) {
               annotation.isRegion = true;
-              annotation.timeEnd = dateTime(doc.TimeEnd).valueOf();
+              annotation.timeEnd = dateTime(doc[endTimePath], timeFormat).valueOf();
             }
             let title = query.annotationTitle;
             let text = query.annotationText;
