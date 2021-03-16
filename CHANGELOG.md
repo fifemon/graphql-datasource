@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.3.0
+
+- **improvement** Support key/value variables (@retzkek #48)
+- **improvement** Configurable timePath and timeFormat (@retzkek #49)
+- **documentation** rewrite examples to use the test data source, which provides
+  an example server and dashboard that [users can
+  install](https://github.com/fifemon/graphql-test-source) to learn and
+  experiment with. (@retzkek #51)
+
 ## v1.2.0
 
 - **improvement** Add support for dashboard variable queries (@ggranberry #38)
