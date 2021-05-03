@@ -2469,11 +2469,8 @@ function (_super) {
                           }
 
                           dataFrame.addField({
-                            name: fieldName,
-                            type: t,
-                            config: {
-                              displayName: title
-                            }
+                            name: title,
+                            type: t
                           }).parse = function (v) {
                             return v || '';
                           };
