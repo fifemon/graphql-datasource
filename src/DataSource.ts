@@ -19,28 +19,31 @@ import {
   MyVariableQuery,
   MultiValueVariable,
   TextValuePair,
+  RequestFactory,
 } from './types';
 import { dateTime, MutableDataFrame, FieldType, DataFrame } from '@grafana/data';
 import { getTemplateSrv } from '@grafana/runtime';
-import _ from 'lodash';
 import { isEqual } from 'lodash';
 import { flatten, isRFC3339_ISO6801 } from './util';
+import { GraphQLObjectType, isObjectType } from 'graphql';
+import { Schema } from './schema';
 
 const supportedVariableTypes = ['constant', 'custom', 'query', 'textbox'];
 
-export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
-  basicAuth: string | undefined;
-  withCredentials: boolean | undefined;
-  url: string | undefined;
-
-  constructor(instanceSettings: DataSourceInstanceSettings<MyDataSourceOptions>, private backendSrv: any) {
-    super(instanceSettings);
-    this.basicAuth = instanceSettings.basicAuth;
-    this.withCredentials = instanceSettings.withCredentials;
-    this.url = instanceSettings.url;
+class _RequestFactory implements RequestFactory {
+  constructor(
+    private basicAuth: string | undefined,
+    private withCredentials: boolean | undefined,
+    private url: string,
+    private backendSrv: any
+  ) {
+    this.basicAuth = basicAuth;
+    this.withCredentials = withCredentials;
+    this.url = url;
+    this.backendSrv = backendSrv;
   }
 
-  private request(data: string) {
+  request(data: string): Promise<any> {
     const options: any = {
       url: this.url,
       method: 'POST',
@@ -60,9 +63,26 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
 
     return this.backendSrv.datasourceRequest(options);
   }
+}
+
+export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
+  private schema: Schema;
+  private requestFactory: RequestFactory;
+
+  constructor(instanceSettings: DataSourceInstanceSettings<MyDataSourceOptions>, backendSrv: any) {
+    super(instanceSettings);
+    this.requestFactory = new _RequestFactory(
+      instanceSettings.basicAuth,
+      instanceSettings.withCredentials,
+      instanceSettings.url as string,
+      backendSrv
+    );
+    this.schema = new Schema(this.requestFactory);
+  }
 
   private postQuery(query: Partial<MyQuery>, payload: string) {
-    return this.request(payload)
+    return this.requestFactory
+      .request(payload)
       .then((results: any) => {
         return { query, results };
       })
@@ -138,12 +158,15 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
   }
 
   async query(options: DataQueryRequest<MyQuery>): Promise<DataQueryResponse> {
-    return Promise.all(
-      options.targets.map((target) => {
-        return this.createQuery(defaults(target, defaultQuery), options.range, options.scopedVars);
-      })
-    ).then((results: any) => {
+    let promises: Array<Promise<any>> = options.targets.map((target) => {
+      return this.createQuery(defaults(target, defaultQuery), options.range, options.scopedVars);
+    });
+    promises.push(this.schema.getQuery());
+
+    return Promise.all(promises).then((results: any[]) => {
       const dataFrameArray: DataFrame[] = [];
+      let queryType: GraphQLObjectType = results.pop();
+
       for (let res of results) {
         const dataPathArray: string[] = DataSource.getDataPathArray(res.query.dataPath);
         const { timePath, timeFormat, groupBy, aliasBy } = res.query;
@@ -157,6 +180,10 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
         }
         for (const dataPath of dataPathArray) {
           const docs: any[] = DataSource.getDocs(res.results.data, dataPath);
+          let dataType = Schema.getTypeOfDescendant(queryType, dataPath);
+          if (!isObjectType(dataType)) {
+            throw `Data path ${dataPath} has type ${dataType.name}, expected object type`;
+          }
 
           const dataFrameMap = new Map<string, MutableDataFrame>();
           for (const doc of docs) {
@@ -180,9 +207,13 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
                 let t: FieldType = FieldType.string;
                 if (fieldName === timePath || isRFC3339_ISO6801(String(doc[fieldName]))) {
                   t = FieldType.time;
-                } else if (_.isNumber(doc[fieldName])) {
-                  t = FieldType.number;
+                } else {
+                  let fieldType = Schema.getTypeOfDescendant(dataType, fieldName);
+                  if (Schema.isNumericType(fieldType)) {
+                    t = FieldType.number;
+                  }
                 }
+
                 let title;
                 if (identifiers.length !== 0) {
                   // if we have any identifiers
