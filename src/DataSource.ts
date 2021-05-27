@@ -3,28 +3,32 @@ import defaults from 'lodash/defaults';
 import {
   AnnotationEvent,
   AnnotationQueryRequest,
+  DataFrame,
   DataQueryRequest,
   DataQueryResponse,
   DataSourceApi,
-  MetricFindValue,
   DataSourceInstanceSettings,
+  dateTime,
+  FieldType,
+  MetricFindValue,
+  MutableDataFrame,
   ScopedVars,
   TimeRange,
 } from '@grafana/data';
 
 import {
-  MyQuery,
-  MyDataSourceOptions,
   defaultQuery,
-  MyVariableQuery,
   MultiValueVariable,
+  MyDataSourceOptions,
+  MyQuery,
+  MyVariableQuery,
   TextValuePair,
 } from './types';
-import { dateTime, MutableDataFrame, FieldType, DataFrame } from '@grafana/data';
 import { getTemplateSrv } from '@grafana/runtime';
-import _ from 'lodash';
-import { isEqual } from 'lodash';
+import _, { isEqual } from 'lodash';
 import { flatten, isRFC3339_ISO6801 } from './util';
+import { from, merge, Observable } from 'rxjs';
+import { ApolloClient, gql, InMemoryCache } from '@apollo/client';
 
 const supportedVariableTypes = ['constant', 'custom', 'query', 'textbox'];
 
@@ -137,91 +141,131 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     return dataPathArray;
   }
 
-  async query(options: DataQueryRequest<MyQuery>): Promise<DataQueryResponse> {
+  resultToDataQueryResponse(options: DataQueryRequest<MyQuery>, results: any): DataQueryResponse {
+    const dataFrameArray: DataFrame[] = [];
+    for (let res of results) {
+      const dataPathArray: string[] = DataSource.getDataPathArray(res.query.dataPath);
+      const { timePath, timeFormat, groupBy, aliasBy } = res.query;
+      const split = groupBy.split(',');
+      const groupByList: string[] = [];
+      for (const element of split) {
+        const trimmed = element.trim();
+        if (trimmed) {
+          groupByList.push(trimmed);
+        }
+      }
+      for (const dataPath of dataPathArray) {
+        const docs: any[] = DataSource.getDocs(res.results.data, dataPath);
+
+        const dataFrameMap = new Map<string, MutableDataFrame>();
+        // MAP THESE DOCS TO RESPONSE OF LIBRARY
+        for (const doc of docs) {
+          console.log(doc);
+          if (timePath in doc) {
+            doc[timePath] = dateTime(doc[timePath], timeFormat);
+          }
+          const identifiers: string[] = [];
+          for (const groupByElement of groupByList) {
+            identifiers.push(doc[groupByElement]);
+          }
+          const identifiersString = identifiers.toString();
+          let dataFrame = dataFrameMap.get(identifiersString);
+          if (!dataFrame) {
+            // we haven't initialized the dataFrame for this specific identifier that we group by yet
+            dataFrame = new MutableDataFrame({ fields: [] });
+            const generalReplaceObject: any = {};
+            for (const fieldName in doc) {
+              generalReplaceObject['field_' + fieldName] = doc[fieldName];
+            }
+            for (const fieldName in doc) {
+              let t: FieldType = FieldType.string;
+              if (fieldName === timePath || isRFC3339_ISO6801(String(doc[fieldName]))) {
+                t = FieldType.time;
+              } else if (_.isNumber(doc[fieldName])) {
+                t = FieldType.number;
+              }
+              let title;
+              if (identifiers.length !== 0) {
+                // if we have any identifiers
+                title = identifiersString + '_' + fieldName;
+              } else {
+                title = fieldName;
+              }
+              if (aliasBy) {
+                title = aliasBy;
+                const replaceObject = { ...generalReplaceObject };
+                replaceObject['fieldName'] = fieldName;
+                for (const replaceKey in replaceObject) {
+                  const replaceValue = replaceObject[replaceKey];
+                  const regex = new RegExp('\\$' + replaceKey, 'g');
+                  title = title.replace(regex, replaceValue);
+                }
+                title = getTemplateSrv().replace(title, options.scopedVars);
+              }
+              dataFrame.addField({
+                name: fieldName,
+                type: t,
+                config: { displayName: title },
+              }).parse = (v: any) => {
+                return v || '';
+              };
+            }
+            dataFrameMap.set(identifiersString, dataFrame);
+          }
+
+          dataFrame.add(doc);
+        }
+        for (const dataFrame of dataFrameMap.values()) {
+          dataFrameArray.push(dataFrame);
+        }
+      }
+    }
+    return { data: dataFrameArray };
+  }
+  async graphQlQuery(options: DataQueryRequest<MyQuery>): Promise<DataQueryResponse> {
     return Promise.all(
       options.targets.map((target) => {
         return this.createQuery(defaults(target, defaultQuery), options.range, options.scopedVars);
       })
     ).then((results: any) => {
-      const dataFrameArray: DataFrame[] = [];
-      for (let res of results) {
-        const dataPathArray: string[] = DataSource.getDataPathArray(res.query.dataPath);
-        const { timePath, timeFormat, groupBy, aliasBy } = res.query;
-        const split = groupBy.split(',');
-        const groupByList: string[] = [];
-        for (const element of split) {
-          const trimmed = element.trim();
-          if (trimmed) {
-            groupByList.push(trimmed);
-          }
-        }
-        for (const dataPath of dataPathArray) {
-          const docs: any[] = DataSource.getDocs(res.results.data, dataPath);
-
-          const dataFrameMap = new Map<string, MutableDataFrame>();
-          for (const doc of docs) {
-            if (timePath in doc) {
-              doc[timePath] = dateTime(doc[timePath], timeFormat);
-            }
-            const identifiers: string[] = [];
-            for (const groupByElement of groupByList) {
-              identifiers.push(doc[groupByElement]);
-            }
-            const identifiersString = identifiers.toString();
-            let dataFrame = dataFrameMap.get(identifiersString);
-            if (!dataFrame) {
-              // we haven't initialized the dataFrame for this specific identifier that we group by yet
-              dataFrame = new MutableDataFrame({ fields: [] });
-              const generalReplaceObject: any = {};
-              for (const fieldName in doc) {
-                generalReplaceObject['field_' + fieldName] = doc[fieldName];
-              }
-              for (const fieldName in doc) {
-                let t: FieldType = FieldType.string;
-                if (fieldName === timePath || isRFC3339_ISO6801(String(doc[fieldName]))) {
-                  t = FieldType.time;
-                } else if (_.isNumber(doc[fieldName])) {
-                  t = FieldType.number;
-                }
-                let title;
-                if (identifiers.length !== 0) {
-                  // if we have any identifiers
-                  title = identifiersString + '_' + fieldName;
-                } else {
-                  title = fieldName;
-                }
-                if (aliasBy) {
-                  title = aliasBy;
-                  const replaceObject = { ...generalReplaceObject };
-                  replaceObject['fieldName'] = fieldName;
-                  for (const replaceKey in replaceObject) {
-                    const replaceValue = replaceObject[replaceKey];
-                    const regex = new RegExp('\\$' + replaceKey, 'g');
-                    title = title.replace(regex, replaceValue);
-                  }
-                  title = getTemplateSrv().replace(title, options.scopedVars);
-                }
-                dataFrame.addField({
-                  name: fieldName,
-                  type: t,
-                  config: { displayName: title },
-                }).parse = (v: any) => {
-                  return v || '';
-                };
-              }
-              dataFrameMap.set(identifiersString, dataFrame);
-            }
-
-            dataFrame.add(doc);
-          }
-          for (const dataFrame of dataFrameMap.values()) {
-            dataFrameArray.push(dataFrame);
-          }
-        }
-      }
-      return { data: dataFrameArray };
+      return this.resultToDataQueryResponse(options, results);
     });
   }
+
+  private createQuery2(
+    query: MyQuery,
+    range: TimeRange | undefined,
+    scopedVars: ScopedVars | undefined = undefined
+  ): string {
+    return getTemplateSrv().replace(query.queryText, {
+      ...scopedVars,
+      timeFrom: { text: 'from', value: range?.from.valueOf() },
+      timeTo: { text: 'to', value: range?.to.valueOf() },
+    });
+  }
+
+  query(options: DataQueryRequest<MyQuery>): Observable<DataQueryResponse> {
+    const client = new ApolloClient({
+      uri: this.url,
+      cache: new InMemoryCache(),
+    });
+    if (false) {
+    } else {
+      options.targets.map((target) => {
+        let payload = this.createQuery2(defaults(target, defaultQuery), options.range, options.scopedVars);
+        client
+          .query({
+            query: gql`
+              ${payload}
+            `,
+          })
+          .then((result) => console.log(result));
+      });
+      const observables = from(this.graphQlQuery(options));
+      return merge(observables);
+    }
+  }
+
   annotationQuery(options: AnnotationQueryRequest<MyQuery>): Promise<AnnotationEvent[]> {
     const query = defaults(options.annotation, defaultQuery);
     return Promise.all([this.createQuery(query, options.range)]).then((results: any) => {
