@@ -28,7 +28,7 @@ import { getTemplateSrv } from '@grafana/runtime';
 import _, { isEqual } from 'lodash';
 import { flatten, isRFC3339_ISO6801 } from './util';
 import { from, merge, Observable } from 'rxjs';
-import { ApolloClient, gql, InMemoryCache } from '@apollo/client';
+import { ApolloClient, ApolloQueryResult, gql, InMemoryCache } from '@apollo/client';
 
 const supportedVariableTypes = ['constant', 'custom', 'query', 'textbox'];
 
@@ -92,7 +92,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     //console.log(payload);
     return this.postQuery(query, payload);
   }
-  private static getDocs(resultsData: any, dataPath: string): any[] {
+  private static getDocs(resultsData: ApolloQueryResult<any>, dataPath: string): any[] {
     if (!resultsData) {
       throw 'resultsData was null or undefined';
     }
@@ -103,9 +103,8 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       return d[p];
     }, resultsData.data);
     if (!data) {
-      const errors: any[] = resultsData.errors;
-      if (errors && errors.length !== 0) {
-        throw errors[0];
+      if (resultsData.errors && resultsData.errors.length !== 0) {
+        throw resultsData.errors[0];
       }
       throw 'Your data path did not exist! dataPath: ' + dataPath;
     }
@@ -139,6 +138,90 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       throw 'data path is empty!';
     }
     return dataPathArray;
+  }
+
+  mapToDataFrame(query: MyQuery, res: ApolloQueryResult<any>): DataQueryResponse {
+    console.log(query);
+    console.log(res);
+    const dataFrameArray: DataFrame[] = [];
+
+    const dataPathArray: string[] = DataSource.getDataPathArray(query.dataPath);
+    const split = query.groupBy.split(',');
+    const groupByList: string[] = [];
+    for (const element of split) {
+      const trimmed = element.trim();
+      if (trimmed) {
+        groupByList.push(trimmed);
+      }
+    }
+    for (const dataPath of dataPathArray) {
+      const docs: any[] = DataSource.getDocs(res, dataPath);
+
+      const dataFrameMap = new Map<string, MutableDataFrame>();
+      for (const doc of docs) {
+        if (query.timePath in doc && query.timeFormat) {
+          doc[query.timePath] = dateTime(doc[query.timePath], query.timeFormat);
+        }
+        const identifiers: string[] = [];
+        for (const groupByElement of groupByList) {
+          identifiers.push(doc[groupByElement]);
+        }
+        const identifiersString = identifiers.toString();
+        let dataFrame = dataFrameMap.get(identifiersString);
+        if (!dataFrame) {
+          // we haven't initialized the dataFrame for this specific identifier that we group by yet
+          dataFrame = new MutableDataFrame({ fields: [] });
+          const generalReplaceObject: any = {};
+          for (const fieldName in doc) {
+            generalReplaceObject['field_' + fieldName] = doc[fieldName];
+          }
+          for (const fieldName in doc) {
+            // ignore metadata fields
+            if (fieldName.startsWith('__')) {
+              continue;
+            }
+            let t: FieldType = FieldType.string;
+            if (fieldName === query.timePath || isRFC3339_ISO6801(String(doc[fieldName]))) {
+              t = FieldType.time;
+            } else if (_.isNumber(doc[fieldName])) {
+              t = FieldType.number;
+            }
+            let title;
+            if (identifiers.length !== 0) {
+              // if we have any identifiers
+              title = identifiersString + '_' + fieldName;
+            } else {
+              title = fieldName;
+            }
+            if (query.aliasBy) {
+              title = query.aliasBy;
+              const replaceObject = { ...generalReplaceObject };
+              replaceObject['fieldName'] = fieldName;
+              for (const replaceKey in replaceObject) {
+                const replaceValue = replaceObject[replaceKey];
+                const regex = new RegExp('\\$' + replaceKey, 'g');
+                title = title.replace(regex, replaceValue);
+              }
+              //title = getTemplateSrv().replace(title, query. options.scopedVars);
+            }
+            dataFrame.addField({
+              name: fieldName,
+              type: t,
+              config: { displayName: title },
+            }).parse = (v: any) => {
+              return v || '';
+            };
+          }
+          dataFrameMap.set(identifiersString, dataFrame);
+        }
+
+        dataFrame.add(doc);
+      }
+      for (const dataFrame of dataFrameMap.values()) {
+        dataFrameArray.push(dataFrame);
+      }
+    }
+    return { data: dataFrameArray };
   }
 
   resultToDataQueryResponse(options: DataQueryRequest<MyQuery>, results: any): DataQueryResponse {
@@ -249,21 +332,21 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       uri: this.url,
       cache: new InMemoryCache(),
     });
-    if (false) {
-    } else {
-      options.targets.map((target) => {
-        let payload = this.createQuery2(defaults(target, defaultQuery), options.range, options.scopedVars);
+    const observables = options.targets.map((target) => {
+      let query = defaults(target, defaultQuery);
+      let payload = this.createQuery2(query, options.range, options.scopedVars);
+      return from(
         client
           .query({
             query: gql`
               ${payload}
             `,
           })
-          .then((result) => console.log(result));
-      });
-      const observables = from(this.graphQlQuery(options));
-      return merge(observables);
-    }
+          .then((result) => this.mapToDataFrame(query, result))
+      );
+    });
+    //const observables = from(this.graphQlQuery(options));
+    return merge(...observables);
   }
 
   annotationQuery(options: AnnotationQueryRequest<MyQuery>): Promise<AnnotationEvent[]> {
