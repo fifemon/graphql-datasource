@@ -10,6 +10,7 @@ import {
   DataSourceInstanceSettings,
   dateTime,
   FieldType,
+  LoadingState,
   MetricFindValue,
   MutableDataFrame,
   ScopedVars,
@@ -27,8 +28,13 @@ import {
 import { getTemplateSrv } from '@grafana/runtime';
 import _, { isEqual } from 'lodash';
 import { flatten, isRFC3339_ISO6801 } from './util';
-import { from, merge, Observable } from 'rxjs';
-import { ApolloClient, ApolloQueryResult, gql, InMemoryCache } from '@apollo/client';
+import { merge, Observable } from 'rxjs';
+import { ApolloClient, FetchResult, gql, InMemoryCache } from '@apollo/client';
+import { split, HttpLink } from '@apollo/client';
+import { getMainDefinition } from '@apollo/client/utilities';
+import { WebSocketLink } from '@apollo/client/link/ws';
+
+import * as ZenObservable from 'zen-observable';
 
 const supportedVariableTypes = ['constant', 'custom', 'query', 'textbox'];
 
@@ -41,12 +47,12 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     super(instanceSettings);
     this.basicAuth = instanceSettings.basicAuth;
     this.withCredentials = instanceSettings.withCredentials;
-    this.url = instanceSettings.url;
+    this.url = instanceSettings.url?.replace(/(^\w+:|^)\/\//, '');
   }
 
   private request(data: string) {
     const options: any = {
-      url: this.url,
+      url: 'http://' + this.url,
       method: 'POST',
       data: {
         query: data,
@@ -82,17 +88,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       });
   }
 
-  private createQuery(query: MyQuery, range: TimeRange | undefined, scopedVars: ScopedVars | undefined = undefined) {
-    let payload = getTemplateSrv().replace(query.queryText, {
-      ...scopedVars,
-      timeFrom: { text: 'from', value: range?.from.valueOf() },
-      timeTo: { text: 'to', value: range?.to.valueOf() },
-    });
-
-    //console.log(payload);
-    return this.postQuery(query, payload);
-  }
-  private static getDocs(resultsData: ApolloQueryResult<any>, dataPath: string): any[] {
+  private static getDocs(resultsData: FetchResult<any>, dataPath: string): any[] {
     if (!resultsData) {
       throw 'resultsData was null or undefined';
     }
@@ -140,7 +136,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     return dataPathArray;
   }
 
-  mapToDataFrame(query: MyQuery, res: ApolloQueryResult<any>): DataQueryResponse {
+  resultToDataQueryResponse(query: MyQuery, res: FetchResult<any>): DataQueryResponse {
     console.log(query);
     console.log(res);
     const dataFrameArray: DataFrame[] = [];
@@ -221,101 +217,13 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
         dataFrameArray.push(dataFrame);
       }
     }
-    return { data: dataFrameArray };
+    return {
+      state: LoadingState.Done,
+      data: dataFrameArray,
+    };
   }
 
-  resultToDataQueryResponse(options: DataQueryRequest<MyQuery>, results: any): DataQueryResponse {
-    const dataFrameArray: DataFrame[] = [];
-    for (let res of results) {
-      const dataPathArray: string[] = DataSource.getDataPathArray(res.query.dataPath);
-      const { timePath, timeFormat, groupBy, aliasBy } = res.query;
-      const split = groupBy.split(',');
-      const groupByList: string[] = [];
-      for (const element of split) {
-        const trimmed = element.trim();
-        if (trimmed) {
-          groupByList.push(trimmed);
-        }
-      }
-      for (const dataPath of dataPathArray) {
-        const docs: any[] = DataSource.getDocs(res.results.data, dataPath);
-
-        const dataFrameMap = new Map<string, MutableDataFrame>();
-        // MAP THESE DOCS TO RESPONSE OF LIBRARY
-        for (const doc of docs) {
-          console.log(doc);
-          if (timePath in doc) {
-            doc[timePath] = dateTime(doc[timePath], timeFormat);
-          }
-          const identifiers: string[] = [];
-          for (const groupByElement of groupByList) {
-            identifiers.push(doc[groupByElement]);
-          }
-          const identifiersString = identifiers.toString();
-          let dataFrame = dataFrameMap.get(identifiersString);
-          if (!dataFrame) {
-            // we haven't initialized the dataFrame for this specific identifier that we group by yet
-            dataFrame = new MutableDataFrame({ fields: [] });
-            const generalReplaceObject: any = {};
-            for (const fieldName in doc) {
-              generalReplaceObject['field_' + fieldName] = doc[fieldName];
-            }
-            for (const fieldName in doc) {
-              let t: FieldType = FieldType.string;
-              if (fieldName === timePath || isRFC3339_ISO6801(String(doc[fieldName]))) {
-                t = FieldType.time;
-              } else if (_.isNumber(doc[fieldName])) {
-                t = FieldType.number;
-              }
-              let title;
-              if (identifiers.length !== 0) {
-                // if we have any identifiers
-                title = identifiersString + '_' + fieldName;
-              } else {
-                title = fieldName;
-              }
-              if (aliasBy) {
-                title = aliasBy;
-                const replaceObject = { ...generalReplaceObject };
-                replaceObject['fieldName'] = fieldName;
-                for (const replaceKey in replaceObject) {
-                  const replaceValue = replaceObject[replaceKey];
-                  const regex = new RegExp('\\$' + replaceKey, 'g');
-                  title = title.replace(regex, replaceValue);
-                }
-                title = getTemplateSrv().replace(title, options.scopedVars);
-              }
-              dataFrame.addField({
-                name: fieldName,
-                type: t,
-                config: { displayName: title },
-              }).parse = (v: any) => {
-                return v || '';
-              };
-            }
-            dataFrameMap.set(identifiersString, dataFrame);
-          }
-
-          dataFrame.add(doc);
-        }
-        for (const dataFrame of dataFrameMap.values()) {
-          dataFrameArray.push(dataFrame);
-        }
-      }
-    }
-    return { data: dataFrameArray };
-  }
-  async graphQlQuery(options: DataQueryRequest<MyQuery>): Promise<DataQueryResponse> {
-    return Promise.all(
-      options.targets.map((target) => {
-        return this.createQuery(defaults(target, defaultQuery), options.range, options.scopedVars);
-      })
-    ).then((results: any) => {
-      return this.resultToDataQueryResponse(options, results);
-    });
-  }
-
-  private createQuery2(
+  private static createQuery(
     query: MyQuery,
     range: TimeRange | undefined,
     scopedVars: ScopedVars | undefined = undefined
@@ -327,31 +235,54 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     });
   }
 
+  private zenToRx<T>(zenObservable: ZenObservable<T>): Observable<T> {
+    return new Observable((observer) => zenObservable.subscribe(observer));
+  }
+
   query(options: DataQueryRequest<MyQuery>): Observable<DataQueryResponse> {
+    const httpLink = new HttpLink({
+      uri: 'http://' + this.url,
+    });
+
+    const wsLink = new WebSocketLink({
+      uri: 'ws://' + this.url,
+      options: {
+        reconnect: true,
+      },
+    });
+    const splitLink = split(
+      ({ query }) => {
+        const definition = getMainDefinition(query);
+        return definition.kind === 'OperationDefinition' && definition.operation === 'subscription';
+      },
+      wsLink,
+      httpLink
+    );
+
+    // Instantiate client
     const client = new ApolloClient({
-      uri: this.url,
+      link: splitLink,
       cache: new InMemoryCache(),
     });
     const observables = options.targets.map((target) => {
       let query = defaults(target, defaultQuery);
-      let payload = this.createQuery2(query, options.range, options.scopedVars);
-      return from(
+      let payload = DataSource.createQuery(query, options.range, options.scopedVars);
+      return this.zenToRx(
         client
-          .query({
+          .subscribe({
             query: gql`
               ${payload}
             `,
           })
-          .then((result) => this.mapToDataFrame(query, result))
+          .map((result) => this.resultToDataQueryResponse(query, result))
       );
     });
-    //const observables = from(this.graphQlQuery(options));
     return merge(...observables);
   }
 
   annotationQuery(options: AnnotationQueryRequest<MyQuery>): Promise<AnnotationEvent[]> {
     const query = defaults(options.annotation, defaultQuery);
-    return Promise.all([this.createQuery(query, options.range)]).then((results: any) => {
+    return Promise.all([DataSource.createQuery(query, options.range)]).then((results: any) => {
       const r: AnnotationEvent[] = [];
       for (const res of results) {
         const { timePath, endTimePath, timeFormat } = res.query;
