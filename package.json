@@ -21,6 +21,8 @@
     "@apollo/client": "^3.3.19",
     "@types/lodash": "^4.14.144",
     "graphql": "^15.5.0",
-    "tslib": "^2.0.0"
+    "subscriptions-transport-ws": "^0.9.18",
+    "tslib": "^2.0.0",
+    "zen-observable": "^0.8.15"
   }
 }
