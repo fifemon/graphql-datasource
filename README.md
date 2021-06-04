@@ -25,6 +25,7 @@ annotations, and dashboard variables.
 - Alias by is used to alter the name of the field displayed in the legend.
   `$field_<field.name>` is substituted with the values of the field and
   `$fieldName` is substituted with the name of the field.
+- [GraphQL subscriptions](https://www.apollographql.com/docs/apollo-server/data/subscriptions/) supported.
 
 # Screenshots
 
@@ -75,6 +76,21 @@ query {
 - Data path: `simple_series`
 - Time path: `timestamp`
 - Time format: `MM.DD.YYYY HHmmss`
+
+## Subscriptions
+
+```graphql
+subscription {
+  data: simple_series {
+    Time: timestamp
+    value
+  }
+}
+```
+
+Subscriptions will automatically update the dashboard as soon as new data is available. 
+Data will be pushed by the GraphQL endpoint, refreshing the dashboard manually is not necessary.
+Only supported when using the `Browser` access option.
 
 ## Alias and group by
 
