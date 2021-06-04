@@ -385,6 +385,9 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
             let text = query.annotationText;
             let tags = query.annotationTags;
             for (const fieldName in doc) {
+              if (fieldName.startsWith('__')) {
+                continue;
+              }
               const fieldValue = doc[fieldName];
               const replaceKey = 'field_' + fieldName;
               const regex = new RegExp('\\$' + replaceKey, 'g');
@@ -459,6 +462,9 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
         metricFindValues.push({ text: doc['__text'], value: doc['__value'] });
       } else {
         for (const fieldName in doc) {
+          if (fieldName.startsWith('__')) {
+            continue;
+          }
           metricFindValues.push({ text: doc[fieldName] });
         }
       }
