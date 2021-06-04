@@ -28,8 +28,9 @@ import {
 import { getTemplateSrv } from '@grafana/runtime';
 import _, { isEqual } from 'lodash';
 import { flatten, isRFC3339_ISO6801 } from './util';
-import { merge, Observable } from 'rxjs';
-import { ApolloClient, FetchResult, gql, InMemoryCache } from '@apollo/client';
+import { merge, Observable, from } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+import { ApolloClient, FetchResult, gql, InMemoryCache, NormalizedCacheObject } from '@apollo/client';
 import { split, HttpLink } from '@apollo/client';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { WebSocketLink } from '@apollo/client/link/ws';
@@ -39,42 +40,154 @@ import * as ZenObservable from 'zen-observable';
 const supportedVariableTypes = ['constant', 'custom', 'query', 'textbox'];
 
 export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
-  basicAuth: string | undefined;
-  withCredentials: boolean | undefined;
-  url: string | undefined;
+  client: ApolloClient<NormalizedCacheObject>;
 
+  // @ts-ignore
   constructor(instanceSettings: DataSourceInstanceSettings<MyDataSourceOptions>, private backendSrv: any) {
     super(instanceSettings);
-    this.basicAuth = instanceSettings.basicAuth;
-    this.withCredentials = instanceSettings.withCredentials;
-    this.url = instanceSettings.url?.replace(/(^\w+:|^)\/\//, '');
+    if (!instanceSettings.url) {
+      throw new Error('URL is needed!');
+    }
+    this.client = DataSource.createClient(instanceSettings.url, instanceSettings.type, instanceSettings.basicAuth);
   }
 
-  private request(data: string) {
-    const options: any = {
-      url: 'http://' + this.url,
-      method: 'POST',
-      data: {
-        query: data,
+  private static checkIfSecureConnectionUrl(url: string) {
+    let protocol = url.split(/(:\/\/)/)[0];
+    return protocol === 'https';
+  }
+
+  /**
+   * Creates an {@link ApolloClient}. Handles internal route split between queries (=http) and subscriptions (=websocket).
+   * @param uri
+   * @param connectionType
+   * @param basicAuth
+   * @private
+   */
+  private static createClient(
+    uri: string,
+    connectionType: string,
+    basicAuth = ''
+  ): ApolloClient<NormalizedCacheObject> {
+    let headers: Record<string, string> = {};
+    if (basicAuth !== '') {
+      headers['Authorization'] = basicAuth;
+    }
+
+    // There is no documentation if websockets are proxied by Grafana
+    // Thus no websockets will be used when using `Server` option
+    if (uri.startsWith('/')) {
+      return new ApolloClient({
+        uri: uri,
+        cache: new InMemoryCache(),
+        headers: headers,
+      });
+    }
+
+    let secure = DataSource.checkIfSecureConnectionUrl(uri);
+    // remove prefix protocol
+    let urn = uri.replace(/(^\w+:|^)\/\//, '');
+    // If connectionType is `Browser`, do WS - HTTP splitting
+    let httpPrefix: string;
+    let wsPrefix: string;
+
+    if (secure) {
+      httpPrefix = 'https://';
+      wsPrefix = 'wss://';
+    } else {
+      httpPrefix = 'http://';
+      wsPrefix = 'ws://';
+    }
+
+    const httpLink = new HttpLink({
+      uri: httpPrefix + urn,
+    });
+
+    const wsLink = new WebSocketLink({
+      uri: wsPrefix + urn,
+      options: {
+        reconnect: true,
       },
-    };
+    });
+    const splitLink = split(
+      ({ query }) => {
+        const definition = getMainDefinition(query);
+        return definition.kind === 'OperationDefinition' && definition.operation === 'subscription';
+      },
+      wsLink,
+      httpLink
+    );
 
-    if (this.basicAuth || this.withCredentials) {
-      options.withCredentials = true;
-    }
-    if (this.basicAuth) {
-      options.headers = {
-        Authorization: this.basicAuth,
-      };
-    }
-
-    return this.backendSrv.datasourceRequest(options);
+    // Instantiate client
+    return new ApolloClient({
+      link: splitLink,
+      cache: new InMemoryCache(),
+      headers: headers,
+    });
   }
 
-  private postQuery(query: Partial<MyQuery>, payload: string) {
-    return this.request(payload)
+  /**
+   * Sends a request to the GraphQL endpoint, will always return an Observable, regardless if request is a query or subscription.
+   * This method can be used if the payload is a user entered string where it is not known if the query is a subscription or a query.
+   * If type of query is already known, use {@link sendSubscription} or {@link sendQuery} instead.
+   * @param payload User-entered query or subscription string
+   * @private
+   */
+  private sendRequest(payload: string): Observable<any> {
+    // split by space or {
+    let method = payload.split(/[{ ]/)[0];
+    if (method === 'subscription') {
+      return this.sendSubscription(payload);
+    }
+    return from(this.sendQuery(payload));
+  }
+
+  /**
+   * Subscribes to a query. This opens a websocket so GraphQL endpoint must support subscriptions.
+   * While payload may also be a simple query, it is more efficient to use {@link sendQuery} for simple one-time queries.
+   * @param payload
+   * @private
+   */
+  private sendSubscription(payload: string): Observable<any> {
+    return this.zenToRx(
+      this.client.subscribe({
+        query: gql`
+          ${payload}
+        `,
+      })
+    )
+      .pipe(
+        catchError((err) => {
+          if (err.data && err.data.error) {
+            throw {
+              message: 'GraphQL error: ' + err.data.error.reason,
+              error: err.data.error,
+            };
+          }
+
+          throw err;
+        })
+      )
+      .pipe(
+        map((result) => {
+          return result;
+        })
+      );
+  }
+
+  /**
+   * Sends a simple query to the GraphQL endpoint. Does not support subscriptions.
+   * @param payload
+   * @private
+   */
+  private sendQuery(payload: string): Promise<any> {
+    return this.client
+      .query({
+        query: gql`
+          ${payload}
+        `,
+      })
       .then((results: any) => {
-        return { query, results };
+        return results;
       })
       .catch((err: any) => {
         if (err.data && err.data.error) {
@@ -136,9 +249,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     return dataPathArray;
   }
 
-  resultToDataQueryResponse(query: MyQuery, res: FetchResult<any>): DataQueryResponse {
-    console.log(query);
-    console.log(res);
+  static resultToDataQueryResponse(query: MyQuery, res: FetchResult<any>): DataQueryResponse {
     const dataFrameArray: DataFrame[] = [];
 
     const dataPathArray: string[] = DataSource.getDataPathArray(query.dataPath);
@@ -235,68 +346,40 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     });
   }
 
+  /**
+   * Helper function to map Zen {@link ZenObservable}s returned from the Apollo Client to rxjs {@link Observable}s.
+   * @param zenObservable
+   * @private
+   */
   private zenToRx<T>(zenObservable: ZenObservable<T>): Observable<T> {
     return new Observable((observer) => zenObservable.subscribe(observer));
   }
 
   query(options: DataQueryRequest<MyQuery>): Observable<DataQueryResponse> {
-    const httpLink = new HttpLink({
-      uri: 'http://' + this.url,
-    });
-
-    const wsLink = new WebSocketLink({
-      uri: 'ws://' + this.url,
-      options: {
-        reconnect: true,
-      },
-    });
-    const splitLink = split(
-      ({ query }) => {
-        const definition = getMainDefinition(query);
-        return definition.kind === 'OperationDefinition' && definition.operation === 'subscription';
-      },
-      wsLink,
-      httpLink
-    );
-
-    // Instantiate client
-    const client = new ApolloClient({
-      link: splitLink,
-      cache: new InMemoryCache(),
-    });
     const observables = options.targets.map((target) => {
       let query = defaults(target, defaultQuery);
       let payload = DataSource.createQuery(query, options.range, options.scopedVars);
-      return this.zenToRx(
-        client
-          .subscribe({
-            query: gql`
-              ${payload}
-            `,
-          })
-          .map((result) => this.resultToDataQueryResponse(query, result))
-      );
+      return this.sendRequest(payload).pipe(map((result) => DataSource.resultToDataQueryResponse(query, result)));
     });
     return merge(...observables);
   }
 
   annotationQuery(options: AnnotationQueryRequest<MyQuery>): Promise<AnnotationEvent[]> {
     const query = defaults(options.annotation, defaultQuery);
-    return Promise.all([DataSource.createQuery(query, options.range)]).then((results: any) => {
+    return this.sendQuery(DataSource.createQuery(query, options.range)).then((results) => {
       const r: AnnotationEvent[] = [];
       for (const res of results) {
-        const { timePath, endTimePath, timeFormat } = res.query;
-        const dataPathArray: string[] = DataSource.getDataPathArray(res.query.dataPath);
+        const dataPathArray: string[] = DataSource.getDataPathArray(query.dataPath);
         for (const dataPath of dataPathArray) {
-          const docs: any[] = DataSource.getDocs(res.results.data, dataPath);
+          const docs: any[] = DataSource.getDocs(res, dataPath);
           for (const doc of docs) {
             const annotation: AnnotationEvent = {};
-            if (timePath in doc) {
-              annotation.time = dateTime(doc[timePath], timeFormat).valueOf();
+            if (query.timePath in doc && query.timeFormat) {
+              doc[query.timePath] = dateTime(doc[query.timePath], query.timeFormat);
             }
-            if (endTimePath in doc) {
+            if (query.endTimePath && query.endTimePath in doc && query.timeFormat) {
               annotation.isRegion = true;
-              annotation.timeEnd = dateTime(doc[endTimePath], timeFormat).valueOf();
+              annotation.timeEnd = dateTime(doc[query.endTimePath], query.timeFormat).valueOf();
             }
             let title = query.annotationTitle;
             let text = query.annotationText;
@@ -328,13 +411,14 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     });
   }
 
-  testDatasource() {
-    const q = `{
-      __schema{
-        queryType{name}
-      }
-    }`;
-    return this.postQuery(defaultQuery, q).then(
+  testDatasource(): Promise<any> {
+    return this.sendQuery(
+      `{
+        __schema{
+          queryType{name}
+        }
+      }`
+    ).then(
       (res: any) => {
         if (res.errors) {
           console.log(res.errors);
@@ -366,9 +450,9 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     let payload = query.queryText;
     payload = getTemplateSrv().replace(payload, { ...this.getVariables });
 
-    const response = await this.postQuery(query, payload);
+    const response = await this.sendQuery(payload);
 
-    const docs: any[] = DataSource.getDocs(response.results.data, query.dataPath);
+    const docs: any[] = DataSource.getDocs(response, query.dataPath);
 
     for (const doc of docs) {
       if ('__text' in doc && '__value' in doc) {
