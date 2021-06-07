@@ -56,3 +56,7 @@ export interface MultiValueVariable extends VariableModel {
   current: TextValuePair;
   options: TextValuePair[];
 }
+
+export interface RequestFactory {
+  request(data: string): Promise<any>;
+}
