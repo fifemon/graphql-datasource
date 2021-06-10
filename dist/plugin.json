@@ -4,6 +4,7 @@
   "id": "fifemon-graphql-datasource",
   "metrics": true,
   "annotations": true,
+  "streaming": true,
 
   "info": {
     "description": "GraphQL Data Source",
@@ -24,8 +25,8 @@
       { "name": "DeutscheBahn Arrivals Annotations", "path": "img/db_arrivals_annotations.png"},
       { "name": "GitHub Security Advisories", "path": "img/github_security_advisories.png"}
     ],
-    "version": "1.3.0",
-    "updated": "2021-03-16"
+    "version": "1.3.1-alpha.1",
+    "updated": "2021-06-10"
   },
 
   "dependencies": {
