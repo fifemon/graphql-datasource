@@ -1,6 +1,6 @@
 {
   "type": "datasource",
-  "name": "GraphQL Data Source",
+  "name": "GraphQL",
   "id": "fifemon-graphql-datasource",
   "metrics": true,
   "annotations": true,
