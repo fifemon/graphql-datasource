@@ -77,7 +77,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
 
     // There is no documentation if websockets are proxied by Grafana
     // Thus no websockets will be used when using `Server` option
-    // TODO: #123
+    // TODO: Support 'Server'-proxied websockets #70
     if (httpUrl.startsWith('/') || !wsUrl) {
       return new ApolloClient({
         uri: httpUrl,
