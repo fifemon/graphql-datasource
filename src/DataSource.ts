@@ -1,5 +1,3 @@
-import defaults from 'lodash/defaults';
-
 import {
   AnnotationEvent,
   AnnotationQueryRequest,
@@ -26,7 +24,7 @@ import {
   TextValuePair,
 } from './types';
 import { getTemplateSrv } from '@grafana/runtime';
-import _, { isEqual } from 'lodash';
+import { isNumber, isEqual, defaults } from 'lodash';
 import { flatten, isRFC3339_ISO6801 } from './util';
 import { merge, Observable, from } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
@@ -278,7 +276,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
             let t: FieldType = FieldType.string;
             if (fieldName === query.timePath || isRFC3339_ISO6801(String(doc[fieldName]))) {
               t = FieldType.time;
-            } else if (_.isNumber(doc[fieldName])) {
+            } else if (isNumber(doc[fieldName])) {
               t = FieldType.number;
             }
             let title;
