@@ -11,18 +11,17 @@
   "author": "Kevin Retzke",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@grafana/data": "7.4.3",
-    "@grafana/runtime": "7.4.3",
-    "@grafana/toolkit": "7.4.3",
-    "@grafana/ui": "7.4.3",
+    "@grafana/data": "8.1.4",
+    "@grafana/runtime": "8.1.4",
+    "@grafana/toolkit": "8.1.4",
+    "@grafana/ui": "8.1.4",
     "moment": "*"
   },
   "dependencies": {
-    "@apollo/client": "^3.3.19",
-    "@types/lodash": "^4.14.144",
-    "graphql": "^15.5.0",
-    "subscriptions-transport-ws": "^0.9.18",
-    "tslib": "^2.0.0",
+    "@apollo/client": "^3.4.11",
+    "@types/lodash": "^4.14.172",
+    "subscriptions-transport-ws": "^0.9.19",
+    "tslib": "^2.3.1",
     "zen-observable": "^0.8.15"
   }
 }
