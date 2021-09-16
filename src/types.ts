@@ -38,6 +38,7 @@ export const defaultQuery: Partial<MyQuery> = {
  */
 export interface MyDataSourceOptions extends DataSourceJsonData {
   apiKey?: string;
+  websocketUrl?: string;
 }
 
 export interface MyVariableQuery extends DataQuery {
