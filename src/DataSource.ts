@@ -2,7 +2,6 @@ import defaults from 'lodash/defaults';
 
 import {
   AnnotationEvent,
-  AnnotationQueryRequest,
   DataQueryRequest,
   DataQueryResponse,
   DataSourceApi,
@@ -10,6 +9,10 @@ import {
   DataSourceInstanceSettings,
   ScopedVars,
   TimeRange,
+  dateTime,
+  MutableDataFrame,
+  FieldType,
+  DataFrame,
 } from '@grafana/data';
 
 import {
@@ -20,10 +23,8 @@ import {
   MultiValueVariable,
   TextValuePair,
 } from './types';
-import { dateTime, MutableDataFrame, FieldType, DataFrame } from '@grafana/data';
 import { getTemplateSrv } from '@grafana/runtime';
 import _ from 'lodash';
-import { isEqual } from 'lodash';
 import { flatten, isRFC3339_ISO6801 } from './util';
 
 const supportedVariableTypes = ['constant', 'custom', 'query', 'textbox'];
@@ -222,7 +223,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       return { data: dataFrameArray };
     });
   }
-  annotationQuery(options: AnnotationQueryRequest<MyQuery>): Promise<AnnotationEvent[]> {
+  annotationQuery(options: any): Promise<AnnotationEvent[]> {
     const query = defaults(options.annotation, defaultQuery);
     return Promise.all([this.createQuery(query, options.range)]).then((results: any) => {
       const r: AnnotationEvent[] = [];
@@ -337,7 +338,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       const supportedVariable = variable as MultiValueVariable;
 
       let variableValue = supportedVariable.current.value;
-      if (variableValue === '$__all' || isEqual(variableValue, ['$__all'])) {
+      if (variableValue === '$__all' || _.isEqual(variableValue, ['$__all'])) {
         if (supportedVariable.allValue === null || supportedVariable.allValue === '') {
           variableValue = supportedVariable.options.slice(1).map((textValuePair) => textValuePair.value);
         } else {

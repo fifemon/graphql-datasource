@@ -11,13 +11,13 @@
   "author": "Kevin Retzke",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@grafana/data": "7.4.3",
-    "@grafana/runtime": "7.4.3",
-    "@grafana/toolkit": "7.4.3",
-    "@grafana/ui": "7.4.3",
+    "@grafana/data": "8.1.2",
+    "@grafana/runtime": "8.1.2",
+    "@grafana/toolkit": "8.1.2",
+    "@grafana/ui": "8.1.2",
     "moment": "*"
   },
   "dependencies": {
-    "@types/lodash": "^4.14.144"
+    "@types/lodash": "^4.14.172"
   }
 }

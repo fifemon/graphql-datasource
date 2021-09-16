@@ -2168,13 +2168,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
-
 var supportedVariableTypes = ['constant', 'custom', 'query', 'textbox'];
 
-var DataSource =
-/** @class */
-function (_super) {
+var DataSource = function (_super) {
   Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__extends"])(DataSource, _super);
 
   function DataSource(instanceSettings, backendSrv) {
@@ -2754,7 +2750,7 @@ function (_super) {
       var supportedVariable = variable;
       var variableValue = supportedVariable.current.value;
 
-      if (variableValue === '$__all' || Object(lodash__WEBPACK_IMPORTED_MODULE_5__["isEqual"])(variableValue, ['$__all'])) {
+      if (variableValue === '$__all' || lodash__WEBPACK_IMPORTED_MODULE_5___default.a.isEqual(variableValue, ['$__all'])) {
         if (supportedVariable.allValue === null || supportedVariable.allValue === '') {
           variableValue = supportedVariable.options.slice(1).map(function (textValuePair) {
             return textValuePair.value;
@@ -2789,9 +2785,7 @@ function (_super) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GraphQLAnnotationsQueryCtrl", function() { return GraphQLAnnotationsQueryCtrl; });
-var GraphQLAnnotationsQueryCtrl =
-/** @class */
-function () {
+var GraphQLAnnotationsQueryCtrl = function () {
   function GraphQLAnnotationsQueryCtrl() {}
 
   GraphQLAnnotationsQueryCtrl.templateUrl = 'partials/annotations.editor.html';
@@ -2826,9 +2820,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-var QueryEditor =
-/** @class */
-function (_super) {
+var QueryEditor = function (_super) {
   Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__extends"])(QueryEditor, _super);
 
   function QueryEditor() {
