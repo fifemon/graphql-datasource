@@ -4,6 +4,7 @@
   "id": "fifemon-graphql-datasource",
   "metrics": true,
   "annotations": true,
+  "streaming": true,
 
   "info": {
     "description": "GraphQL Data Source",
@@ -25,7 +26,7 @@
       { "name": "GitHub Security Advisories", "path": "img/github_security_advisories.png"}
     ],
     "version": "1.3.0",
-    "updated": "2021-03-16"
+    "updated": "2021-09-16"
   },
 
   "dependencies": {

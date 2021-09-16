@@ -43,28 +43,30 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
   client: ApolloClient<NormalizedCacheObject>;
 
   // @ts-ignore
-  constructor(instanceSettings: DataSourceInstanceSettings<MyDataSourceOptions>, private backendSrv: any) {
+  constructor(instanceSettings: DataSourceInstanceSettings<MyDataSourceOptions>) {
     super(instanceSettings);
     if (!instanceSettings.url) {
       throw new Error('URL is needed!');
     }
-    this.client = DataSource.createClient(instanceSettings.url, instanceSettings.type, instanceSettings.basicAuth);
-  }
-
-  private static checkIfSecureConnectionUrl(url: string) {
-    let protocol = url.split(/(:\/\/)/)[0];
-    return protocol === 'https';
+    this.client = DataSource.createClient(
+      instanceSettings.url,
+      instanceSettings.jsonData.websocketUrl,
+      instanceSettings.type,
+      instanceSettings.basicAuth
+    );
   }
 
   /**
    * Creates an {@link ApolloClient}. Handles internal route split between queries (=http) and subscriptions (=websocket).
-   * @param uri
+   * @param httpUrl
+   * @param wsUrl
    * @param connectionType
    * @param basicAuth
    * @private
    */
   private static createClient(
-    uri: string,
+    httpUrl: string,
+    wsUrl: string | undefined,
     connectionType: string,
     basicAuth = ''
   ): ApolloClient<NormalizedCacheObject> {
@@ -75,35 +77,21 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
 
     // There is no documentation if websockets are proxied by Grafana
     // Thus no websockets will be used when using `Server` option
-    if (uri.startsWith('/')) {
+    // TODO: #123
+    if (httpUrl.startsWith('/') || !wsUrl) {
       return new ApolloClient({
-        uri: uri,
+        uri: httpUrl,
         cache: new InMemoryCache(),
         headers: headers,
       });
     }
 
-    let secure = DataSource.checkIfSecureConnectionUrl(uri);
-    // remove prefix protocol
-    let urn = uri.replace(/(^\w+:|^)\/\//, '');
-    // If connectionType is `Browser`, do WS - HTTP splitting
-    let httpPrefix: string;
-    let wsPrefix: string;
-
-    if (secure) {
-      httpPrefix = 'https://';
-      wsPrefix = 'wss://';
-    } else {
-      httpPrefix = 'http://';
-      wsPrefix = 'ws://';
-    }
-
     const httpLink = new HttpLink({
-      uri: httpPrefix + urn,
+      uri: httpUrl,
     });
 
     const wsLink = new WebSocketLink({
-      uri: wsPrefix + urn,
+      uri: wsUrl,
       options: {
         reconnect: true,
       },
