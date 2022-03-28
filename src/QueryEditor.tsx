@@ -1,10 +1,13 @@
 import defaults from 'lodash/defaults';
 
-import React, { PureComponent, ChangeEvent } from 'react';
+import React, { ChangeEvent, PureComponent } from 'react';
 import { QueryEditorProps } from '@grafana/data';
-import { LegacyForms, QueryField, Icon } from '@grafana/ui';
+import { Icon, LegacyForms } from '@grafana/ui';
 import { DataSource } from './DataSource';
-import { MyQuery, MyDataSourceOptions, defaultQuery } from './types';
+import { defaultQuery, MyDataSourceOptions, MyQuery } from './types';
+import { DocumentNode } from 'graphql';
+import GraphiQL from 'graphiql';
+import { Fetcher } from 'graphiql/dist/components/GraphiQL';
 
 type Props = QueryEditorProps<DataSource, MyQuery, MyDataSourceOptions>;
 
@@ -13,9 +16,10 @@ interface State {}
 export class QueryEditor extends PureComponent<Props, State> {
   onComponentDidMount() {}
 
-  onChangeQuery = (value: string, override?: boolean) => {
+  onChangeQuery = (value?: string, documentAST?: DocumentNode) => {
+    // any should be replaced with DocumentNode
     const { onChange, query } = this.props;
-    if (onChange) {
+    if (onChange && value !== undefined) {
       onChange({ ...query, queryText: value });
     }
   };
@@ -45,10 +49,34 @@ export class QueryEditor extends PureComponent<Props, State> {
   render() {
     const query = defaults(this.props.query, defaultQuery);
     const { queryText, dataPath, timePath, timeFormat, groupBy, aliasBy } = query;
-
+    // Good info about GraphiQL here: https://www.npmjs.com/package/graphiql
+    const datasource = this.props.datasource;
+    // TODO We might want to include some basic auth stuff in the CreateFetcherOptions since DataSource has the basicAuth property
+    const fetcher: Fetcher = async (graphQLParams) => {
+      const data = await fetch(datasource.url || '', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(graphQLParams),
+        credentials: 'same-origin',
+      });
+      return data.json().catch(() => data.text());
+    };
     return (
       <>
-        <QueryField query={queryText || ''} onChange={this.onChangeQuery} portalOrigin="graphQL" />
+        {/*<QueryField query={queryText || ''} onChange={this.onChangeQuery} portalOrigin="graphQL" />*/}
+        <link href="https://unpkg.com/graphiql/graphiql.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.23.0/theme/dracula.css" />
+        <div style={{ height: '50vh' }}>
+          <GraphiQL
+            query={queryText || ''}
+            fetcher={fetcher}
+            editorTheme={'dracula'}
+            onEditQuery={this.onChangeQuery}
+          />
+        </div>
         <div className="gf-form">
           <LegacyForms.FormField
             labelWidth={8}
