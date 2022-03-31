@@ -161,12 +161,14 @@ TODO make sure that whatever base we use for graphiql.css is the same version we
     position: relative;
 }
 
+/*
 .graphiql-container .secondary-editor {
     display: flex;
     flex-direction: column;
     height: 30px;
     position: relative;
 }
+*/
 
 .graphiql-container .secondary-editor-title {
     background: #eeeeee;
@@ -1926,6 +1928,6 @@ button:not(.history-label) {
 
 
 /* The rest of this file is not part of the original graphiql.css file */
-.variable-editor, .resultWrap, .result-window, .execute-button-wrap {
+.variable-editor, .secondary-editor, .resultWrap, .execute-button-wrap {
     display: none;
 }
