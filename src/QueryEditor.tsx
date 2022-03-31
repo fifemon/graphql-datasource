@@ -8,6 +8,7 @@ import { defaultQuery, MyDataSourceOptions, MyQuery } from './types';
 import { DocumentNode } from 'graphql';
 import GraphiQL from 'graphiql';
 import { Fetcher } from 'graphiql/dist/components/GraphiQL';
+import './graphiql_modified.css';
 
 type Props = QueryEditorProps<DataSource, MyQuery, MyDataSourceOptions>;
 
@@ -66,10 +67,13 @@ export class QueryEditor extends PureComponent<Props, State> {
     };
     return (
       <>
-        {/*<QueryField query={queryText || ''} onChange={this.onChangeQuery} portalOrigin="graphQL" />*/}
-        <link href="https://unpkg.com/graphiql/graphiql.min.css" rel="stylesheet" />
+        {/*<link href="https://unpkg.com/graphiql/graphiql.min.css" rel="stylesheet" />*/}
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.23.0/theme/dracula.css" />
-        <div style={{ height: '50vh' }}>
+        <div
+          style={{
+            height: '50vh',
+          }}
+        >
           <GraphiQL
             query={queryText || ''}
             fetcher={fetcher}
