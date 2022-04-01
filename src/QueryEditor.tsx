@@ -5,11 +5,8 @@ import { QueryEditorProps } from '@grafana/data';
 import { Icon, LegacyForms } from '@grafana/ui';
 import { DataSource } from './DataSource';
 import { defaultQuery, MyDataSourceOptions, MyQuery } from './types';
-import { DocumentNode } from 'graphql';
-import GraphiQL from 'graphiql';
-import { Fetcher } from 'graphiql/dist/components/GraphiQL';
 import './graphiql_modified.css';
-import { ToolbarButton } from 'graphiql/dist/components/ToolbarButton';
+import { createGraphiQL } from './GraphiQLUtil';
 
 type Props = QueryEditorProps<DataSource, MyQuery, MyDataSourceOptions>;
 
@@ -18,7 +15,7 @@ interface State {}
 export class QueryEditor extends PureComponent<Props, State> {
   onComponentDidMount() {}
 
-  onChangeQuery = (value?: string, documentAST?: DocumentNode) => {
+  onChangeQuery = (value?: string) => {
     // any should be replaced with DocumentNode
     const { onChange, query } = this.props;
     if (onChange && value !== undefined) {
@@ -52,30 +49,7 @@ export class QueryEditor extends PureComponent<Props, State> {
     const query = defaults(this.props.query, defaultQuery);
     const { queryText, dataPath, timePath, timeFormat, groupBy, aliasBy } = query;
     // Good info about GraphiQL here: https://www.npmjs.com/package/graphiql
-    const datasource = this.props.datasource;
-    // TODO We might want to include some basic auth stuff in the CreateFetcherOptions since DataSource has the basicAuth property
-    const fetcher: Fetcher = async (graphQLParams) => {
-      const data = await fetch(datasource.url || '', {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(graphQLParams),
-        credentials: 'same-origin',
-      });
-      return data.json().catch(() => data.text());
-    };
-    const graphiqlReference: Array<GraphiQL | null> = [null];
-    const handlePrettifyQuery = () => {
-      graphiqlReference[0]?.handlePrettifyQuery();
-    };
-    const handleMergeQuery = () => {
-      graphiqlReference[0]?.handleMergeQuery();
-    };
-    const handleCopyQuery = () => {
-      graphiqlReference[0]?.handleCopyQuery();
-    };
+    const graphiQL = createGraphiQL(this.props.datasource, queryText, this.onChangeQuery);
     return (
       <>
         {/*<link href="https://unpkg.com/graphiql/graphiql.min.css" rel="stylesheet" />*/}
@@ -85,26 +59,7 @@ export class QueryEditor extends PureComponent<Props, State> {
             height: '50vh',
           }}
         >
-          <GraphiQL
-            ref={(node) => {
-              graphiqlReference[0] = node;
-            }}
-            query={queryText || ''}
-            fetcher={fetcher}
-            editorTheme={'dracula'}
-            onEditQuery={this.onChangeQuery}
-            // If we get around to adding variable support, we would make it visible in CSS, then use the onEditVariables
-          >
-            <GraphiQL.Toolbar>
-              {/* In GraphiQL.tsx, there is stuff like this.handlePrettifyQuery,
-              which we cannot do here because this does not refer to the GraphiQL object.
-              We define those functions ourselves as a workaround.*/}
-              <ToolbarButton onClick={handlePrettifyQuery} title="Prettify Query (Shift-Ctrl-P)" label="Prettify" />
-              <ToolbarButton onClick={handleMergeQuery} title="Merge Query (Shift-Ctrl-M)" label="Merge" />
-              <ToolbarButton onClick={handleCopyQuery} title="Copy Query (Shift-Ctrl-C)" label="Copy" />
-              {/*The entire point of this whole GraphiQL.Toolbar thing is to remove the "history" button that would be right here*/}
-            </GraphiQL.Toolbar>
-          </GraphiQL>
+          {graphiQL}
         </div>
         <div className="gf-form">
           <LegacyForms.FormField

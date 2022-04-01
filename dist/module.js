@@ -62823,6 +62823,110 @@ var GraphQLAnnotationsQueryCtrl = function () {
 
 /***/ }),
 
+/***/ "./GraphiQLUtil.tsx":
+/*!**************************!*\
+  !*** ./GraphiQLUtil.tsx ***!
+  \**************************/
+/*! exports provided: createGraphiQL */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createGraphiQL", function() { return createGraphiQL; });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "../node_modules/tslib/tslib.es6.js");
+/* harmony import */ var graphiql__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! graphiql */ "../node_modules/graphiql/esm/index.js");
+/* harmony import */ var graphiql_dist_components_ToolbarButton__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! graphiql/dist/components/ToolbarButton */ "../node_modules/graphiql/dist/components/ToolbarButton.js");
+/* harmony import */ var graphiql_dist_components_ToolbarButton__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(graphiql_dist_components_ToolbarButton__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_3__);
+
+
+
+
+function createGraphiQL(datasource, queryText, onEditQuery) {
+  var _this = this;
+
+  var headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json'
+  };
+
+  if (datasource.basicAuth) {
+    headers['Authorization'] = datasource.basicAuth;
+  }
+
+  var fetcher = function fetcher(graphQLParams) {
+    return Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__awaiter"])(_this, void 0, void 0, function () {
+      var data;
+      return Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__generator"])(this, function (_a) {
+        switch (_a.label) {
+          case 0:
+            return [4
+            /*yield*/
+            , fetch(datasource.url || '', {
+              method: 'POST',
+              headers: headers,
+              body: JSON.stringify(graphQLParams),
+              credentials: 'same-origin'
+            })];
+
+          case 1:
+            data = _a.sent();
+            return [2
+            /*return*/
+            , data.json()["catch"](function () {
+              return data.text();
+            })];
+        }
+      });
+    });
+  };
+
+  var graphiqlReference = [null];
+
+  var handlePrettifyQuery = function handlePrettifyQuery() {
+    var _a;
+
+    (_a = graphiqlReference[0]) === null || _a === void 0 ? void 0 : _a.handlePrettifyQuery();
+  };
+
+  var handleMergeQuery = function handleMergeQuery() {
+    var _a;
+
+    (_a = graphiqlReference[0]) === null || _a === void 0 ? void 0 : _a.handleMergeQuery();
+  };
+
+  var handleCopyQuery = function handleCopyQuery() {
+    var _a;
+
+    (_a = graphiqlReference[0]) === null || _a === void 0 ? void 0 : _a.handleCopyQuery();
+  };
+
+  return react__WEBPACK_IMPORTED_MODULE_3___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_3___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_3___default.a.createElement(graphiql__WEBPACK_IMPORTED_MODULE_1__["default"], {
+    ref: function ref(node) {
+      graphiqlReference[0] = node;
+    },
+    query: queryText,
+    fetcher: fetcher,
+    editorTheme: 'dracula',
+    onEditQuery: onEditQuery
+  }, react__WEBPACK_IMPORTED_MODULE_3___default.a.createElement(graphiql__WEBPACK_IMPORTED_MODULE_1__["default"].Toolbar, null, react__WEBPACK_IMPORTED_MODULE_3___default.a.createElement(graphiql_dist_components_ToolbarButton__WEBPACK_IMPORTED_MODULE_2__["ToolbarButton"], {
+    onClick: handlePrettifyQuery,
+    title: "Prettify Query (Shift-Ctrl-P)",
+    label: "Prettify"
+  }), react__WEBPACK_IMPORTED_MODULE_3___default.a.createElement(graphiql_dist_components_ToolbarButton__WEBPACK_IMPORTED_MODULE_2__["ToolbarButton"], {
+    onClick: handleMergeQuery,
+    title: "Merge Query (Shift-Ctrl-M)",
+    label: "Merge"
+  }), react__WEBPACK_IMPORTED_MODULE_3___default.a.createElement(graphiql_dist_components_ToolbarButton__WEBPACK_IMPORTED_MODULE_2__["ToolbarButton"], {
+    onClick: handleCopyQuery,
+    title: "Copy Query (Shift-Ctrl-C)",
+    label: "Copy"
+  }))));
+}
+
+/***/ }),
+
 /***/ "./QueryEditor.tsx":
 /*!*************************!*\
   !*** ./QueryEditor.tsx ***!
@@ -62841,12 +62945,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _grafana_ui__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @grafana/ui */ "@grafana/ui");
 /* harmony import */ var _grafana_ui__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__);
 /* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./types */ "./types.ts");
-/* harmony import */ var graphiql__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! graphiql */ "../node_modules/graphiql/esm/index.js");
-/* harmony import */ var _graphiql_modified_css__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./graphiql_modified.css */ "./graphiql_modified.css");
-/* harmony import */ var _graphiql_modified_css__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(_graphiql_modified_css__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var graphiql_dist_components_ToolbarButton__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! graphiql/dist/components/ToolbarButton */ "../node_modules/graphiql/dist/components/ToolbarButton.js");
-/* harmony import */ var graphiql_dist_components_ToolbarButton__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(graphiql_dist_components_ToolbarButton__WEBPACK_IMPORTED_MODULE_7__);
-
+/* harmony import */ var _graphiql_modified_css__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./graphiql_modified.css */ "./graphiql_modified.css");
+/* harmony import */ var _graphiql_modified_css__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_graphiql_modified_css__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _GraphiQLUtil__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./GraphiQLUtil */ "./GraphiQLUtil.tsx");
 
 
 
@@ -62861,7 +62962,7 @@ var QueryEditor = function (_super) {
   function QueryEditor() {
     var _this = _super !== null && _super.apply(this, arguments) || this;
 
-    _this.onChangeQuery = function (value, documentAST) {
+    _this.onChangeQuery = function (value) {
       // any should be replaced with DocumentNode
       var _a = _this.props,
           onChange = _a.onChange,
@@ -62925,8 +63026,6 @@ var QueryEditor = function (_super) {
   QueryEditor.prototype.onComponentDidMount = function () {};
 
   QueryEditor.prototype.render = function () {
-    var _this = this;
-
     var query = lodash_defaults__WEBPACK_IMPORTED_MODULE_1___default()(this.props.query, _types__WEBPACK_IMPORTED_MODULE_4__["defaultQuery"]);
     var queryText = query.queryText,
         dataPath = query.dataPath,
@@ -62935,58 +63034,7 @@ var QueryEditor = function (_super) {
         groupBy = query.groupBy,
         aliasBy = query.aliasBy; // Good info about GraphiQL here: https://www.npmjs.com/package/graphiql
 
-    var datasource = this.props.datasource; // TODO We might want to include some basic auth stuff in the CreateFetcherOptions since DataSource has the basicAuth property
-
-    var fetcher = function fetcher(graphQLParams) {
-      return Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__awaiter"])(_this, void 0, void 0, function () {
-        var data;
-        return Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__generator"])(this, function (_a) {
-          switch (_a.label) {
-            case 0:
-              return [4
-              /*yield*/
-              , fetch(datasource.url || '', {
-                method: 'POST',
-                headers: {
-                  Accept: 'application/json',
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(graphQLParams),
-                credentials: 'same-origin'
-              })];
-
-            case 1:
-              data = _a.sent();
-              return [2
-              /*return*/
-              , data.json()["catch"](function () {
-                return data.text();
-              })];
-          }
-        });
-      });
-    };
-
-    var graphiqlReference = [null];
-
-    var handlePrettifyQuery = function handlePrettifyQuery() {
-      var _a;
-
-      (_a = graphiqlReference[0]) === null || _a === void 0 ? void 0 : _a.handlePrettifyQuery();
-    };
-
-    var handleMergeQuery = function handleMergeQuery() {
-      var _a;
-
-      (_a = graphiqlReference[0]) === null || _a === void 0 ? void 0 : _a.handleMergeQuery();
-    };
-
-    var handleCopyQuery = function handleCopyQuery() {
-      var _a;
-
-      (_a = graphiqlReference[0]) === null || _a === void 0 ? void 0 : _a.handleCopyQuery();
-    };
-
+    var graphiQL = Object(_GraphiQLUtil__WEBPACK_IMPORTED_MODULE_6__["createGraphiQL"])(this.props.datasource, queryText, this.onChangeQuery);
     return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_2___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("link", {
       rel: "stylesheet",
       href: "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.23.0/theme/dracula.css"
@@ -62994,27 +63042,7 @@ var QueryEditor = function (_super) {
       style: {
         height: '50vh'
       }
-    }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(graphiql__WEBPACK_IMPORTED_MODULE_5__["default"], {
-      ref: function ref(node) {
-        graphiqlReference[0] = node;
-      },
-      query: queryText || '',
-      fetcher: fetcher,
-      editorTheme: 'dracula',
-      onEditQuery: this.onChangeQuery
-    }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(graphiql__WEBPACK_IMPORTED_MODULE_5__["default"].Toolbar, null, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(graphiql_dist_components_ToolbarButton__WEBPACK_IMPORTED_MODULE_7__["ToolbarButton"], {
-      onClick: handlePrettifyQuery,
-      title: "Prettify Query (Shift-Ctrl-P)",
-      label: "Prettify"
-    }), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(graphiql_dist_components_ToolbarButton__WEBPACK_IMPORTED_MODULE_7__["ToolbarButton"], {
-      onClick: handleMergeQuery,
-      title: "Merge Query (Shift-Ctrl-M)",
-      label: "Merge"
-    }), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(graphiql_dist_components_ToolbarButton__WEBPACK_IMPORTED_MODULE_7__["ToolbarButton"], {
-      onClick: handleCopyQuery,
-      title: "Copy Query (Shift-Ctrl-C)",
-      label: "Copy"
-    })))), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
+    }, graphiQL), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
       className: "gf-form"
     }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["LegacyForms"].FormField, {
       labelWidth: 8,
@@ -63085,18 +63113,18 @@ var QueryEditor = function (_super) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "VariableQueryEditor", function() { return VariableQueryEditor; });
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "../node_modules/tslib/tslib.es6.js");
-/* harmony import */ var _grafana_ui__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @grafana/ui */ "@grafana/ui");
-/* harmony import */ var _grafana_ui__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_grafana_ui__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react */ "react");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _GraphiQLUtil__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./GraphiQLUtil */ "./GraphiQLUtil.tsx");
 
 
 
 var VariableQueryEditor = function VariableQueryEditor(_a) {
   var onChange = _a.onChange,
-      query = _a.query;
+      query = _a.query,
+      datasource = _a.datasource;
 
-  var _b = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__read"])(Object(react__WEBPACK_IMPORTED_MODULE_2__["useState"])(query), 2),
+  var _b = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__read"])(Object(react__WEBPACK_IMPORTED_MODULE_1__["useState"])(query), 2),
       state = _b[0],
       setState = _b[1];
 
@@ -63104,10 +63132,13 @@ var VariableQueryEditor = function VariableQueryEditor(_a) {
     onChange(state, state.queryText + " (" + state.dataPath + ")");
   };
 
-  var onChangeQuery = function onChangeQuery(value, override) {
-    return setState(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, state), {
-      queryText: value
-    }));
+  var onChangeQuery = function onChangeQuery(value) {
+    if (value !== undefined) {
+      setState(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, state), {
+        queryText: value
+      }));
+      saveQuery();
+    }
   };
 
   var handleChange = function handleChange(event) {
@@ -63116,26 +63147,25 @@ var VariableQueryEditor = function VariableQueryEditor(_a) {
     return setState(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, state), (_a = {}, _a[event.currentTarget.name] = event.currentTarget.value, _a)));
   };
 
-  return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_2___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
+  var graphiQL = Object(_GraphiQLUtil__WEBPACK_IMPORTED_MODULE_2__["createGraphiQL"])(datasource, state.queryText || '', onChangeQuery);
+  return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_1___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
     className: "gf-form"
-  }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("span", {
+  }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("span", {
     className: "gf-form-label width-10"
-  }, "Data Path"), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("input", {
+  }, "Data Path"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("input", {
     name: "dataPath",
     className: "gf-form-input",
     onBlur: saveQuery,
     onChange: handleChange,
     value: state.dataPath
-  })), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
-    className: "gf-form"
-  }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("span", {
-    className: "gf-form-label width-10"
-  }, "Query"), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_1__["QueryField"], {
-    query: state.queryText || '',
-    onBlur: saveQuery,
-    onChange: onChangeQuery,
-    portalOrigin: "graphQL"
-  })));
+  })), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("link", {
+    rel: "stylesheet",
+    href: "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.23.0/theme/dracula.css"
+  }), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
+    style: {
+      height: '50vh'
+    }
+  }, graphiQL));
 };
 
 /***/ }),

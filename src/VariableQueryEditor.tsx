@@ -1,30 +1,38 @@
-import { QueryField } from '@grafana/ui';
 import React, { useState } from 'react';
-import { MyQuery } from './types';
+import { MyVariableQuery } from './types';
+import { createGraphiQL } from './GraphiQLUtil';
+import { DataSource } from './DataSource';
 
 interface VariableQueryProps {
-  query: MyQuery;
-  onChange: (query: MyQuery, definition: string) => void;
+  query: MyVariableQuery;
+  onChange: (query: MyVariableQuery, definition: string) => void;
+  datasource: DataSource;
 }
 
-export const VariableQueryEditor: React.FC<VariableQueryProps> = ({ onChange, query }) => {
+export const VariableQueryEditor: React.FC<VariableQueryProps> = ({ onChange, query, datasource }) => {
   const [state, setState] = useState(query);
 
   const saveQuery = () => {
     onChange(state, `${state.queryText} (${state.dataPath})`);
   };
 
-  const onChangeQuery = (value: string, override?: boolean) =>
-    setState({
-      ...state,
-      queryText: value,
-    });
+  const onChangeQuery = (value?: string) => {
+    if (value !== undefined) {
+      setState({
+        ...state,
+        queryText: value,
+      });
+      saveQuery();
+    }
+  };
 
   const handleChange = (event: React.FormEvent<HTMLInputElement>) =>
     setState({
       ...state,
       [event.currentTarget.name]: event.currentTarget.value,
     });
+
+  const graphiQL = createGraphiQL(datasource, state.queryText || '', onChangeQuery);
 
   return (
     <>
@@ -38,9 +46,13 @@ export const VariableQueryEditor: React.FC<VariableQueryProps> = ({ onChange, qu
           value={state.dataPath}
         />
       </div>
-      <div className="gf-form">
-        <span className="gf-form-label width-10">Query</span>
-        <QueryField query={state.queryText || ''} onBlur={saveQuery} onChange={onChangeQuery} portalOrigin="graphQL" />
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.23.0/theme/dracula.css" />
+      <div
+        style={{
+          height: '50vh',
+        }}
+      >
+        {graphiQL}
       </div>
     </>
   );
