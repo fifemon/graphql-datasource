@@ -2,11 +2,12 @@ import defaults from 'lodash/defaults';
 
 import React, { ChangeEvent, PureComponent } from 'react';
 import { QueryEditorProps } from '@grafana/data';
-import { Icon, LegacyForms } from '@grafana/ui';
+import { LegacyForms } from '@grafana/ui';
 import { DataSource } from './DataSource';
-import { defaultQuery, MyDataSourceOptions, MyQuery } from './types';
+import {defaultMainQuery, MyDataSourceOptions, MyMainQuery, MyQuery} from './types';
 import './graphiql_modified.css';
 import { createGraphiQL } from './GraphiQLUtil';
+import {createDataPathForm, createTimeFormatForm} from "./QueryEditorUtil";
 
 type Props = QueryEditorProps<DataSource, MyQuery, MyDataSourceOptions>;
 
@@ -46,7 +47,7 @@ export class QueryEditor extends PureComponent<Props, State> {
   };
 
   render() {
-    const query = defaults(this.props.query, defaultQuery);
+    const query: MyMainQuery = defaults(this.props.query, defaultMainQuery) as MyMainQuery;
     const { queryText, dataPath, timePath, timeFormat, groupBy, aliasBy } = query;
     // Good info about GraphiQL here: https://www.npmjs.com/package/graphiql
     const graphiQL = createGraphiQL(this.props.datasource, queryText, this.onChangeQuery);
@@ -61,16 +62,7 @@ export class QueryEditor extends PureComponent<Props, State> {
         >
           {graphiQL}
         </div>
-        <div className="gf-form">
-          <LegacyForms.FormField
-            labelWidth={8}
-            inputWidth={24}
-            value={dataPath || ''}
-            onChange={this.onDataPathTextChange}
-            label="Data path"
-            tooltip="dot-delimited path to data in response. Separate with commas to use multiple data paths"
-          />
-        </div>
+        {createDataPathForm(dataPath || '', this.onDataPathTextChange)}
         <div className="gf-form">
           <LegacyForms.FormField
             labelWidth={8}
@@ -81,21 +73,7 @@ export class QueryEditor extends PureComponent<Props, State> {
             tooltip="dot-delimited path to time under data path"
           />
         </div>
-        <div className={'gf-form'}>
-          <LegacyForms.FormField
-            labelWidth={8}
-            inputWidth={24}
-            value={timeFormat || ''}
-            onChange={this.onTimeFormatTextChange}
-            label="Time format"
-            tooltip={
-              <a href="https://momentjs.com/docs/#/parsing/string-format/" title="Formatting help">
-                Optional time format in moment.js format.&nbsp;
-                <Icon name="external-link-alt" />
-              </a>
-            }
-          />
-        </div>
+        {createTimeFormatForm(timeFormat || '', this.onTimeFormatTextChange)}
         <div className={'gf-form'}>
           <LegacyForms.FormField
             labelWidth={8}

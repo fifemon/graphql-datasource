@@ -1,31 +1,34 @@
 import defaults from 'lodash/defaults';
 
 import {
-  AnnotationEvent,
+  AnnotationEventFieldSource,
+  AnnotationEventMappings,
+  AnnotationQuery,
+  DataFrame,
   DataQueryRequest,
   DataQueryResponse,
   DataSourceApi,
-  MetricFindValue,
   DataSourceInstanceSettings,
+  dateTime,
+  FieldType,
+  MetricFindValue,
+  MutableDataFrame,
   ScopedVars,
   TimeRange,
-  dateTime,
-  MutableDataFrame,
-  FieldType,
-  DataFrame,
 } from '@grafana/data';
 
 import {
-  MyQuery,
-  MyDataSourceOptions,
-  defaultQuery,
-  MyVariableQuery,
+  CommonQuery, defaultAnnotationQuery, defaultCommonQuery, defaultMainQuery, defaultVariableQuery,
   MultiValueVariable,
+  MyDataSourceOptions,
+  MyQuery,
+  MyVariableQuery,
   TextValuePair,
 } from './types';
-import { getTemplateSrv } from '@grafana/runtime';
-import _ from 'lodash';
-import { flatten, isRFC3339_ISO6801 } from './util';
+import {getTemplateSrv} from '@grafana/runtime';
+import _, {escapeRegExp} from 'lodash';
+import {flatten, isRFC3339_ISO6801} from './util';
+import {AnnotationQueryEditor} from "./AnnotationQueryEditor";
 
 const supportedVariableTypes = ['constant', 'custom', 'query', 'textbox'];
 
@@ -39,6 +42,70 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     this.basicAuth = instanceSettings.basicAuth;
     this.withCredentials = instanceSettings.withCredentials;
     this.url = instanceSettings.url;
+    this.annotations = {
+      prepareAnnotation(json: any): AnnotationQuery<MyQuery> {
+        console.log("preparing JSON");
+        console.log(json);
+        if ("target" in json) { // New format
+          return json;
+        }
+        const mappings: AnnotationEventMappings = {
+          time: {
+            source: AnnotationEventFieldSource.Field,
+            value: json.timePath ?? defaultMainQuery.timePath
+          }
+        };
+        const additionalTexts: Record<string, string> = {};
+        if (json.endTimePath) {
+          mappings.timeEnd = {
+            source: AnnotationEventFieldSource.Field,
+            value: json.endTimePath
+          }
+        }
+        if (json.annotationTags) {
+          additionalTexts["extra.tags"] = json.annotationTags;
+          mappings.tags = {
+            source: AnnotationEventFieldSource.Field,
+            value: "extra.tags"
+          }
+        }
+        if (json.annotationText) {
+          additionalTexts["extra.text"] = json.annotationText;
+          mappings.text = {
+            source: AnnotationEventFieldSource.Field,
+            value: "extra.text"
+          }
+        }
+        if (json.annotationTitle) {
+          additionalTexts["extra.title"] = json.annotationTitle;
+          mappings.title = {
+            source: AnnotationEventFieldSource.Field,
+            value: "extra.title"
+          }
+        }
+        const timePaths = [json.timePath ?? defaultMainQuery.timePath];
+        if (json.endTimePath) {
+          timePaths.push(json.endTimePath);
+        }
+        // This is the old legacy format, so let's transform it to avoid breaking users' existing queries
+        return {
+          datasource: json.datasource,
+          enable: json.enable,
+          iconColor: json.iconColor,
+          name: json.name,
+          mappings: mappings,
+          target: {
+            refId: "Anno",
+            queryText: json.queryText,
+            dataPath: json.dataPath,
+            timePaths: timePaths,
+            timeFormat: json.timeFormat ?? defaultAnnotationQuery.timeFormat, // very old configurations may not have timeFormat defined
+            additionalTexts: additionalTexts,
+          }
+        };
+      },
+      QueryEditor: AnnotationQueryEditor,
+    };
   }
 
   private request(data: string) {
@@ -62,7 +129,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     return this.backendSrv.datasourceRequest(options);
   }
 
-  private postQuery(query: Partial<MyQuery>, payload: string) {
+  private postQuery(query: Partial<CommonQuery>, payload: string) {
     return this.request(payload)
       .then((results: any) => {
         return { query, results };
@@ -79,7 +146,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       });
   }
 
-  private createQuery(query: MyQuery, range: TimeRange | undefined, scopedVars: ScopedVars | undefined = undefined) {
+  private createQuery(query: CommonQuery, range: TimeRange | undefined, scopedVars: ScopedVars | undefined = undefined) {
     let payload = getTemplateSrv().replace(query.queryText, {
       ...scopedVars,
       timeFrom: { text: 'from', value: range?.from.valueOf() },
@@ -138,17 +205,49 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     return dataPathArray;
   }
 
+  private static substituteString(text: string, scopedVars: ScopedVars, replaceObject: any = {}): string {
+    let result = text;
+    for (const replaceKey in replaceObject) {
+      const replaceValue = replaceObject[replaceKey];
+
+      const regex = new RegExp(escapeRegExp("$" + replaceKey), 'g');
+      result = result.replace(regex, replaceValue);
+    }
+    return getTemplateSrv().replace(result, scopedVars);
+  }
+
+  private static getDisplayName(options: DataQueryRequest<MyQuery>, fieldName: string, identifiers: string[], identifiersString: string, generalReplaceObject: any, aliasBy?: string): string {
+    if (aliasBy) {
+      const replaceObject = { ...generalReplaceObject };
+      replaceObject['fieldName'] = fieldName;
+      return this.substituteString(aliasBy, options.scopedVars, replaceObject);
+    }
+    if (identifiers.length !== 0) {
+      // if we have any identifiers
+      return identifiersString + '_' + fieldName;
+    }
+    return fieldName;
+  }
+
   async query(options: DataQueryRequest<MyQuery>): Promise<DataQueryResponse> {
     return Promise.all(
       options.targets.map((target) => {
-        return this.createQuery(defaults(target, defaultQuery), options.range, options.scopedVars);
+        return this.createQuery(defaults(target, defaultCommonQuery), options.range, options.scopedVars);
       })
-    ).then((results: any) => {
+    ).then((results) => {
       const dataFrameArray: DataFrame[] = [];
       for (let res of results) {
         const dataPathArray: string[] = DataSource.getDataPathArray(res.query.dataPath);
-        const { timePath, timeFormat, groupBy, aliasBy } = res.query;
-        const split = groupBy.split(',');
+        const query: MyQuery = res.query;
+        const { timePath, endTimePath, timePaths, timeFormat, groupBy, aliasBy, additionalTexts } = query; // any of these variables may be undefined
+        const allTimePaths = timePaths === undefined ? [] : [...timePaths];
+        if (timePath) {
+          allTimePaths.push(timePath);
+        }
+        if (endTimePath) {
+          allTimePaths.push(endTimePath);
+        }
+        const split = groupBy === undefined ? [] : groupBy.split(',');
         const groupByList: string[] = [];
         for (const element of split) {
           const trimmed = element.trim();
@@ -161,47 +260,31 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
 
           const dataFrameMap = new Map<string, MutableDataFrame>();
           for (const doc of docs) {
-            if (timePath in doc) {
-              doc[timePath] = dateTime(doc[timePath], timeFormat);
+            if (timePath !== undefined && timePath in doc) {
+              // If timePath is in doc, then timePath !== undefined, which means timeFormat !== undefined too
+              doc[timePath] = dateTime(doc[timePath], timeFormat as string);
             }
             const identifiers: string[] = [];
             for (const groupByElement of groupByList) {
               identifiers.push(doc[groupByElement]);
             }
             const identifiersString = identifiers.toString();
+            const generalReplaceObject: Record<string, any> = {};
+            for (const fieldName in doc) {
+              generalReplaceObject['field_' + fieldName] = doc[fieldName];
+            }
             let dataFrame = dataFrameMap.get(identifiersString);
             if (!dataFrame) {
               // we haven't initialized the dataFrame for this specific identifier that we group by yet
               dataFrame = new MutableDataFrame({ fields: [] });
-              const generalReplaceObject: any = {};
-              for (const fieldName in doc) {
-                generalReplaceObject['field_' + fieldName] = doc[fieldName];
-              }
               for (const fieldName in doc) {
                 let t: FieldType = FieldType.string;
-                if (fieldName === timePath || isRFC3339_ISO6801(String(doc[fieldName]))) {
+                if (fieldName in allTimePaths || isRFC3339_ISO6801(String(doc[fieldName]))) {
                   t = FieldType.time;
                 } else if (_.isNumber(doc[fieldName])) {
                   t = FieldType.number;
                 }
-                let title;
-                if (identifiers.length !== 0) {
-                  // if we have any identifiers
-                  title = identifiersString + '_' + fieldName;
-                } else {
-                  title = fieldName;
-                }
-                if (aliasBy) {
-                  title = aliasBy;
-                  const replaceObject = { ...generalReplaceObject };
-                  replaceObject['fieldName'] = fieldName;
-                  for (const replaceKey in replaceObject) {
-                    const replaceValue = replaceObject[replaceKey];
-                    const regex = new RegExp('\\$' + replaceKey, 'g');
-                    title = title.replace(regex, replaceValue);
-                  }
-                  title = getTemplateSrv().replace(title, options.scopedVars);
-                }
+                const title = DataSource.getDisplayName(options, fieldName, identifiers, identifiersString, generalReplaceObject, aliasBy);
                 dataFrame.addField({
                   name: fieldName,
                   type: t,
@@ -210,10 +293,25 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
                   return v || '';
                 };
               }
+              for (const additionalFieldName in additionalTexts) {
+                // Note that although aliasBy should be undefined, we will get getDisplayName anyway for consistency.
+                dataFrame.addField({
+                  name: additionalFieldName,
+                  type: FieldType.string,
+                  config: { displayName: DataSource.getDisplayName(options, additionalFieldName, identifiers, identifiersString, generalReplaceObject, aliasBy) }
+                })
+              }
+
               dataFrameMap.set(identifiersString, dataFrame);
             }
 
-            dataFrame.add(doc);
+            const finalDoc = { ...doc };
+            for (const additionalFieldName in additionalTexts) {
+              const additionalText = additionalTexts[additionalFieldName];
+              finalDoc[additionalFieldName] = DataSource.substituteString(additionalText, options.scopedVars, generalReplaceObject);
+            }
+
+            dataFrame.add(finalDoc);
           }
           for (const dataFrame of dataFrameMap.values()) {
             dataFrameArray.push(dataFrame);
@@ -223,53 +321,6 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       return { data: dataFrameArray };
     });
   }
-  annotationQuery(options: any): Promise<AnnotationEvent[]> {
-    const query = defaults(options.annotation, defaultQuery);
-    return Promise.all([this.createQuery(query, options.range)]).then((results: any) => {
-      const r: AnnotationEvent[] = [];
-      for (const res of results) {
-        const { timePath, endTimePath, timeFormat } = res.query;
-        const dataPathArray: string[] = DataSource.getDataPathArray(res.query.dataPath);
-        for (const dataPath of dataPathArray) {
-          const docs: any[] = DataSource.getDocs(res.results.data, dataPath);
-          for (const doc of docs) {
-            const annotation: AnnotationEvent = {};
-            if (timePath in doc) {
-              annotation.time = dateTime(doc[timePath], timeFormat).valueOf();
-            }
-            if (endTimePath in doc) {
-              annotation.isRegion = true;
-              annotation.timeEnd = dateTime(doc[endTimePath], timeFormat).valueOf();
-            }
-            let title = query.annotationTitle;
-            let text = query.annotationText;
-            let tags = query.annotationTags;
-            for (const fieldName in doc) {
-              const fieldValue = doc[fieldName];
-              const replaceKey = 'field_' + fieldName;
-              const regex = new RegExp('\\$' + replaceKey, 'g');
-              title = title.replace(regex, fieldValue);
-              text = text.replace(regex, fieldValue);
-              tags = tags.replace(regex, fieldValue);
-            }
-
-            annotation.title = title;
-            annotation.text = text;
-            const tagsList: string[] = [];
-            for (const element of tags.split(',')) {
-              const trimmed = element.trim();
-              if (trimmed) {
-                tagsList.push(trimmed);
-              }
-            }
-            annotation.tags = tagsList;
-            r.push(annotation);
-          }
-        }
-      }
-      return r;
-    });
-  }
 
   testDatasource() {
     const q = `{
@@ -277,7 +328,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
         queryType{name}
       }
     }`;
-    return this.postQuery(defaultQuery, q).then(
+    return this.postQuery(defaultCommonQuery, q).then(
       (res: any) => {
         if (res.errors) {
           console.log(res.errors);
@@ -304,7 +355,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
   async metricFindQuery(query: MyVariableQuery, options?: any) {
     const metricFindValues: MetricFindValue[] = [];
 
-    query = defaults(query, defaultQuery);
+    query = defaults(query, defaultVariableQuery);
 
     let payload = query.queryText;
     payload = getTemplateSrv().replace(payload, { ...this.getVariables });
