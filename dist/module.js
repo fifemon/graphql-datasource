@@ -62976,34 +62976,47 @@ function createGraphiQL(datasource, queryText, onEditQuery) {
     });
   };
 
-  var graphiqlReference = [null];
+  var graphiqlReference = null;
 
   var handlePrettifyQuery = function handlePrettifyQuery() {
-    var _a;
-
-    (_a = graphiqlReference[0]) === null || _a === void 0 ? void 0 : _a.handlePrettifyQuery();
+    graphiqlReference === null || graphiqlReference === void 0 ? void 0 : graphiqlReference.handlePrettifyQuery();
   };
 
   var handleMergeQuery = function handleMergeQuery() {
-    var _a;
-
-    (_a = graphiqlReference[0]) === null || _a === void 0 ? void 0 : _a.handleMergeQuery();
+    graphiqlReference === null || graphiqlReference === void 0 ? void 0 : graphiqlReference.handleMergeQuery();
   };
 
   var handleCopyQuery = function handleCopyQuery() {
-    var _a;
-
-    (_a = graphiqlReference[0]) === null || _a === void 0 ? void 0 : _a.handleCopyQuery();
+    graphiqlReference === null || graphiqlReference === void 0 ? void 0 : graphiqlReference.handleCopyQuery();
   };
 
-  return react__WEBPACK_IMPORTED_MODULE_3___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_3___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_3___default.a.createElement(graphiql__WEBPACK_IMPORTED_MODULE_1__["default"], {
+  var currentQuery = null;
+
+  var onBlur = function onBlur() {
+    var query = currentQuery;
+
+    if (query !== null) {
+      onEditQuery(query);
+    }
+  };
+
+  var onQueryChange = function onQueryChange(query) {
+    if (query !== undefined) {
+      currentQuery = query;
+    }
+  };
+
+  return react__WEBPACK_IMPORTED_MODULE_3___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_3___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_3___default.a.createElement("span", {
+    tabIndex: 0,
+    onBlur: onBlur
+  }, react__WEBPACK_IMPORTED_MODULE_3___default.a.createElement(graphiql__WEBPACK_IMPORTED_MODULE_1__["default"], {
     ref: function ref(node) {
-      graphiqlReference[0] = node;
+      graphiqlReference = node;
     },
     query: queryText,
     fetcher: fetcher,
     editorTheme: 'dracula',
-    onEditQuery: onEditQuery
+    onEditQuery: onQueryChange
   }, react__WEBPACK_IMPORTED_MODULE_3___default.a.createElement(graphiql__WEBPACK_IMPORTED_MODULE_1__["default"].Toolbar, null, react__WEBPACK_IMPORTED_MODULE_3___default.a.createElement(graphiql_dist_components_ToolbarButton__WEBPACK_IMPORTED_MODULE_2__["ToolbarButton"], {
     onClick: handlePrettifyQuery,
     title: "Prettify Query (Shift-Ctrl-P)",
@@ -63016,7 +63029,7 @@ function createGraphiQL(datasource, queryText, onEditQuery) {
     onClick: handleCopyQuery,
     title: "Copy Query (Shift-Ctrl-C)",
     label: "Copy"
-  }))));
+  })))));
 }
 
 /***/ }),
@@ -63059,7 +63072,6 @@ var QueryEditor = function (_super) {
     var _this = _super !== null && _super.apply(this, arguments) || this;
 
     _this.onChangeQuery = function (value) {
-      // any should be replaced with DocumentNode
       var _a = _this.props,
           onChange = _a.onChange,
           query = _a.query;

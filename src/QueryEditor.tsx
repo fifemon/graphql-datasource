@@ -17,7 +17,6 @@ export class QueryEditor extends PureComponent<Props, State> {
   onComponentDidMount() {}
 
   onChangeQuery = (value?: string) => {
-    // any should be replaced with DocumentNode
     const { onChange, query } = this.props;
     if (onChange && value !== undefined) {
       onChange({ ...query, queryText: value });
