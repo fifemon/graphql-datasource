@@ -23,18 +23,21 @@ export interface MyMainQuery extends TimedQuery {
   aliasBy: string;
 }
 
-export interface MyVariableQuery extends CommonQuery {
-}
+export interface MyVariableQuery extends CommonQuery {}
 
 export interface MyAnnotationQuery extends TimedQuery {
-  /** The paths to be recognized as a time field */
-  timePaths: string[];
+  /** Comma-delimited list of time paths, where each time path is dot-delimited*/
+  timePaths: string;
   additionalTexts: Record<string, string>;
 }
 
 // export interface MyQuery extends MyMainQuery, MyVariableQuery, MyAnnotationQuery, LegacyQueryOptions {
 // }
-export type MyQuery = (MyMainQuery | MyVariableQuery | MyAnnotationQuery) & Partial<MyMainQuery> & Partial<MyVariableQuery> & Partial<MyAnnotationQuery> & Partial<LegacyQueryOptions>
+export type MyQuery = (MyMainQuery | MyVariableQuery | MyAnnotationQuery) &
+  Partial<MyMainQuery> &
+  Partial<MyVariableQuery> &
+  Partial<MyAnnotationQuery> &
+  Partial<LegacyQueryOptions>;
 
 export const defaultCommonQuery: Partial<CommonQuery> = {
   queryText: `{
@@ -46,18 +49,18 @@ export const defaultCommonQuery: Partial<CommonQuery> = {
   }
 }`,
   dataPath: 'data',
-}
+};
 const defaultTimedQuery: Partial<TimedQuery> = {
   ...defaultCommonQuery,
   timeFormat: null,
-}
+};
 
 export const defaultMainQuery: Partial<MyMainQuery> = {
   ...defaultTimedQuery,
   timePath: 'Time',
   groupBy: '', // `identifier`
   aliasBy: '', // 'Server [[tag_identifier]]`
-}
+};
 
 /** Should not be used except for legacy field defaults. */
 export const defaultMixedQuery: Partial<MyQuery> = {
@@ -75,12 +78,11 @@ export const defaultMixedQuery: Partial<MyQuery> = {
 };
 export const defaultAnnotationQuery: Partial<MyAnnotationQuery> = {
   ...defaultTimedQuery,
-  timePaths: [],
-  // endTimePath: 'endTime',
-}
+  timePaths: 'Time, endTime',
+};
 export const defaultVariableQuery: Partial<MyVariableQuery> = {
-  ...defaultCommonQuery
-}
+  ...defaultCommonQuery,
+};
 
 /**
  * These are options configured for each DataSource instance
@@ -88,7 +90,6 @@ export const defaultVariableQuery: Partial<MyVariableQuery> = {
 export interface MyDataSourceOptions extends DataSourceJsonData {
   apiKey?: string;
 }
-
 
 export interface TextValuePair {
   text: string;

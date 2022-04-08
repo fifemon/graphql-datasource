@@ -18,17 +18,21 @@ import {
 } from '@grafana/data';
 
 import {
-  CommonQuery, defaultAnnotationQuery, defaultCommonQuery, defaultMainQuery, defaultVariableQuery,
+  CommonQuery,
+  defaultAnnotationQuery,
+  defaultCommonQuery,
+  defaultMainQuery,
+  defaultVariableQuery,
   MultiValueVariable,
   MyDataSourceOptions,
   MyQuery,
   MyVariableQuery,
   TextValuePair,
 } from './types';
-import {getTemplateSrv} from '@grafana/runtime';
-import _, {escapeRegExp} from 'lodash';
-import {flatten, isRFC3339_ISO6801} from './util';
-import {AnnotationQueryEditor} from "./AnnotationQueryEditor";
+import { getTemplateSrv } from '@grafana/runtime';
+import _, { escapeRegExp } from 'lodash';
+import { flatten, isRFC3339_ISO6801 } from './util';
+import { AnnotationQueryEditor } from './AnnotationQueryEditor';
 
 const supportedVariableTypes = ['constant', 'custom', 'query', 'textbox'];
 
@@ -44,44 +48,43 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     this.url = instanceSettings.url;
     this.annotations = {
       prepareAnnotation(json: any): AnnotationQuery<MyQuery> {
-        console.log("preparing JSON");
-        console.log(json);
-        if ("target" in json) { // New format
+        if ('target' in json) {
+          // New format
           return json;
         }
         const mappings: AnnotationEventMappings = {
           time: {
             source: AnnotationEventFieldSource.Field,
-            value: json.timePath ?? defaultMainQuery.timePath
-          }
+            value: json.timePath ?? defaultMainQuery.timePath,
+          },
         };
         const additionalTexts: Record<string, string> = {};
         if (json.endTimePath) {
           mappings.timeEnd = {
             source: AnnotationEventFieldSource.Field,
-            value: json.endTimePath
-          }
+            value: json.endTimePath,
+          };
         }
         if (json.annotationTags) {
-          additionalTexts["extra.tags"] = json.annotationTags;
+          additionalTexts['extra.tags'] = json.annotationTags;
           mappings.tags = {
             source: AnnotationEventFieldSource.Field,
-            value: "extra.tags"
-          }
+            value: 'extra.tags',
+          };
         }
         if (json.annotationText) {
-          additionalTexts["extra.text"] = json.annotationText;
+          additionalTexts['extra.text'] = json.annotationText;
           mappings.text = {
             source: AnnotationEventFieldSource.Field,
-            value: "extra.text"
-          }
+            value: 'extra.text',
+          };
         }
         if (json.annotationTitle) {
-          additionalTexts["extra.title"] = json.annotationTitle;
+          additionalTexts['extra.title'] = json.annotationTitle;
           mappings.title = {
             source: AnnotationEventFieldSource.Field,
-            value: "extra.title"
-          }
+            value: 'extra.title',
+          };
         }
         const timePaths = [json.timePath ?? defaultMainQuery.timePath];
         if (json.endTimePath) {
@@ -95,13 +98,13 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
           name: json.name,
           mappings: mappings,
           target: {
-            refId: "Anno",
+            refId: 'Anno',
             queryText: json.queryText,
             dataPath: json.dataPath,
-            timePaths: timePaths,
+            timePaths: timePaths.join(', '),
             timeFormat: json.timeFormat ?? defaultAnnotationQuery.timeFormat, // very old configurations may not have timeFormat defined
             additionalTexts: additionalTexts,
-          }
+          },
         };
       },
       QueryEditor: AnnotationQueryEditor,
@@ -146,7 +149,11 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       });
   }
 
-  private createQuery(query: CommonQuery, range: TimeRange | undefined, scopedVars: ScopedVars | undefined = undefined) {
+  private createQuery(
+    query: CommonQuery,
+    range: TimeRange | undefined,
+    scopedVars: ScopedVars | undefined = undefined
+  ) {
     let payload = getTemplateSrv().replace(query.queryText, {
       ...scopedVars,
       timeFrom: { text: 'from', value: range?.from.valueOf() },
@@ -210,13 +217,20 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     for (const replaceKey in replaceObject) {
       const replaceValue = replaceObject[replaceKey];
 
-      const regex = new RegExp(escapeRegExp("$" + replaceKey), 'g');
+      const regex = new RegExp(escapeRegExp('$' + replaceKey), 'g');
       result = result.replace(regex, replaceValue);
     }
     return getTemplateSrv().replace(result, scopedVars);
   }
 
-  private static getDisplayName(options: DataQueryRequest<MyQuery>, fieldName: string, identifiers: string[], identifiersString: string, generalReplaceObject: any, aliasBy?: string): string {
+  private static getDisplayName(
+    options: DataQueryRequest<MyQuery>,
+    fieldName: string,
+    identifiers: string[],
+    identifiersString: string,
+    generalReplaceObject: any,
+    aliasBy?: string
+  ): string {
     if (aliasBy) {
       const replaceObject = { ...generalReplaceObject };
       replaceObject['fieldName'] = fieldName;
@@ -279,12 +293,19 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
               dataFrame = new MutableDataFrame({ fields: [] });
               for (const fieldName in doc) {
                 let t: FieldType = FieldType.string;
-                if (fieldName in allTimePaths || isRFC3339_ISO6801(String(doc[fieldName]))) {
+                if (allTimePaths.indexOf(fieldName) !== -1 || isRFC3339_ISO6801(String(doc[fieldName]))) {
                   t = FieldType.time;
                 } else if (_.isNumber(doc[fieldName])) {
                   t = FieldType.number;
                 }
-                const title = DataSource.getDisplayName(options, fieldName, identifiers, identifiersString, generalReplaceObject, aliasBy);
+                const title = DataSource.getDisplayName(
+                  options,
+                  fieldName,
+                  identifiers,
+                  identifiersString,
+                  generalReplaceObject,
+                  aliasBy
+                );
                 dataFrame.addField({
                   name: fieldName,
                   type: t,
@@ -298,8 +319,17 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
                 dataFrame.addField({
                   name: additionalFieldName,
                   type: FieldType.string,
-                  config: { displayName: DataSource.getDisplayName(options, additionalFieldName, identifiers, identifiersString, generalReplaceObject, aliasBy) }
-                })
+                  config: {
+                    displayName: DataSource.getDisplayName(
+                      options,
+                      additionalFieldName,
+                      identifiers,
+                      identifiersString,
+                      generalReplaceObject,
+                      aliasBy
+                    ),
+                  },
+                });
               }
 
               dataFrameMap.set(identifiersString, dataFrame);
@@ -308,7 +338,11 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
             const finalDoc = { ...doc };
             for (const additionalFieldName in additionalTexts) {
               const additionalText = additionalTexts[additionalFieldName];
-              finalDoc[additionalFieldName] = DataSource.substituteString(additionalText, options.scopedVars, generalReplaceObject);
+              finalDoc[additionalFieldName] = DataSource.substituteString(
+                additionalText,
+                options.scopedVars,
+                generalReplaceObject
+              );
             }
 
             dataFrame.add(finalDoc);

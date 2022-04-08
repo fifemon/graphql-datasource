@@ -4,10 +4,10 @@ import React, { ChangeEvent, PureComponent } from 'react';
 import { QueryEditorProps } from '@grafana/data';
 import { LegacyForms } from '@grafana/ui';
 import { DataSource } from './DataSource';
-import {defaultMainQuery, MyDataSourceOptions, MyMainQuery, MyQuery} from './types';
+import { defaultMainQuery, MyDataSourceOptions, MyMainQuery, MyQuery } from './types';
 import './graphiql_modified.css';
 import { createGraphiQL } from './GraphiQLUtil';
-import {createDataPathForm, createTimeFormatForm} from "./QueryEditorUtil";
+import { createDataPathForm, createTimeFormatForm } from './QueryEditorUtil';
 
 type Props = QueryEditorProps<DataSource, MyQuery, MyDataSourceOptions>;
 

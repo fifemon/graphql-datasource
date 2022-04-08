@@ -1,20 +1,19 @@
 import defaults from 'lodash/defaults';
 
-import React, {ChangeEvent, PureComponent} from 'react';
-import {QueryEditorProps} from '@grafana/data';
-import {DataSource} from './DataSource';
-import {defaultAnnotationQuery, MyAnnotationQuery, MyDataSourceOptions, MyQuery} from './types';
+import React, { ChangeEvent, PureComponent } from 'react';
+import { QueryEditorProps } from '@grafana/data';
+import { DataSource } from './DataSource';
+import { defaultAnnotationQuery, MyAnnotationQuery, MyDataSourceOptions, MyQuery } from './types';
 import './graphiql_modified.css';
-import {createGraphiQL} from './GraphiQLUtil';
-import {createDataPathForm, createTimeFormatForm} from "./QueryEditorUtil";
-import {LegacyForms} from "@grafana/ui";
+import { createGraphiQL } from './GraphiQLUtil';
+import { createDataPathForm, createTimeFormatForm } from './QueryEditorUtil';
+import { LegacyForms } from '@grafana/ui';
 
 type Props = QueryEditorProps<DataSource, MyQuery, MyDataSourceOptions>;
 
 interface State {}
 
 export class AnnotationQueryEditor extends PureComponent<Props, State> {
-
   onChangeQuery = (value?: string) => {
     // any should be replaced with DocumentNode
     const { onChange, query } = this.props;
@@ -29,27 +28,12 @@ export class AnnotationQueryEditor extends PureComponent<Props, State> {
   };
   onTimePathsTextChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { onChange, query } = this.props;
-    const timePathString = event.target.value;
-    onChange({ ...query, timePaths: AnnotationQueryEditor.timePathsToArray(timePathString) });
+    onChange({ ...query, timePaths: event.target.value });
   };
   onTimeFormatTextChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { onChange, query } = this.props;
     onChange({ ...query, timeFormat: event.target.value });
   };
-
-  private static timePathsToString(timePaths: string[]): string {
-    return timePaths.join(",");
-  }
-  private static timePathsToArray(timePaths: string): string[] {
-    const r = [];
-    for (const timePath in timePaths.split(",")) {
-      const trimmed = timePath.trim();
-      if (trimmed) {
-        r.push(trimmed);
-      }
-    }
-    return r;
-  }
 
   render() {
     const query: MyAnnotationQuery = defaults(this.props.query, defaultAnnotationQuery) as MyAnnotationQuery;
@@ -71,7 +55,7 @@ export class AnnotationQueryEditor extends PureComponent<Props, State> {
           <LegacyForms.FormField
             labelWidth={8}
             inputWidth={24}
-            value={AnnotationQueryEditor.timePathsToString(timePaths)}
+            value={timePaths}
             onChange={this.onTimePathsTextChange}
             label="Time paths"
             tooltip="Comma separated list of paths to each field to be treated as a timestamp. Each path is dot-delimited to time under data path"

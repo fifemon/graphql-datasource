@@ -62138,6 +62138,119 @@ module.exports = function(module) {
 
 /***/ }),
 
+/***/ "./AnnotationQueryEditor.tsx":
+/*!***********************************!*\
+  !*** ./AnnotationQueryEditor.tsx ***!
+  \***********************************/
+/*! exports provided: AnnotationQueryEditor */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AnnotationQueryEditor", function() { return AnnotationQueryEditor; });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "../node_modules/tslib/tslib.es6.js");
+/* harmony import */ var lodash_defaults__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! lodash/defaults */ "../node_modules/lodash/defaults.js");
+/* harmony import */ var lodash_defaults__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(lodash_defaults__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./types */ "./types.ts");
+/* harmony import */ var _graphiql_modified_css__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./graphiql_modified.css */ "./graphiql_modified.css");
+/* harmony import */ var _graphiql_modified_css__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_graphiql_modified_css__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _GraphiQLUtil__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./GraphiQLUtil */ "./GraphiQLUtil.tsx");
+/* harmony import */ var _QueryEditorUtil__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./QueryEditorUtil */ "./QueryEditorUtil.tsx");
+/* harmony import */ var _grafana_ui__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @grafana/ui */ "@grafana/ui");
+/* harmony import */ var _grafana_ui__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(_grafana_ui__WEBPACK_IMPORTED_MODULE_7__);
+
+
+
+
+
+
+
+
+
+var AnnotationQueryEditor = function (_super) {
+  Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__extends"])(AnnotationQueryEditor, _super);
+
+  function AnnotationQueryEditor() {
+    var _this = _super !== null && _super.apply(this, arguments) || this;
+
+    _this.onChangeQuery = function (value) {
+      // any should be replaced with DocumentNode
+      var _a = _this.props,
+          onChange = _a.onChange,
+          query = _a.query;
+
+      if (onChange && value !== undefined) {
+        onChange(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, query), {
+          queryText: value
+        }));
+      }
+    };
+
+    _this.onDataPathTextChange = function (event) {
+      var _a = _this.props,
+          onChange = _a.onChange,
+          query = _a.query;
+      onChange(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, query), {
+        dataPath: event.target.value
+      }));
+    };
+
+    _this.onTimePathsTextChange = function (event) {
+      var _a = _this.props,
+          onChange = _a.onChange,
+          query = _a.query;
+      onChange(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, query), {
+        timePaths: event.target.value
+      }));
+    };
+
+    _this.onTimeFormatTextChange = function (event) {
+      var _a = _this.props,
+          onChange = _a.onChange,
+          query = _a.query;
+      onChange(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, query), {
+        timeFormat: event.target.value
+      }));
+    };
+
+    return _this;
+  }
+
+  AnnotationQueryEditor.prototype.render = function () {
+    var query = lodash_defaults__WEBPACK_IMPORTED_MODULE_1___default()(this.props.query, _types__WEBPACK_IMPORTED_MODULE_3__["defaultAnnotationQuery"]);
+    var queryText = query.queryText,
+        dataPath = query.dataPath,
+        timeFormat = query.timeFormat,
+        timePaths = query.timePaths;
+    var graphiQL = Object(_GraphiQLUtil__WEBPACK_IMPORTED_MODULE_5__["createGraphiQL"])(this.props.datasource, queryText, this.onChangeQuery);
+    return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_2___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("link", {
+      rel: "stylesheet",
+      href: "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.23.0/theme/dracula.css"
+    }), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
+      style: {
+        height: '50vh'
+      }
+    }, graphiQL), Object(_QueryEditorUtil__WEBPACK_IMPORTED_MODULE_6__["createDataPathForm"])(dataPath || '', this.onDataPathTextChange), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
+      className: "gf-form"
+    }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_7__["LegacyForms"].FormField, {
+      labelWidth: 8,
+      inputWidth: 24,
+      value: timePaths,
+      onChange: this.onTimePathsTextChange,
+      label: "Time paths",
+      tooltip: "Comma separated list of paths to each field to be treated as a timestamp. Each path is dot-delimited to time under data path"
+    })), Object(_QueryEditorUtil__WEBPACK_IMPORTED_MODULE_6__["createTimeFormatForm"])(timeFormat || '', this.onTimeFormatTextChange));
+  };
+
+  return AnnotationQueryEditor;
+}(react__WEBPACK_IMPORTED_MODULE_2__["PureComponent"]);
+
+
+
+/***/ }),
+
 /***/ "./ConfigEditor.tsx":
 /*!**************************!*\
   !*** ./ConfigEditor.tsx ***!
@@ -62188,6 +62301,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! lodash */ "lodash");
 /* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_5__);
 /* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./util */ "./util.ts");
+/* harmony import */ var _AnnotationQueryEditor__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./AnnotationQueryEditor */ "./AnnotationQueryEditor.tsx");
+
 
 
 
@@ -62207,6 +62322,79 @@ var DataSource = function (_super) {
     _this.basicAuth = instanceSettings.basicAuth;
     _this.withCredentials = instanceSettings.withCredentials;
     _this.url = instanceSettings.url;
+    _this.annotations = {
+      prepareAnnotation: function prepareAnnotation(json) {
+        var _a, _b, _c;
+
+        if ('target' in json) {
+          // New format
+          return json;
+        }
+
+        var mappings = {
+          time: {
+            source: _grafana_data__WEBPACK_IMPORTED_MODULE_2__["AnnotationEventFieldSource"].Field,
+            value: (_a = json.timePath) !== null && _a !== void 0 ? _a : _types__WEBPACK_IMPORTED_MODULE_3__["defaultMainQuery"].timePath
+          }
+        };
+        var additionalTexts = {};
+
+        if (json.endTimePath) {
+          mappings.timeEnd = {
+            source: _grafana_data__WEBPACK_IMPORTED_MODULE_2__["AnnotationEventFieldSource"].Field,
+            value: json.endTimePath
+          };
+        }
+
+        if (json.annotationTags) {
+          additionalTexts['extra.tags'] = json.annotationTags;
+          mappings.tags = {
+            source: _grafana_data__WEBPACK_IMPORTED_MODULE_2__["AnnotationEventFieldSource"].Field,
+            value: 'extra.tags'
+          };
+        }
+
+        if (json.annotationText) {
+          additionalTexts['extra.text'] = json.annotationText;
+          mappings.text = {
+            source: _grafana_data__WEBPACK_IMPORTED_MODULE_2__["AnnotationEventFieldSource"].Field,
+            value: 'extra.text'
+          };
+        }
+
+        if (json.annotationTitle) {
+          additionalTexts['extra.title'] = json.annotationTitle;
+          mappings.title = {
+            source: _grafana_data__WEBPACK_IMPORTED_MODULE_2__["AnnotationEventFieldSource"].Field,
+            value: 'extra.title'
+          };
+        }
+
+        var timePaths = [(_b = json.timePath) !== null && _b !== void 0 ? _b : _types__WEBPACK_IMPORTED_MODULE_3__["defaultMainQuery"].timePath];
+
+        if (json.endTimePath) {
+          timePaths.push(json.endTimePath);
+        } // This is the old legacy format, so let's transform it to avoid breaking users' existing queries
+
+
+        return {
+          datasource: json.datasource,
+          enable: json.enable,
+          iconColor: json.iconColor,
+          name: json.name,
+          mappings: mappings,
+          target: {
+            refId: 'Anno',
+            queryText: json.queryText,
+            dataPath: json.dataPath,
+            timePaths: timePaths.join(', '),
+            timeFormat: (_c = json.timeFormat) !== null && _c !== void 0 ? _c : _types__WEBPACK_IMPORTED_MODULE_3__["defaultAnnotationQuery"].timeFormat,
+            additionalTexts: additionalTexts
+          }
+        };
+      },
+      QueryEditor: _AnnotationQueryEditor__WEBPACK_IMPORTED_MODULE_7__["AnnotationQueryEditor"]
+    };
     return _this;
   }
 
@@ -62363,6 +62551,38 @@ var DataSource = function (_super) {
     return dataPathArray;
   };
 
+  DataSource.substituteString = function (text, scopedVars, replaceObject) {
+    if (replaceObject === void 0) {
+      replaceObject = {};
+    }
+
+    var result = text;
+
+    for (var replaceKey in replaceObject) {
+      var replaceValue = replaceObject[replaceKey];
+      var regex = new RegExp(Object(lodash__WEBPACK_IMPORTED_MODULE_5__["escapeRegExp"])('$' + replaceKey), 'g');
+      result = result.replace(regex, replaceValue);
+    }
+
+    return Object(_grafana_runtime__WEBPACK_IMPORTED_MODULE_4__["getTemplateSrv"])().replace(result, scopedVars);
+  };
+
+  DataSource.getDisplayName = function (options, fieldName, identifiers, identifiersString, generalReplaceObject, aliasBy) {
+    if (aliasBy) {
+      var replaceObject = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, generalReplaceObject);
+
+      replaceObject['fieldName'] = fieldName;
+      return this.substituteString(aliasBy, options.scopedVars, replaceObject);
+    }
+
+    if (identifiers.length !== 0) {
+      // if we have any identifiers
+      return identifiersString + '_' + fieldName;
+    }
+
+    return fieldName;
+  };
+
   DataSource.prototype.query = function (options) {
     return Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__awaiter"])(this, void 0, Promise, function () {
       var _this = this;
@@ -62371,7 +62591,7 @@ var DataSource = function (_super) {
         return [2
         /*return*/
         , Promise.all(options.targets.map(function (target) {
-          return _this.createQuery(lodash_defaults__WEBPACK_IMPORTED_MODULE_1___default()(target, _types__WEBPACK_IMPORTED_MODULE_3__["defaultQuery"]), options.range, options.scopedVars);
+          return _this.createQuery(lodash_defaults__WEBPACK_IMPORTED_MODULE_1___default()(target, _types__WEBPACK_IMPORTED_MODULE_3__["defaultCommonQuery"]), options.range, options.scopedVars);
         })).then(function (results) {
           var e_3, _a, e_4, _b, e_5, _c, e_6, _d, e_7, _e, e_8, _f;
 
@@ -62381,12 +62601,26 @@ var DataSource = function (_super) {
             for (var results_1 = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(results), results_1_1 = results_1.next(); !results_1_1.done; results_1_1 = results_1.next()) {
               var res = results_1_1.value;
               var dataPathArray = DataSource.getDataPathArray(res.query.dataPath);
-              var _g = res.query,
-                  timePath = _g.timePath,
-                  timeFormat = _g.timeFormat,
-                  groupBy = _g.groupBy,
-                  aliasBy = _g.aliasBy;
-              var split = groupBy.split(',');
+              var query = res.query;
+              var timePath = query.timePath,
+                  endTimePath = query.endTimePath,
+                  timePaths = query.timePaths,
+                  timeFormat = query.timeFormat,
+                  groupBy = query.groupBy,
+                  aliasBy = query.aliasBy,
+                  additionalTexts = query.additionalTexts; // any of these variables may be undefined
+
+              var allTimePaths = timePaths === undefined ? [] : Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__spreadArray"])([], Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__read"])(timePaths));
+
+              if (timePath) {
+                allTimePaths.push(timePath);
+              }
+
+              if (endTimePath) {
+                allTimePaths.push(endTimePath);
+              }
+
+              var split = groupBy === undefined ? [] : groupBy.split(',');
               var groupByList = [];
 
               try {
@@ -62420,7 +62654,8 @@ var DataSource = function (_super) {
                     for (var docs_1 = (e_6 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(docs)), docs_1_1 = docs_1.next(); !docs_1_1.done; docs_1_1 = docs_1.next()) {
                       var doc = docs_1_1.value;
 
-                      if (timePath in doc) {
+                      if (timePath !== undefined && timePath in doc) {
+                        // If timePath is in doc, then timePath !== undefined, which means timeFormat !== undefined too
                         doc[timePath] = Object(_grafana_data__WEBPACK_IMPORTED_MODULE_2__["dateTime"])(doc[timePath], timeFormat);
                       }
 
@@ -62444,6 +62679,12 @@ var DataSource = function (_super) {
                       }
 
                       var identifiersString = identifiers.toString();
+                      var generalReplaceObject = {};
+
+                      for (var fieldName in doc) {
+                        generalReplaceObject['field_' + fieldName] = doc[fieldName];
+                      }
+
                       var dataFrame = dataFrameMap.get(identifiersString);
 
                       if (!dataFrame) {
@@ -62451,45 +62692,17 @@ var DataSource = function (_super) {
                         dataFrame = new _grafana_data__WEBPACK_IMPORTED_MODULE_2__["MutableDataFrame"]({
                           fields: []
                         });
-                        var generalReplaceObject = {};
-
-                        for (var fieldName in doc) {
-                          generalReplaceObject['field_' + fieldName] = doc[fieldName];
-                        }
 
                         for (var fieldName in doc) {
                           var t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].string;
 
-                          if (fieldName === timePath || Object(_util__WEBPACK_IMPORTED_MODULE_6__["isRFC3339_ISO6801"])(String(doc[fieldName]))) {
+                          if (allTimePaths.indexOf(fieldName) !== -1 || Object(_util__WEBPACK_IMPORTED_MODULE_6__["isRFC3339_ISO6801"])(String(doc[fieldName]))) {
                             t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].time;
                           } else if (lodash__WEBPACK_IMPORTED_MODULE_5___default.a.isNumber(doc[fieldName])) {
                             t = _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].number;
                           }
 
-                          var title = void 0;
-
-                          if (identifiers.length !== 0) {
-                            // if we have any identifiers
-                            title = identifiersString + '_' + fieldName;
-                          } else {
-                            title = fieldName;
-                          }
-
-                          if (aliasBy) {
-                            title = aliasBy;
-
-                            var replaceObject = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, generalReplaceObject);
-
-                            replaceObject['fieldName'] = fieldName;
-
-                            for (var replaceKey in replaceObject) {
-                              var replaceValue = replaceObject[replaceKey];
-                              var regex = new RegExp('\\$' + replaceKey, 'g');
-                              title = title.replace(regex, replaceValue);
-                            }
-
-                            title = Object(_grafana_runtime__WEBPACK_IMPORTED_MODULE_4__["getTemplateSrv"])().replace(title, options.scopedVars);
-                          }
+                          var title = DataSource.getDisplayName(options, fieldName, identifiers, identifiersString, generalReplaceObject, aliasBy);
 
                           dataFrame.addField({
                             name: fieldName,
@@ -62502,10 +62715,28 @@ var DataSource = function (_super) {
                           };
                         }
 
+                        for (var additionalFieldName in additionalTexts) {
+                          // Note that although aliasBy should be undefined, we will get getDisplayName anyway for consistency.
+                          dataFrame.addField({
+                            name: additionalFieldName,
+                            type: _grafana_data__WEBPACK_IMPORTED_MODULE_2__["FieldType"].string,
+                            config: {
+                              displayName: DataSource.getDisplayName(options, additionalFieldName, identifiers, identifiersString, generalReplaceObject, aliasBy)
+                            }
+                          });
+                        }
+
                         dataFrameMap.set(identifiersString, dataFrame);
                       }
 
-                      dataFrame.add(doc);
+                      var finalDoc = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, doc);
+
+                      for (var additionalFieldName in additionalTexts) {
+                        var additionalText = additionalTexts[additionalFieldName];
+                        finalDoc[additionalFieldName] = DataSource.substituteString(additionalText, options.scopedVars, generalReplaceObject);
+                      }
+
+                      dataFrame.add(finalDoc);
                     }
                   } catch (e_6_1) {
                     e_6 = {
@@ -62520,8 +62751,8 @@ var DataSource = function (_super) {
                   }
 
                   try {
-                    for (var _h = (e_8 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(dataFrameMap.values())), _j = _h.next(); !_j.done; _j = _h.next()) {
-                      var dataFrame = _j.value;
+                    for (var _g = (e_8 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(dataFrameMap.values())), _h = _g.next(); !_h.done; _h = _g.next()) {
+                      var dataFrame = _h.value;
                       dataFrameArray.push(dataFrame);
                     }
                   } catch (e_8_1) {
@@ -62530,7 +62761,7 @@ var DataSource = function (_super) {
                     };
                   } finally {
                     try {
-                      if (_j && !_j.done && (_f = _h["return"])) _f.call(_h);
+                      if (_h && !_h.done && (_f = _g["return"])) _f.call(_g);
                     } finally {
                       if (e_8) throw e_8.error;
                     }
@@ -62568,125 +62799,9 @@ var DataSource = function (_super) {
     });
   };
 
-  DataSource.prototype.annotationQuery = function (options) {
-    var query = lodash_defaults__WEBPACK_IMPORTED_MODULE_1___default()(options.annotation, _types__WEBPACK_IMPORTED_MODULE_3__["defaultQuery"]);
-    return Promise.all([this.createQuery(query, options.range)]).then(function (results) {
-      var e_9, _a, e_10, _b, e_11, _c, e_12, _d;
-
-      var r = [];
-
-      try {
-        for (var results_2 = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(results), results_2_1 = results_2.next(); !results_2_1.done; results_2_1 = results_2.next()) {
-          var res = results_2_1.value;
-          var _e = res.query,
-              timePath = _e.timePath,
-              endTimePath = _e.endTimePath,
-              timeFormat = _e.timeFormat;
-          var dataPathArray = DataSource.getDataPathArray(res.query.dataPath);
-
-          try {
-            for (var dataPathArray_2 = (e_10 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(dataPathArray)), dataPathArray_2_1 = dataPathArray_2.next(); !dataPathArray_2_1.done; dataPathArray_2_1 = dataPathArray_2.next()) {
-              var dataPath = dataPathArray_2_1.value;
-              var docs = DataSource.getDocs(res.results.data, dataPath);
-
-              try {
-                for (var docs_2 = (e_11 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(docs)), docs_2_1 = docs_2.next(); !docs_2_1.done; docs_2_1 = docs_2.next()) {
-                  var doc = docs_2_1.value;
-                  var annotation = {};
-
-                  if (timePath in doc) {
-                    annotation.time = Object(_grafana_data__WEBPACK_IMPORTED_MODULE_2__["dateTime"])(doc[timePath], timeFormat).valueOf();
-                  }
-
-                  if (endTimePath in doc) {
-                    annotation.isRegion = true;
-                    annotation.timeEnd = Object(_grafana_data__WEBPACK_IMPORTED_MODULE_2__["dateTime"])(doc[endTimePath], timeFormat).valueOf();
-                  }
-
-                  var title = query.annotationTitle;
-                  var text = query.annotationText;
-                  var tags = query.annotationTags;
-
-                  for (var fieldName in doc) {
-                    var fieldValue = doc[fieldName];
-                    var replaceKey = 'field_' + fieldName;
-                    var regex = new RegExp('\\$' + replaceKey, 'g');
-                    title = title.replace(regex, fieldValue);
-                    text = text.replace(regex, fieldValue);
-                    tags = tags.replace(regex, fieldValue);
-                  }
-
-                  annotation.title = title;
-                  annotation.text = text;
-                  var tagsList = [];
-
-                  try {
-                    for (var _f = (e_12 = void 0, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(tags.split(','))), _g = _f.next(); !_g.done; _g = _f.next()) {
-                      var element = _g.value;
-                      var trimmed = element.trim();
-
-                      if (trimmed) {
-                        tagsList.push(trimmed);
-                      }
-                    }
-                  } catch (e_12_1) {
-                    e_12 = {
-                      error: e_12_1
-                    };
-                  } finally {
-                    try {
-                      if (_g && !_g.done && (_d = _f["return"])) _d.call(_f);
-                    } finally {
-                      if (e_12) throw e_12.error;
-                    }
-                  }
-
-                  annotation.tags = tagsList;
-                  r.push(annotation);
-                }
-              } catch (e_11_1) {
-                e_11 = {
-                  error: e_11_1
-                };
-              } finally {
-                try {
-                  if (docs_2_1 && !docs_2_1.done && (_c = docs_2["return"])) _c.call(docs_2);
-                } finally {
-                  if (e_11) throw e_11.error;
-                }
-              }
-            }
-          } catch (e_10_1) {
-            e_10 = {
-              error: e_10_1
-            };
-          } finally {
-            try {
-              if (dataPathArray_2_1 && !dataPathArray_2_1.done && (_b = dataPathArray_2["return"])) _b.call(dataPathArray_2);
-            } finally {
-              if (e_10) throw e_10.error;
-            }
-          }
-        }
-      } catch (e_9_1) {
-        e_9 = {
-          error: e_9_1
-        };
-      } finally {
-        try {
-          if (results_2_1 && !results_2_1.done && (_a = results_2["return"])) _a.call(results_2);
-        } finally {
-          if (e_9) throw e_9.error;
-        }
-      }
-
-      return r;
-    });
-  };
-
   DataSource.prototype.testDatasource = function () {
     var q = "{\n      __schema{\n        queryType{name}\n      }\n    }";
-    return this.postQuery(_types__WEBPACK_IMPORTED_MODULE_3__["defaultQuery"], q).then(function (res) {
+    return this.postQuery(_types__WEBPACK_IMPORTED_MODULE_3__["defaultCommonQuery"], q).then(function (res) {
       if (res.errors) {
         console.log(res.errors);
         return {
@@ -62710,15 +62825,15 @@ var DataSource = function (_super) {
 
   DataSource.prototype.metricFindQuery = function (query, options) {
     return Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__awaiter"])(this, void 0, void 0, function () {
-      var metricFindValues, payload, response, docs, docs_3, docs_3_1, doc, fieldName;
+      var metricFindValues, payload, response, docs, docs_2, docs_2_1, doc, fieldName;
 
-      var e_13, _a;
+      var e_9, _a;
 
       return Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__generator"])(this, function (_b) {
         switch (_b.label) {
           case 0:
             metricFindValues = [];
-            query = lodash_defaults__WEBPACK_IMPORTED_MODULE_1___default()(query, _types__WEBPACK_IMPORTED_MODULE_3__["defaultQuery"]);
+            query = lodash_defaults__WEBPACK_IMPORTED_MODULE_1___default()(query, _types__WEBPACK_IMPORTED_MODULE_3__["defaultVariableQuery"]);
             payload = query.queryText;
             payload = Object(_grafana_runtime__WEBPACK_IMPORTED_MODULE_4__["getTemplateSrv"])().replace(payload, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, this.getVariables));
             return [4
@@ -62730,8 +62845,8 @@ var DataSource = function (_super) {
             docs = DataSource.getDocs(response.results.data, query.dataPath);
 
             try {
-              for (docs_3 = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(docs), docs_3_1 = docs_3.next(); !docs_3_1.done; docs_3_1 = docs_3.next()) {
-                doc = docs_3_1.value;
+              for (docs_2 = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__values"])(docs), docs_2_1 = docs_2.next(); !docs_2_1.done; docs_2_1 = docs_2.next()) {
+                doc = docs_2_1.value;
 
                 if ('__text' in doc && '__value' in doc) {
                   metricFindValues.push({
@@ -62746,15 +62861,15 @@ var DataSource = function (_super) {
                   }
                 }
               }
-            } catch (e_13_1) {
-              e_13 = {
-                error: e_13_1
+            } catch (e_9_1) {
+              e_9 = {
+                error: e_9_1
               };
             } finally {
               try {
-                if (docs_3_1 && !docs_3_1.done && (_a = docs_3["return"])) _a.call(docs_3);
+                if (docs_2_1 && !docs_2_1.done && (_a = docs_2["return"])) _a.call(docs_2);
               } finally {
-                if (e_13) throw e_13.error;
+                if (e_9) throw e_9.error;
               }
             }
 
@@ -62797,27 +62912,6 @@ var DataSource = function (_super) {
 
   return DataSource;
 }(_grafana_data__WEBPACK_IMPORTED_MODULE_2__["DataSourceApi"]);
-
-
-
-/***/ }),
-
-/***/ "./GraphQLAnnotationsQueryCtrl.tsx":
-/*!*****************************************!*\
-  !*** ./GraphQLAnnotationsQueryCtrl.tsx ***!
-  \*****************************************/
-/*! exports provided: GraphQLAnnotationsQueryCtrl */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GraphQLAnnotationsQueryCtrl", function() { return GraphQLAnnotationsQueryCtrl; });
-var GraphQLAnnotationsQueryCtrl = function () {
-  function GraphQLAnnotationsQueryCtrl() {}
-
-  GraphQLAnnotationsQueryCtrl.templateUrl = 'partials/annotations.editor.html';
-  return GraphQLAnnotationsQueryCtrl;
-}();
 
 
 
@@ -62948,6 +63042,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _graphiql_modified_css__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./graphiql_modified.css */ "./graphiql_modified.css");
 /* harmony import */ var _graphiql_modified_css__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_graphiql_modified_css__WEBPACK_IMPORTED_MODULE_5__);
 /* harmony import */ var _GraphiQLUtil__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./GraphiQLUtil */ "./GraphiQLUtil.tsx");
+/* harmony import */ var _QueryEditorUtil__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./QueryEditorUtil */ "./QueryEditorUtil.tsx");
+
 
 
 
@@ -63026,7 +63122,7 @@ var QueryEditor = function (_super) {
   QueryEditor.prototype.onComponentDidMount = function () {};
 
   QueryEditor.prototype.render = function () {
-    var query = lodash_defaults__WEBPACK_IMPORTED_MODULE_1___default()(this.props.query, _types__WEBPACK_IMPORTED_MODULE_4__["defaultQuery"]);
+    var query = lodash_defaults__WEBPACK_IMPORTED_MODULE_1___default()(this.props.query, _types__WEBPACK_IMPORTED_MODULE_4__["defaultMainQuery"]);
     var queryText = query.queryText,
         dataPath = query.dataPath,
         timePath = query.timePath,
@@ -63042,16 +63138,7 @@ var QueryEditor = function (_super) {
       style: {
         height: '50vh'
       }
-    }, graphiQL), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
-      className: "gf-form"
-    }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["LegacyForms"].FormField, {
-      labelWidth: 8,
-      inputWidth: 24,
-      value: dataPath || '',
-      onChange: this.onDataPathTextChange,
-      label: "Data path",
-      tooltip: "dot-delimited path to data in response. Separate with commas to use multiple data paths"
-    })), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
+    }, graphiQL), Object(_QueryEditorUtil__WEBPACK_IMPORTED_MODULE_7__["createDataPathForm"])(dataPath || '', this.onDataPathTextChange), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
       className: "gf-form"
     }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["LegacyForms"].FormField, {
       labelWidth: 8,
@@ -63060,21 +63147,7 @@ var QueryEditor = function (_super) {
       onChange: this.onTimePathTextChange,
       label: "Time path",
       tooltip: "dot-delimited path to time under data path"
-    })), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
-      className: 'gf-form'
-    }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["LegacyForms"].FormField, {
-      labelWidth: 8,
-      inputWidth: 24,
-      value: timeFormat || '',
-      onChange: this.onTimeFormatTextChange,
-      label: "Time format",
-      tooltip: react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("a", {
-        href: "https://momentjs.com/docs/#/parsing/string-format/",
-        title: "Formatting help"
-      }, "Optional time format in moment.js format.\xA0", react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["Icon"], {
-        name: "external-link-alt"
-      }))
-    })), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
+    })), Object(_QueryEditorUtil__WEBPACK_IMPORTED_MODULE_7__["createTimeFormatForm"])(timeFormat || '', this.onTimeFormatTextChange), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
       className: 'gf-form'
     }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["LegacyForms"].FormField, {
       labelWidth: 8,
@@ -63099,6 +63172,55 @@ var QueryEditor = function (_super) {
 }(react__WEBPACK_IMPORTED_MODULE_2__["PureComponent"]);
 
 
+
+/***/ }),
+
+/***/ "./QueryEditorUtil.tsx":
+/*!*****************************!*\
+  !*** ./QueryEditorUtil.tsx ***!
+  \*****************************/
+/*! exports provided: createDataPathForm, createTimeFormatForm */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createDataPathForm", function() { return createDataPathForm; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createTimeFormatForm", function() { return createTimeFormatForm; });
+/* harmony import */ var _grafana_ui__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @grafana/ui */ "@grafana/ui");
+/* harmony import */ var _grafana_ui__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_grafana_ui__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
+
+
+function createDataPathForm(dataPath, onDataPathTextChange) {
+  return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_1___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
+    className: "gf-form"
+  }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_0__["LegacyForms"].FormField, {
+    labelWidth: 8,
+    inputWidth: 24,
+    value: dataPath,
+    onChange: onDataPathTextChange,
+    label: "Data path",
+    tooltip: "dot-delimited path to data in response. Separate with commas to use multiple data paths"
+  })));
+}
+function createTimeFormatForm(timeFormat, onTimeFormatTextChange) {
+  return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_1___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
+    className: 'gf-form'
+  }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_0__["LegacyForms"].FormField, {
+    labelWidth: 8,
+    inputWidth: 24,
+    value: timeFormat || '',
+    onChange: onTimeFormatTextChange,
+    label: "Time format",
+    tooltip: react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("a", {
+      href: "https://momentjs.com/docs/#/parsing/string-format/",
+      title: "Formatting help"
+    }, "Optional time format in moment.js format.\xA0", react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_0__["Icon"], {
+      name: "external-link-alt"
+    }))
+  })));
+}
 
 /***/ }),
 
@@ -63216,15 +63338,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _DataSource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./DataSource */ "./DataSource.ts");
 /* harmony import */ var _ConfigEditor__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./ConfigEditor */ "./ConfigEditor.tsx");
 /* harmony import */ var _QueryEditor__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./QueryEditor */ "./QueryEditor.tsx");
-/* harmony import */ var _GraphQLAnnotationsQueryCtrl__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./GraphQLAnnotationsQueryCtrl */ "./GraphQLAnnotationsQueryCtrl.tsx");
-/* harmony import */ var _VariableQueryEditor__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./VariableQueryEditor */ "./VariableQueryEditor.tsx");
+/* harmony import */ var _VariableQueryEditor__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./VariableQueryEditor */ "./VariableQueryEditor.tsx");
 
 
 
 
 
-
-var plugin = new _grafana_data__WEBPACK_IMPORTED_MODULE_0__["DataSourcePlugin"](_DataSource__WEBPACK_IMPORTED_MODULE_1__["DataSource"]).setConfigEditor(_ConfigEditor__WEBPACK_IMPORTED_MODULE_2__["ConfigEditor"]).setAnnotationQueryCtrl(_GraphQLAnnotationsQueryCtrl__WEBPACK_IMPORTED_MODULE_4__["GraphQLAnnotationsQueryCtrl"]).setQueryEditor(_QueryEditor__WEBPACK_IMPORTED_MODULE_3__["QueryEditor"]).setVariableQueryEditor(_VariableQueryEditor__WEBPACK_IMPORTED_MODULE_5__["VariableQueryEditor"]);
+var plugin = new _grafana_data__WEBPACK_IMPORTED_MODULE_0__["DataSourcePlugin"](_DataSource__WEBPACK_IMPORTED_MODULE_1__["DataSource"]).setConfigEditor(_ConfigEditor__WEBPACK_IMPORTED_MODULE_2__["ConfigEditor"]).setQueryEditor(_QueryEditor__WEBPACK_IMPORTED_MODULE_3__["QueryEditor"]).setVariableQueryEditor(_VariableQueryEditor__WEBPACK_IMPORTED_MODULE_4__["VariableQueryEditor"]);
 
 /***/ }),
 
@@ -63232,25 +63352,51 @@ var plugin = new _grafana_data__WEBPACK_IMPORTED_MODULE_0__["DataSourcePlugin"](
 /*!******************!*\
   !*** ./types.ts ***!
   \******************/
-/*! exports provided: defaultQuery */
+/*! exports provided: defaultCommonQuery, defaultMainQuery, defaultMixedQuery, defaultAnnotationQuery, defaultVariableQuery */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "defaultQuery", function() { return defaultQuery; });
-var defaultQuery = {
-  queryText: "query {\n      data:submissions(user:\"$user\"){\n          Time:submitTime\n          idle running completed\n      }\n}",
-  dataPath: 'data',
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "defaultCommonQuery", function() { return defaultCommonQuery; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "defaultMainQuery", function() { return defaultMainQuery; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "defaultMixedQuery", function() { return defaultMixedQuery; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "defaultAnnotationQuery", function() { return defaultAnnotationQuery; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "defaultVariableQuery", function() { return defaultVariableQuery; });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "../node_modules/tslib/tslib.es6.js");
+
+var defaultCommonQuery = {
+  queryText: "{\n  data:submissions(user:\"$user\"){\n    Time:submitTime\n    idle\n    running\n    completed\n  }\n}",
+  dataPath: 'data'
+};
+
+var defaultTimedQuery = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, defaultCommonQuery), {
+  timeFormat: null
+});
+
+var defaultMainQuery = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, defaultTimedQuery), {
   timePath: 'Time',
+  groupBy: '',
+  aliasBy: ''
+});
+/** Should not be used except for legacy field defaults. */
+
+var defaultMixedQuery = {
+  queryText: defaultMainQuery.queryText,
+  dataPath: defaultMainQuery.dataPath,
+  timePath: defaultMainQuery.timePath,
   endTimePath: 'endTime',
   timeFormat: null,
-  groupBy: '',
-  aliasBy: '',
+  groupBy: defaultMainQuery.groupBy,
+  aliasBy: defaultMainQuery.aliasBy,
   annotationTitle: '',
   annotationText: '',
   annotationTags: '',
   constant: 6.5
 };
+var defaultAnnotationQuery = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, defaultTimedQuery), {
+  timePaths: 'Time, endTime'
+});
+var defaultVariableQuery = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, defaultCommonQuery);
 
 /***/ }),
 
