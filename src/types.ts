@@ -79,6 +79,7 @@ export const defaultMixedQuery: Partial<MyQuery> = {
 export const defaultAnnotationQuery: Partial<MyAnnotationQuery> = {
   ...defaultTimedQuery,
   timePaths: 'Time, endTime',
+  additionalTexts: {},
 };
 export const defaultVariableQuery: Partial<MyVariableQuery> = {
   ...defaultCommonQuery,

@@ -62215,16 +62215,86 @@ var AnnotationQueryEditor = function (_super) {
       }));
     };
 
+    _this.removeAdditionalText = function (fieldName) {
+      var _a = _this.props,
+          onChange = _a.onChange,
+          query = _a.query;
+
+      var additionalTexts = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, query.additionalTexts);
+
+      delete additionalTexts[fieldName];
+      onChange(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, query), {
+        additionalTexts: additionalTexts
+      }));
+    };
+
+    _this.addNewAdditionalText = function (fieldName) {
+      _this.setAdditionalText(fieldName, '');
+    };
+
+    _this.setAdditionalText = function (fieldName, value) {
+      var _a;
+
+      var _b = _this.props,
+          onChange = _b.onChange,
+          query = _b.query;
+      onChange(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, query), {
+        additionalTexts: Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, query.additionalTexts), (_a = {}, _a[fieldName] = value, _a))
+      }));
+    };
+
+    _this.graphiQLElement = null;
     return _this;
   }
 
   AnnotationQueryEditor.prototype.render = function () {
+    var _this = this;
+
+    var _a, _b;
+
     var query = lodash_defaults__WEBPACK_IMPORTED_MODULE_1___default()(this.props.query, _types__WEBPACK_IMPORTED_MODULE_3__["defaultAnnotationQuery"]);
     var queryText = query.queryText,
         dataPath = query.dataPath,
         timeFormat = query.timeFormat,
-        timePaths = query.timePaths;
-    var graphiQL = Object(_GraphiQLUtil__WEBPACK_IMPORTED_MODULE_5__["createGraphiQL"])(this.props.datasource, queryText, this.onChangeQuery);
+        timePaths = query.timePaths,
+        additionalTexts = query.additionalTexts;
+
+    if (this.graphiQLElement === null) {
+      // render() gets called a lot. We only need to create the graphiQL element once so this can help eliminate needless reloads
+      this.graphiQLElement = Object(_GraphiQLUtil__WEBPACK_IMPORTED_MODULE_5__["createGraphiQL"])(this.props.datasource, queryText, this.onChangeQuery);
+    }
+
+    var graphiQL = this.graphiQLElement;
+    var additionalTextElements = [];
+
+    var _loop_1 = function _loop_1(additionalFieldName) {
+      var value = additionalTexts[additionalFieldName];
+      additionalTextElements.push(react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_2___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
+        className: "gf-form"
+      }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_7__["LegacyForms"].FormField, {
+        labelWidth: 8,
+        inputWidth: 24,
+        value: value,
+        onChange: function onChange(event) {
+          _this.setAdditionalText(additionalFieldName, event.target.value);
+        },
+        label: additionalFieldName,
+        tooltip: "This is a custom field. Use $field_<field name> to replace with the value of another field."
+      }), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_7__["InlineLabel"], {
+        as: "button",
+        style: {
+          width: '2em'
+        },
+        onClick: function onClick() {
+          _this.removeAdditionalText(additionalFieldName);
+        }
+      }, "-"))));
+    };
+
+    for (var additionalFieldName in additionalTexts) {
+      _loop_1(additionalFieldName);
+    }
+
     return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_2___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("link", {
       rel: "stylesheet",
       href: "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.23.0/theme/dracula.css"
@@ -62241,7 +62311,39 @@ var AnnotationQueryEditor = function (_super) {
       onChange: this.onTimePathsTextChange,
       label: "Time paths",
       tooltip: "Comma separated list of paths to each field to be treated as a timestamp. Each path is dot-delimited to time under data path"
-    })), Object(_QueryEditorUtil__WEBPACK_IMPORTED_MODULE_6__["createTimeFormatForm"])(timeFormat || '', this.onTimeFormatTextChange));
+    })), Object(_QueryEditorUtil__WEBPACK_IMPORTED_MODULE_6__["createTimeFormatForm"])(timeFormat || '', this.onTimeFormatTextChange), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", null, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
+      className: "gf-form"
+    }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_7__["LegacyForms"].FormField, {
+      labelWidth: 8,
+      inputWidth: 24,
+      value: (_b = (_a = this.state) === null || _a === void 0 ? void 0 : _a.newAdditionalTextFieldName) !== null && _b !== void 0 ? _b : '',
+      onChange: function onChange(event) {
+        var _a;
+
+        _this.setState(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, (_a = _this.state) !== null && _a !== void 0 ? _a : {}), {
+          newAdditionalTextFieldName: event.target.value
+        }));
+      },
+      label: "Add additional field"
+    }), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_7__["InlineLabel"], {
+      as: "button",
+      style: {
+        width: '2em'
+      },
+      onClick: function onClick() {
+        var _a, _b, _c;
+
+        var fieldName = (_b = (_a = _this.state) === null || _a === void 0 ? void 0 : _a.newAdditionalTextFieldName) === null || _b === void 0 ? void 0 : _b.trim();
+
+        if (fieldName) {
+          _this.addNewAdditionalText(fieldName);
+        }
+
+        _this.setState(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, (_c = _this.state) !== null && _c !== void 0 ? _c : {}), {
+          newAdditionalTextFieldName: ''
+        }));
+      }
+    }, "+")), additionalTextElements));
   };
 
   return AnnotationQueryEditor;
@@ -63406,7 +63508,8 @@ var defaultMixedQuery = {
   constant: 6.5
 };
 var defaultAnnotationQuery = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, defaultTimedQuery), {
-  timePaths: 'Time, endTime'
+  timePaths: 'Time, endTime',
+  additionalTexts: {}
 });
 var defaultVariableQuery = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, defaultCommonQuery);
 
