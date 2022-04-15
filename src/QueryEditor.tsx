@@ -5,7 +5,6 @@ import { QueryEditorProps } from '@grafana/data';
 import { LegacyForms } from '@grafana/ui';
 import { DataSource } from './DataSource';
 import { defaultMainQuery, MyDataSourceOptions, MyMainQuery, MyQuery } from './types';
-import './graphiql_modified.css';
 import { createGraphiQL } from './GraphiQLUtil';
 import { createDataPathForm, createTimeFormatForm } from './QueryEditorUtil';
 
@@ -52,8 +51,6 @@ export class QueryEditor extends PureComponent<Props, State> {
     const graphiQL = createGraphiQL(this.props.datasource, queryText, this.onChangeQuery);
     return (
       <>
-        {/*<link href="https://unpkg.com/graphiql/graphiql.min.css" rel="stylesheet" />*/}
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.23.0/theme/dracula.css" />
         <div
           style={{
             height: '50vh',

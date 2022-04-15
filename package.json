@@ -19,8 +19,9 @@
   },
   "dependencies": {
     "@types/lodash": "^4.14.172",
-    "graphiql": "1.0.6",
-    "graphql": "15.4.0",
-    "@types/codemirror": "^0.0.90"
+    "@types/codemirror": "^5.60.5",
+    "graphiql": "1.8.6",
+    "graphql": "16.3.0",
+    "tslib": "^2.3.1"
   }
 }

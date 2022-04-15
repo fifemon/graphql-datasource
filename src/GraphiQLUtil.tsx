@@ -1,8 +1,7 @@
-import { Fetcher } from 'graphiql/dist/components/GraphiQL';
-import GraphiQL from 'graphiql';
+import GraphiQL, { Fetcher, ToolbarButton } from 'graphiql';
 import { DataSource } from './DataSource';
-import { ToolbarButton } from 'graphiql/dist/components/ToolbarButton';
 import React from 'react';
+import './graphiql_modified.css';
 
 export function createGraphiQL(datasource: DataSource, queryText: string, onEditQuery: (query?: string) => void) {
   const headers: any = {
@@ -46,6 +45,9 @@ export function createGraphiQL(datasource: DataSource, queryText: string, onEdit
   return (
     <>
       <span tabIndex={0} onBlur={onBlur}>
+        {/*<link href="https://unpkg.com/graphiql/graphiql.min.css" rel="stylesheet" />*/}
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.2/theme/dracula.css" />
+        {/*<link rel="stylesheet" href="https://unpkg.com/graphiql@1.8.6/graphiql.css" />*/}
         <GraphiQL
           ref={(node) => {
             graphiqlReference = node;

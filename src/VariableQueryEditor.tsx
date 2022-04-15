@@ -46,7 +46,6 @@ export const VariableQueryEditor: React.FC<VariableQueryProps> = ({ onChange, qu
           value={state.dataPath}
         />
       </div>
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.23.0/theme/dracula.css" />
       <div
         style={{
           height: '50vh',

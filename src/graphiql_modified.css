@@ -1,8 +1,7 @@
 /*
-From https://unpkg.com/graphiql@1.8.2/graphiql.css
+From https://unpkg.com/graphiql@1.8.6/graphiql.css
 
 Modified to hide particular elements that are all but impossible to hide through customization
-TODO make sure that whatever base we use for graphiql.css is the same version we use in package.json
 */
 
 .graphiql-container,

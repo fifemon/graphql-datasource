@@ -4,7 +4,6 @@ import React, { ChangeEvent, PureComponent } from 'react';
 import { QueryEditorProps } from '@grafana/data';
 import { DataSource } from './DataSource';
 import { defaultAnnotationQuery, MyAnnotationQuery, MyDataSourceOptions, MyQuery } from './types';
-import './graphiql_modified.css';
 import { createGraphiQL } from './GraphiQLUtil';
 import { createDataPathForm, createTimeFormatForm } from './QueryEditorUtil';
 import { InlineLabel, LegacyForms } from '@grafana/ui';
@@ -101,8 +100,6 @@ export class AnnotationQueryEditor extends PureComponent<Props, State> {
 
     return (
       <>
-        {/*<link href="https://unpkg.com/graphiql/graphiql.min.css" rel="stylesheet" />*/}
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.23.0/theme/dracula.css" />
         <div
           style={{
             height: '50vh',
