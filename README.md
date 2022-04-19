@@ -122,12 +122,18 @@ query {
 }
 ```
 
+Query Configuration
 - Data path: `events`
-- Time path: `timestamp`
-- End time path: `end_timestamp`
+- Time paths: `timestamp,end_timestamp`
+
+Additional Texts Configuration
 - Title: `$field_name`
 - Text: `$field_description`
 - Tags: `tag1, tag2`
+
+Configuration
+- Time path: `timestamp`
+- End time path: `end_timestamp`
 
 The above annotation example is similar to regular queries. You are able to
 define a data path, time path, and time format. Similar to the last example, you
