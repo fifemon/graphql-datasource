@@ -1,21 +1,28 @@
 import defaults from 'lodash/defaults';
 
-import React, { PureComponent, ChangeEvent } from 'react';
+import React, { ChangeEvent, PureComponent } from 'react';
 import { QueryEditorProps } from '@grafana/data';
-import { LegacyForms, QueryField, Icon } from '@grafana/ui';
+import { LegacyForms } from '@grafana/ui';
 import { DataSource } from './DataSource';
-import { MyQuery, MyDataSourceOptions, defaultQuery } from './types';
+import { defaultMainQuery, MyDataSourceOptions, MyMainQuery, MyQuery } from './types';
+import { createGraphiQL } from './GraphiQLUtil';
+import { createDataPathForm, createTimeFormatForm } from './QueryEditorUtil';
 
 type Props = QueryEditorProps<DataSource, MyQuery, MyDataSourceOptions>;
 
 interface State {}
 
 export class QueryEditor extends PureComponent<Props, State> {
-  onComponentDidMount() {}
+  graphiQLElement: JSX.Element;
 
-  onChangeQuery = (value: string, override?: boolean) => {
+  constructor(props: Props) {
+    super(props);
+    this.graphiQLElement = createGraphiQL(this.props.datasource, this.props.query.queryText, this.onChangeQuery);
+  }
+
+  onChangeQuery = (value?: string) => {
     const { onChange, query } = this.props;
-    if (onChange) {
+    if (onChange && value !== undefined) {
       onChange({ ...query, queryText: value });
     }
   };
@@ -43,22 +50,20 @@ export class QueryEditor extends PureComponent<Props, State> {
   };
 
   render() {
-    const query = defaults(this.props.query, defaultQuery);
-    const { queryText, dataPath, timePath, timeFormat, groupBy, aliasBy } = query;
-
+    const query: MyMainQuery = defaults(this.props.query, defaultMainQuery) as MyMainQuery;
+    const { dataPath, timePath, timeFormat, groupBy, aliasBy } = query;
+    // Good info about GraphiQL here: https://www.npmjs.com/package/graphiql
+    const graphiQL = this.graphiQLElement;
     return (
       <>
-        <QueryField query={queryText || ''} onChange={this.onChangeQuery} portalOrigin="graphQL" />
-        <div className="gf-form">
-          <LegacyForms.FormField
-            labelWidth={8}
-            inputWidth={24}
-            value={dataPath || ''}
-            onChange={this.onDataPathTextChange}
-            label="Data path"
-            tooltip="dot-delimited path to data in response. Separate with commas to use multiple data paths"
-          />
+        <div
+          style={{
+            height: '50vh',
+          }}
+        >
+          {graphiQL}
         </div>
+        {createDataPathForm(dataPath || '', this.onDataPathTextChange)}
         <div className="gf-form">
           <LegacyForms.FormField
             labelWidth={8}
@@ -69,21 +74,7 @@ export class QueryEditor extends PureComponent<Props, State> {
             tooltip="dot-delimited path to time under data path"
           />
         </div>
-        <div className={'gf-form'}>
-          <LegacyForms.FormField
-            labelWidth={8}
-            inputWidth={24}
-            value={timeFormat || ''}
-            onChange={this.onTimeFormatTextChange}
-            label="Time format"
-            tooltip={
-              <a href="https://momentjs.com/docs/#/parsing/string-format/" title="Formatting help">
-                Optional time format in moment.js format.&nbsp;
-                <Icon name="external-link-alt" />
-              </a>
-            }
-          />
-        </div>
+        {createTimeFormatForm(timeFormat || '', this.onTimeFormatTextChange)}
         <div className={'gf-form'}>
           <LegacyForms.FormField
             labelWidth={8}
