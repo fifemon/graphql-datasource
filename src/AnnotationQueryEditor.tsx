@@ -15,6 +15,13 @@ interface State {
 }
 
 export class AnnotationQueryEditor extends PureComponent<Props, State> {
+  graphiQLElement: JSX.Element;
+
+  constructor(props: Props) {
+    super(props);
+    this.graphiQLElement = createGraphiQL(this.props.datasource, this.props.query.queryText, this.onChangeQuery);
+  }
+
   onChangeQuery = (value?: string) => {
     // any should be replaced with DocumentNode
     const { onChange, query } = this.props;
@@ -57,15 +64,10 @@ export class AnnotationQueryEditor extends PureComponent<Props, State> {
       },
     });
   };
-  graphiQLElement: JSX.Element | null = null;
 
   render() {
     const query: MyAnnotationQuery = defaults(this.props.query, defaultAnnotationQuery) as MyAnnotationQuery;
-    const { queryText, dataPath, timeFormat, timePaths, additionalTexts } = query;
-    if (this.graphiQLElement === null) {
-      // render() gets called a lot. We only need to create the graphiQL element once so this can help eliminate needless reloads
-      this.graphiQLElement = createGraphiQL(this.props.datasource, queryText, this.onChangeQuery);
-    }
+    const { dataPath, timeFormat, timePaths, additionalTexts } = query;
     const graphiQL = this.graphiQLElement;
 
     const additionalTextElements: JSX.Element[] = [];

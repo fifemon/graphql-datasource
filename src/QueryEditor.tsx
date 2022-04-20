@@ -13,7 +13,12 @@ type Props = QueryEditorProps<DataSource, MyQuery, MyDataSourceOptions>;
 interface State {}
 
 export class QueryEditor extends PureComponent<Props, State> {
-  onComponentDidMount() {}
+  graphiQLElement: JSX.Element;
+
+  constructor(props: Props) {
+    super(props);
+    this.graphiQLElement = createGraphiQL(this.props.datasource, this.props.query.queryText, this.onChangeQuery);
+  }
 
   onChangeQuery = (value?: string) => {
     const { onChange, query } = this.props;
@@ -46,9 +51,9 @@ export class QueryEditor extends PureComponent<Props, State> {
 
   render() {
     const query: MyMainQuery = defaults(this.props.query, defaultMainQuery) as MyMainQuery;
-    const { queryText, dataPath, timePath, timeFormat, groupBy, aliasBy } = query;
+    const { dataPath, timePath, timeFormat, groupBy, aliasBy } = query;
     // Good info about GraphiQL here: https://www.npmjs.com/package/graphiql
-    const graphiQL = createGraphiQL(this.props.datasource, queryText, this.onChangeQuery);
+    const graphiQL = this.graphiQLElement;
     return (
       <>
         <div

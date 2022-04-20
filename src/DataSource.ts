@@ -389,10 +389,11 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
   async metricFindQuery(query: MyVariableQuery, options?: any) {
     const metricFindValues: MetricFindValue[] = [];
 
-    query = defaults(query, defaultVariableQuery);
+    // defaults mutates query, and mutating query seems to have no effect, so we copy it.
+    query = defaults({ ...query }, defaultVariableQuery);
 
     let payload = query.queryText;
-    payload = getTemplateSrv().replace(payload, { ...this.getVariables });
+    payload = getTemplateSrv().replace(payload, { ...this.getVariables() });
 
     const response = await this.postQuery(query, payload);
 

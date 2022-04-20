@@ -136,10 +136,15 @@ Configuration
 - End time path: `end_timestamp`
 
 The above annotation example is similar to regular queries. You are able to
-define a data path, time path, and time format. Similar to the last example, you
+define a data path, and time format. Similar to the last example, you
 can also substitute values into the title, text, and tags by using
 `$field_<field name>`. Tags are separated by commas. The above example has two
 tags: "tag1" and "tag2".
+You do not have to create additional text fields to use for the title, text, and tags.
+If you would like to use one of the fields from your query directly, you can do that.
+
+Note that as of the most recent Grafana version, if you select time, timeEnd, title, text, tags, or ID,
+you cannot "unset" them without editing the JSON of the dashboard yourself.
 
 If the optional end time field is defined and present, the annotation will be
 shown over a period of time.

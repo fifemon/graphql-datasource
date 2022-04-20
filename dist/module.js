@@ -48775,8 +48775,8 @@ __webpack_require__.r(__webpack_exports__);
 var AnnotationQueryEditor = function (_super) {
   Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__extends"])(AnnotationQueryEditor, _super);
 
-  function AnnotationQueryEditor() {
-    var _this = _super !== null && _super.apply(this, arguments) || this;
+  function AnnotationQueryEditor(props) {
+    var _this = _super.call(this, props) || this;
 
     _this.onChangeQuery = function (value) {
       // any should be replaced with DocumentNode
@@ -48846,7 +48846,7 @@ var AnnotationQueryEditor = function (_super) {
       }));
     };
 
-    _this.graphiQLElement = null;
+    _this.graphiQLElement = Object(_GraphiQLUtil__WEBPACK_IMPORTED_MODULE_4__["createGraphiQL"])(_this.props.datasource, _this.props.query.queryText, _this.onChangeQuery);
     return _this;
   }
 
@@ -48856,17 +48856,10 @@ var AnnotationQueryEditor = function (_super) {
     var _a, _b;
 
     var query = lodash_defaults__WEBPACK_IMPORTED_MODULE_1___default()(this.props.query, _types__WEBPACK_IMPORTED_MODULE_3__["defaultAnnotationQuery"]);
-    var queryText = query.queryText,
-        dataPath = query.dataPath,
+    var dataPath = query.dataPath,
         timeFormat = query.timeFormat,
         timePaths = query.timePaths,
         additionalTexts = query.additionalTexts;
-
-    if (this.graphiQLElement === null) {
-      // render() gets called a lot. We only need to create the graphiQL element once so this can help eliminate needless reloads
-      this.graphiQLElement = Object(_GraphiQLUtil__WEBPACK_IMPORTED_MODULE_4__["createGraphiQL"])(this.props.datasource, queryText, this.onChangeQuery);
-    }
-
     var graphiQL = this.graphiQLElement;
     var additionalTextElements = [];
 
@@ -49534,10 +49527,11 @@ var DataSource = function (_super) {
       return Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__generator"])(this, function (_b) {
         switch (_b.label) {
           case 0:
-            metricFindValues = [];
-            query = lodash_defaults__WEBPACK_IMPORTED_MODULE_1___default()(query, _types__WEBPACK_IMPORTED_MODULE_3__["defaultVariableQuery"]);
+            metricFindValues = []; // defaults mutates query, and mutating query seems to have no effect, so we copy it.
+
+            query = lodash_defaults__WEBPACK_IMPORTED_MODULE_1___default()(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, query), _types__WEBPACK_IMPORTED_MODULE_3__["defaultVariableQuery"]);
             payload = query.queryText;
-            payload = Object(_grafana_runtime__WEBPACK_IMPORTED_MODULE_4__["getTemplateSrv"])().replace(payload, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, this.getVariables));
+            payload = Object(_grafana_runtime__WEBPACK_IMPORTED_MODULE_4__["getTemplateSrv"])().replace(payload, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, this.getVariables()));
             return [4
             /*yield*/
             , this.postQuery(query, payload)];
@@ -49710,7 +49704,10 @@ function createGraphiQL(datasource, queryText, onEditQuery) {
 
   return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_2___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("span", {
     tabIndex: 0,
-    onBlur: onBlur
+    onBlur: onBlur,
+    style: {
+      backgroundColor: '#FFFFFF'
+    }
   }, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("link", {
     rel: "stylesheet",
     href: "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.2/theme/dracula.css"
@@ -49770,8 +49767,8 @@ __webpack_require__.r(__webpack_exports__);
 var QueryEditor = function (_super) {
   Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__extends"])(QueryEditor, _super);
 
-  function QueryEditor() {
-    var _this = _super !== null && _super.apply(this, arguments) || this;
+  function QueryEditor(props) {
+    var _this = _super.call(this, props) || this;
 
     _this.onChangeQuery = function (value) {
       var _a = _this.props,
@@ -49830,21 +49827,19 @@ var QueryEditor = function (_super) {
       }));
     };
 
+    _this.graphiQLElement = Object(_GraphiQLUtil__WEBPACK_IMPORTED_MODULE_5__["createGraphiQL"])(_this.props.datasource, _this.props.query.queryText, _this.onChangeQuery);
     return _this;
   }
 
-  QueryEditor.prototype.onComponentDidMount = function () {};
-
   QueryEditor.prototype.render = function () {
     var query = lodash_defaults__WEBPACK_IMPORTED_MODULE_1___default()(this.props.query, _types__WEBPACK_IMPORTED_MODULE_4__["defaultMainQuery"]);
-    var queryText = query.queryText,
-        dataPath = query.dataPath,
+    var dataPath = query.dataPath,
         timePath = query.timePath,
         timeFormat = query.timeFormat,
         groupBy = query.groupBy,
         aliasBy = query.aliasBy; // Good info about GraphiQL here: https://www.npmjs.com/package/graphiql
 
-    var graphiQL = Object(_GraphiQLUtil__WEBPACK_IMPORTED_MODULE_5__["createGraphiQL"])(this.props.datasource, queryText, this.onChangeQuery);
+    var graphiQL = this.graphiQLElement;
     return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_2___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("div", {
       style: {
         height: '50vh'
@@ -49952,51 +49947,74 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-var VariableQueryEditor = function VariableQueryEditor(_a) {
-  var onChange = _a.onChange,
-      query = _a.query,
-      datasource = _a.datasource;
 
-  var _b = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__read"])(Object(react__WEBPACK_IMPORTED_MODULE_1__["useState"])(query), 2),
-      state = _b[0],
-      setState = _b[1];
+var VariableQueryEditor = function (_super) {
+  Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__extends"])(VariableQueryEditor, _super);
 
-  var saveQuery = function saveQuery() {
-    onChange(state, state.queryText + " (" + state.dataPath + ")");
+  function VariableQueryEditor(props) {
+    var _this = _super.call(this, props) || this;
+
+    _this.onChangeQuery = function (value) {
+      var _a = _this.props,
+          onChange = _a.onChange,
+          query = _a.query;
+
+      if (onChange && value !== undefined) {
+        onChange(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, query), {
+          // we shouldn't need to include ...this.state here because its changes should have already made it into query
+          queryText: value
+        }));
+      }
+    };
+
+    _this.saveState = function () {
+      var _a; // We don't use the state for queryText since createGraphiQL handles that
+
+
+      var _b = _this.props,
+          onChange = _b.onChange,
+          query = _b.query;
+      onChange(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, query), (_a = _this.state) !== null && _a !== void 0 ? _a : {}));
+    }; // Right now this is only used for dataPath, so [event.currentTarget.name] should always be dataPath
+
+
+    _this.handleChange = function (event) {
+      var _a;
+
+      var _b;
+
+      _this.setState(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, (_b = _this.state) !== null && _b !== void 0 ? _b : {}), (_a = {}, _a[event.currentTarget.name] = event.currentTarget.value, _a)));
+    };
+
+    _this.graphiQLElement = Object(_GraphiQLUtil__WEBPACK_IMPORTED_MODULE_2__["createGraphiQL"])(_this.props.datasource, _this.props.query.queryText, _this.onChangeQuery);
+    return _this;
+  }
+
+  VariableQueryEditor.prototype.render = function () {
+    var _a, _b;
+
+    var graphiQL = this.graphiQLElement;
+    return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_1___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
+      className: "gf-form"
+    }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("span", {
+      className: "gf-form-label width-10"
+    }, "Data Path"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("input", {
+      name: "dataPath",
+      className: "gf-form-input",
+      onBlur: this.saveState,
+      onChange: this.handleChange,
+      value: (_b = (_a = this.state) === null || _a === void 0 ? void 0 : _a.dataPath) !== null && _b !== void 0 ? _b : this.props.query.dataPath
+    })), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
+      style: {
+        height: '50vh'
+      }
+    }, graphiQL));
   };
 
-  var onChangeQuery = function onChangeQuery(value) {
-    if (value !== undefined) {
-      setState(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, state), {
-        queryText: value
-      }));
-      saveQuery();
-    }
-  };
+  return VariableQueryEditor;
+}(react__WEBPACK_IMPORTED_MODULE_1__["PureComponent"]);
 
-  var handleChange = function handleChange(event) {
-    var _a;
 
-    return setState(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])(Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"])({}, state), (_a = {}, _a[event.currentTarget.name] = event.currentTarget.value, _a)));
-  };
-
-  var graphiQL = Object(_GraphiQLUtil__WEBPACK_IMPORTED_MODULE_2__["createGraphiQL"])(datasource, state.queryText || '', onChangeQuery);
-  return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_1___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
-    className: "gf-form"
-  }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("span", {
-    className: "gf-form-label width-10"
-  }, "Data Path"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("input", {
-    name: "dataPath",
-    className: "gf-form-input",
-    onBlur: saveQuery,
-    onChange: handleChange,
-    value: state.dataPath
-  })), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
-    style: {
-      height: '50vh'
-    }
-  }, graphiQL));
-};
 
 /***/ }),
 
