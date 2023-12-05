@@ -1,0 +1,48 @@
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+{
+  "manifestVersion": "2.0.0",
+  "signatureType": "private",
+  "signedByOrg": "ammp",
+  "signedByOrgName": "ammp",
+  "rootUrls": [
+    "http://localhost:3000/",
+    "https://app.ammp.io/",
+    "https://app.stage.ammp.io/",
+    "https://nextgen.ammp.io/",
+    "https://elum.stage.ammp.io/",
+    "https://elum.ammp.io/"
+  ],
+  "plugin": "fifemon-graphql-datasource",
+  "version": "1.3.0",
+  "time": 1701814507876,
+  "keyId": "7e4d0c6a708866e7",
+  "files": {
+    "index.html": "2fa2c4168c5bb7b8502989f437e4a1a71e663702b0ec9c01530215c8c026dcaf",
+    "LICENSE": "8296125b6632f7fcaa2c69d2837a7bb188c2767ae23461db27b8a7f6756cdf55",
+    "CHANGELOG.md": "090a3711a33dd2d094a5815d88f379a83d1d09cb249cd15e2bab05248af5dd45",
+    "module.js.map": "c9d1fc78a493947b0b366255898b628ee3202adf57efc5a62d463004af890c02",
+    "plugin.json": "5e62685ef535d4bc3963d7ee3e997e05deb940e083d8f2777e1731d4f2b43df3",
+    "README.md": "acd4e7e511bc898a090bfec9a4f5e08380aafb602df5a03afbde792194b2a4e9",
+    "img/github_security_advisories.png": "b11ce1951842ff426f6a3f4adc79f14ce66d1e73da761911a1cefc74dbf8c0cd",
+    "img/README": "15d4389999e277a1749d107ed84e099e38089b88d74c6ab33ed6771087d162f4",
+    "img/db_arrivals.png": "e8b7aba490ac43bc801b9739cca8408bb9c247aca102a02ec612c396c73b4b31",
+    "img/logo.svg": "3f359408b247bdd53517f653fbad65ee067d9cdb338ec5d438bd98f081f81b59",
+    "img/db_arrivals_annotations.png": "99a3e09181a74140f61be7cdb6bbd86d92657e66a21961b3c8cb9d6c5fef1986",
+    "module.js": "e8931f82a8f0b544ade39458ba49f94e041fb5827d055a8c1840fcb6995ee96b",
+    "partials/annotations.editor.html": "853304dc1a489056877366f6c43e574fed8ccfb3603c6973590606e8f556cb7a"
+  }
+}
+-----BEGIN PGP SIGNATURE-----
+Version: OpenPGP.js v4.10.10
+Comment: https://openpgpjs.org
+
+wrgEARMKAAYFAmVvoOwAIQkQfk0ManCIZucWIQTzOyW2kQdOhGNlcPN+TQxq
+cIhm5ykFAgjyRo3Bz5GTjknKONLSjC595fjVZ/IOJH72HdlqA6ozDOmgQmjd
+xQjpmIJKqE6Ni49gFgPufgb8oCoytVO3QReo9QIJAWTcxPBWgZbBkhL36rEA
+v1A0gsMwwTTq9iTgDCrqrKIoH4vFVaTFp6hWNqr4t2GffNBel6feo1YOh4sN
+QbiDB2A3
+=ddGl
+-----END PGP SIGNATURE-----
